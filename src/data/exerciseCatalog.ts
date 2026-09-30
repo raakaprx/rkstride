@@ -1,0 +1,496 @@
+export type ExerciseCategory = 'push' | 'pull' | 'legs' | 'arms' | 'core';
+export type ExerciseType = 'bodyweight' | 'gym';
+
+export interface ExerciseItem {
+  id: string;
+  name: string;
+  category: ExerciseCategory;
+  type: ExerciseType;
+  targetMuscles: string;
+  description: string;
+  isLegStrain?: boolean; // Menandai gerakan yang membebani paha/lutut/hamstring
+}
+
+export const EXERCISE_CATALOG: ExerciseItem[] = [
+  // ==========================================
+  // 1. KATEGORI PUSH (Dada, Bahu, Trisep)
+  // ==========================================
+  // Kalistenik & Beban Tubuh
+  {
+    id: 'push-bw-1',
+    name: 'Standard Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Dada Tengah, Bahu Depan, Trisep',
+    description: 'Melatih dada tengah, bahu depan, dan trisep secara seimbang.',
+  },
+  {
+    id: 'push-bw-2',
+    name: 'Incline Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Dada Bawah, Bahu Depan',
+    description: 'Tangan bertumpu lebih tinggi dari kaki; fokus dada bawah dan beban lebih ringan.',
+  },
+  {
+    id: 'push-bw-3',
+    name: 'Decline Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Dada Atas, Bahu Depan, Trisep',
+    description: 'Kaki bertumpu lebih tinggi dari tangan; fokus dada atas dan bahu depan.',
+  },
+  {
+    id: 'push-bw-4',
+    name: 'Diamond Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Trisep, Dada Bagian Dalam',
+    description: 'Posisi kedua tangan rapat membentuk segitiga; fokus utama pada trisep dan dada bagian dalam.',
+  },
+  {
+    id: 'push-bw-5',
+    name: 'Wide-Grip Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Dada Luar',
+    description: 'Rentang tangan lebih lebar dari bahu; menekankan aktivasi serat dada luar.',
+  },
+  {
+    id: 'push-bw-6',
+    name: 'Archer Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Dada Unilateral, Bahu, Trisep',
+    description: 'Mendorong tubuh bergantian ke satu sisi; melatih kekuatan unilateral.',
+  },
+  {
+    id: 'push-bw-7',
+    name: 'Pike Push-Up',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Bahu Depan (Deltoid), Trisep',
+    description: 'Pinggul diangkat tinggi membentuk sudut terbalik; memindahkan beban langsung ke bahu deltoid.',
+  },
+  {
+    id: 'push-bw-8',
+    name: 'Handstand Push-Up (HSPU)',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Bahu Menyeluruh, Trisep, Core',
+    description: 'Mendorong beban seluruh tubuh secara vertikal; puncak kekuatan bahu dan trisep.',
+  },
+  {
+    id: 'push-bw-9',
+    name: 'Dips (Parallel Bars / Bench)',
+    category: 'push',
+    type: 'bodyweight',
+    targetMuscles: 'Dada Bawah, Trisep',
+    description: 'Gerakan dorong vertikal bawah; melatih dada bawah dan trisep secara intensif.',
+  },
+
+  // Beban Bebas & Mesin Gym
+  {
+    id: 'push-gym-1',
+    name: 'Flat Barbell / Dumbbell Bench Press',
+    category: 'push',
+    type: 'gym',
+    targetMuscles: 'Dada Menyeluruh, Bahu Depan, Trisep',
+    description: 'Pembentukan massa dan kekuatan dasar dada secara menyeluruh.',
+  },
+  {
+    id: 'push-gym-2',
+    name: 'Incline Dumbbell Press',
+    category: 'push',
+    type: 'gym',
+    targetMuscles: 'Dada Bagian Atas (Clavicular Head)',
+    description: 'Penekanan pada serat otot dada bagian atas (clavicular head).',
+  },
+  {
+    id: 'push-gym-3',
+    name: 'Overhead Press (OHP) / Military Press',
+    category: 'push',
+    type: 'gym',
+    targetMuscles: 'Bahu Menyeluruh, Stabilitas Inti',
+    description: 'Mendorong beban lurus ke atas untuk kekuatan bahu menyeluruh dan stabilitas inti.',
+  },
+  {
+    id: 'push-gym-4',
+    name: 'Dumbbell Lateral Raise',
+    category: 'push',
+    type: 'gym',
+    targetMuscles: 'Bahu Samping (Lateral Deltoid)',
+    description: 'Isolasi otot bahu samping (lateral deltoid) untuk melebarkan siluet tubuh.',
+  },
+  {
+    id: 'push-gym-5',
+    name: 'Cable Chest Fly / Pec Deck',
+    category: 'push',
+    type: 'gym',
+    targetMuscles: 'Dada (Isolasi Regangan)',
+    description: 'Menjaga tegangan konstan pada otot dada di sepanjang rentang gerak.',
+  },
+  {
+    id: 'push-gym-6',
+    name: 'Triceps Rope Pushdown / Skull Crusher',
+    category: 'push',
+    type: 'gym',
+    targetMuscles: 'Trisep (Ketiga Kepala Otot)',
+    description: 'Isolasi penuh untuk ketiga kepala otot trisep.',
+  },
+
+  // ==========================================
+  // 2. KATEGORI PULL (Punggung, Bisep, Bahu Belakang)
+  // ==========================================
+  // Kalistenik & Beban Tubuh
+  {
+    id: 'pull-bw-1',
+    name: 'Standard Pull-Up (Overhand/Pronated)',
+    category: 'pull',
+    type: 'bodyweight',
+    targetMuscles: 'Lats (Sayap), Punggung Atas',
+    description: 'Telapak tangan menghadap depan; aktivasi maksimal otot sayap (latissimus dorsi) dan punggung atas.',
+  },
+  {
+    id: 'pull-bw-2',
+    name: 'Chin-Up (Underhand/Supinated)',
+    category: 'pull',
+    type: 'bodyweight',
+    targetMuscles: 'Bisep, Lats Bawah',
+    description: 'Telapak tangan menghadap wajah; melibatkan fleksor bisep lebih dominan bersama lats.',
+  },
+  {
+    id: 'pull-bw-3',
+    name: 'Neutral-Grip Pull-Up',
+    category: 'pull',
+    type: 'bodyweight',
+    targetMuscles: 'Lats, Brachialis, Sendi Bahu Ramah',
+    description: 'Telapak tangan saling berhadapan; variasi paling ramah untuk sendi bahu dan pergelangan tangan.',
+  },
+  {
+    id: 'pull-bw-4',
+    name: 'Australian Pull-Up / Inverted Row',
+    category: 'pull',
+    type: 'bodyweight',
+    targetMuscles: 'Rhomboids, Ketebalan Punggung',
+    description: 'Tarikan horizontal menggunakan palang rendah; melatih otot belikat (rhomboids) dan ketebalan punggung.',
+  },
+  {
+    id: 'pull-bw-5',
+    name: 'Scapular Pull-Up',
+    category: 'pull',
+    type: 'bodyweight',
+    targetMuscles: 'Belikat, Postur, Cengkeraman',
+    description: 'Gerakan menarik hanya dengan mengunci dan menurunkan belikat tanpa menekuk siku; memperkuat postur dan cengkeraman.',
+  },
+  {
+    id: 'pull-bw-6',
+    name: 'Commando Pull-Up',
+    category: 'pull',
+    type: 'bodyweight',
+    targetMuscles: 'Punggung Unilateral, Stabilitas Lateral',
+    description: 'Berdiri sejajar di bawah palang dengan pegangan staggered; melatih stabilitas lateral.',
+  },
+
+  // Beban Bebas & Mesin Gym
+  {
+    id: 'pull-gym-1',
+    name: 'Barbell / Dumbbell Bent-Over Row',
+    category: 'pull',
+    type: 'gym',
+    targetMuscles: 'Punggung Tengah, Lats, Erector Spinae',
+    description: 'Gerakan majemuk untuk membangun ketebalan punggung tengah dan bawah.',
+  },
+  {
+    id: 'pull-gym-2',
+    name: 'Lat Pulldown',
+    category: 'pull',
+    type: 'gym',
+    targetMuscles: 'Latissimus Dorsi (Sayap)',
+    description: 'Alternatif mesin untuk melatih jalur gerak tarikan vertikal dengan beban yang dapat diatur presisi.',
+  },
+  {
+    id: 'pull-gym-3',
+    name: 'Seated Cable Row',
+    category: 'pull',
+    type: 'gym',
+    targetMuscles: 'Punggung Tengah, Lats Bawah',
+    description: 'Tarikan horizontal kabel untuk kontraksi stabil pada punggung tengah dan lats bawah.',
+  },
+  {
+    id: 'pull-gym-4',
+    name: 'Face Pull',
+    category: 'pull',
+    type: 'gym',
+    targetMuscles: 'Bahu Belakang (Rear Delt), Rotator Cuff',
+    description: 'Menarik tali ke arah kening; vital untuk rotasi bahu luar, deltoid belakang (rear delt), dan pencegahan postur bungkuk.',
+  },
+  {
+    id: 'pull-gym-5',
+    name: 'Barbell / Incline Dumbbell Curl',
+    category: 'pull',
+    type: 'gym',
+    targetMuscles: 'Kepala Panjang & Pendek Bisep',
+    description: 'Isolasi langsung untuk kepala panjang dan pendek otot bisep.',
+  },
+  {
+    id: 'pull-gym-6',
+    name: 'Hammer Curl',
+    category: 'pull',
+    type: 'gym',
+    targetMuscles: 'Brachialis, Lengan Bawah (Forearm)',
+    description: 'Pegangan netral untuk melatih otot brachialis dan kekuatan lengan bawah (forearm).',
+  },
+
+  // ==========================================
+  // 3. KATEGORI LEGS / LOWER BODY
+  // ==========================================
+  // Kalistenik & Beban Tubuh
+  {
+    id: 'legs-bw-1',
+    name: 'Air Squat / Bodyweight Squat',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Kuadrisep, Bokong, Panggul',
+    description: 'Gerakan dasar untuk melatih kuadrisep, bokong, dan fleksibilitas panggul.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-bw-2',
+    name: 'Bulgarian Split Squat',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Kuadrisep, Glutes, Stabilitas Lutut',
+    description: 'Satu kaki bertumpu di belakang; krusial untuk melatih keseimbangan unilateral dan stabilitas lutut pelari.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-bw-3',
+    name: 'Walking Lunges / Reverse Lunges',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Kuadrisep, Kontrol Gluteus',
+    description: 'Melatih langkah dinamis, kekuatan kuadrisep, dan kontrol gluteus.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-bw-4',
+    name: 'Pistol Squat',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Kuadrisep Ekstrem, Mobilitas Engkel',
+    description: 'Jongkok satu kaki tanpa bantuan; menuntut kekuatan ekstrem kuadrisep dan mobilitas pergelangan kaki.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-bw-5',
+    name: 'Single-Leg Glute Bridge',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Gluteus, Hamstring',
+    description: 'Mengangkat pinggul dengan satu kaki; aktivasi rantai posterior tanpa membebani tulang belakang.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-bw-6',
+    name: 'Nordic Hamstring Curl',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Hamstring Eksentrik',
+    description: 'Menahan tubuh turun ke depan menggunakan kekuatan hamstring; pencegah utama cedera robek hamstring saat lari cepat.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-bw-7',
+    name: 'Calf Raises (Single-Leg)',
+    category: 'legs',
+    type: 'bodyweight',
+    targetMuscles: 'Betis (Gastrocnemius & Soleus), Tendon Achilles',
+    description: 'Angkat tumit satu kaki di tepi pijakan; memperkuat tendon Achilles dan daya pegas telapak kaki.',
+    isLegStrain: true,
+  },
+
+  // Beban Bebas & Mesin Gym
+  {
+    id: 'legs-gym-1',
+    name: 'Barbell Back Squat / Front Squat',
+    category: 'legs',
+    type: 'gym',
+    targetMuscles: 'Kuadrisep, Glutes, Tulang Punggung',
+    description: 'Standar emas untuk kekuatan kompresi kuadrisep, glutes, dan tulang punggung.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-gym-2',
+    name: 'Romanian Deadlift (RDL)',
+    category: 'legs',
+    type: 'gym',
+    targetMuscles: 'Hamstring, Glutes (Hip Hinge)',
+    description: 'Pola engsel pinggul (hip hinge); menargetkan regangan hamstring dan glutes secara maksimal.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-gym-3',
+    name: 'Conventional Deadlift',
+    category: 'legs',
+    type: 'gym',
+    targetMuscles: 'Rantai Posterior Menyeluruh, Core',
+    description: 'Mengangkat beban dari lantai; melatih kekuatan total dari telapak kaki hingga punggung atas.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-gym-4',
+    name: 'Leg Press / Hack Squat',
+    category: 'legs',
+    type: 'gym',
+    targetMuscles: 'Kuadrisep, Glutes',
+    description: 'Mendorong beban berat dengan punggung terlindungi secara stabil.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-gym-5',
+    name: 'Lying / Seated Leg Curl',
+    category: 'legs',
+    type: 'gym',
+    targetMuscles: 'Hamstring (Isolasi Kontraksi)',
+    description: 'Isolasi kontraksi hamstring untuk menyeimbangkan dominansi kuadrisep.',
+    isLegStrain: true,
+  },
+  {
+    id: 'legs-gym-6',
+    name: 'Barbell Hip Thrust',
+    category: 'legs',
+    type: 'gym',
+    targetMuscles: 'Gluteus Maximus (Bokong)',
+    description: 'Posisi punggung disandarkan ke bangku; isolasi kontraksi beban maksimal untuk otot bokong.',
+    isLegStrain: true,
+  },
+
+  // ==========================================
+  // 4. KATEGORI ARMS (Lengan Khusus - Bisep, Trisep, Forearm)
+  // ==========================================
+  {
+    id: 'arms-1',
+    name: 'Barbell Biceps Curl',
+    category: 'arms',
+    type: 'gym',
+    targetMuscles: 'Bisep (Short & Long Head)',
+    description: 'Gerakan klasik pembentukan volume puncak otot bisep.',
+  },
+  {
+    id: 'arms-2',
+    name: 'Incline Dumbbell Curl',
+    category: 'arms',
+    type: 'gym',
+    targetMuscles: 'Bisep (Regangan Maksimal)',
+    description: 'Posisi bangku miring memberikan regangan maksimal pada kepala panjang bisep.',
+  },
+  {
+    id: 'arms-3',
+    name: 'Dumbbell Hammer Curl',
+    category: 'arms',
+    type: 'gym',
+    targetMuscles: 'Brachialis, Brachioradialis',
+    description: 'Membangun ketebalan lengan atas dan kekuatan genggaman pergelangan tangan.',
+  },
+  {
+    id: 'arms-4',
+    name: 'Triceps Overhead Dumbbell Extension',
+    category: 'arms',
+    type: 'gym',
+    targetMuscles: 'Trisep (Long Head)',
+    description: 'Regangan vertikal menargetkan kepala panjang trisep secara dominan.',
+  },
+  {
+    id: 'arms-5',
+    name: 'Skull Crusher (Lying Triceps Extension)',
+    category: 'arms',
+    type: 'gym',
+    targetMuscles: 'Trisep Medial & Lateral Head',
+    description: 'Isolasi trisep dengan bar EZ pada posisi berbaring.',
+  },
+  {
+    id: 'arms-6',
+    name: 'Triceps Rope Pushdown',
+    category: 'arms',
+    type: 'gym',
+    targetMuscles: 'Trisep Lateral Head',
+    description: 'Tekanan kabel konstan dengan bukaan tali di ujung gerak untuk kontraksi puncak.',
+  },
+  {
+    id: 'arms-7',
+    name: 'Chin-Up for Biceps Focus',
+    category: 'arms',
+    type: 'bodyweight',
+    targetMuscles: 'Bisep, Brachialis',
+    description: 'Beban tubuh penuh dengan tarikan supinasi untuk pertumbuhan bisep.',
+  },
+  {
+    id: 'arms-8',
+    name: 'Dips for Triceps Focus',
+    category: 'arms',
+    type: 'bodyweight',
+    targetMuscles: 'Trisep, Dada',
+    description: 'Posisi badan tegak di palang paralel memusatkan beban langsung ke trisep.',
+  },
+  {
+    id: 'arms-9',
+    name: 'Dead Hang & Wrist Curls',
+    category: 'arms',
+    type: 'bodyweight',
+    targetMuscles: 'Lengan Bawah (Forearm), Grip Strength',
+    description: 'Menggantung statis dan fleksi pergelangan tangan untuk kekuatan cengkeraman kokoh.',
+  },
+
+  // ==========================================
+  // 5. KATEGORI CORE & RUNNING STABILIZERS
+  // ==========================================
+  {
+    id: 'core-1',
+    name: 'Standard Plank & Side Plank',
+    category: 'core',
+    type: 'bodyweight',
+    targetMuscles: 'Transversus Abdominis, Obliques',
+    description: 'Menahan posisi tubuh lurus; melatih ketahanan isometrik dinding perut dan otot obliques samping.',
+  },
+  {
+    id: 'core-2',
+    name: 'Hanging Leg Raise / Knee Raise',
+    category: 'core',
+    type: 'bodyweight',
+    targetMuscles: 'Perut Bawah (Rectus Abdominis), Fleksor Panggul',
+    description: 'Menggantung di palang lalu mengangkat kaki; melatih perut bawah dan fleksor panggul.',
+  },
+  {
+    id: 'core-3',
+    name: 'Ab Wheel Rollout',
+    category: 'core',
+    type: 'gym',
+    targetMuscles: 'Inti Menyeluruh (Anti-Ekstensi)',
+    description: 'Menggulung roda ke depan; melatih stabilitas anti-ekstensi tulang belakang tingkat lanjut.',
+  },
+  {
+    id: 'core-4',
+    name: 'Dead Bug & Bird Dog',
+    category: 'core',
+    type: 'bodyweight',
+    targetMuscles: 'Stabilitas Panggul Silang (Mekanika Lari)',
+    description: 'Koordinasi lengan dan kaki berlawanan; menjaga kestabilan panggul saat bergerak silang seperti mekanika lari.',
+  },
+  {
+    id: 'core-5',
+    name: 'Pallof Press',
+    category: 'core',
+    type: 'gym',
+    targetMuscles: 'Stabilitas Anti-Rotasi Inti',
+    description: 'Menahan tarikan kabel ke samping tanpa memutar badan; melatih stabilitas anti-rotasi inti tubuh.',
+  },
+  {
+    id: 'core-6',
+    name: 'Tibialis Raise',
+    category: 'core',
+    type: 'bodyweight',
+    targetMuscles: 'Tibialis Anterior (Anti Shin-Splints)',
+    description: 'Mengangkat jari kaki ke arah tulang kering; memperkuat otot tibialis anterior untuk mencegah cedera shin splints (nyeri tulang kering akibat lari).',
+  },
+];
