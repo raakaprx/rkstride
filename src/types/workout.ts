@@ -32,17 +32,22 @@ export interface RunningIntervalBlock {
   zone: HeartRateZone;
   durationMinutes: number;
   description?: string;
+  targetBpmRange?: { min: number; max: number };
 }
 
 export interface StrengthSet {
   bebanKg: number;
   reps: number;
   rpe: number; // RPE scale 1–10
+  isWarmup?: boolean;
 }
 
 export interface StrengthExercise {
   namaGerakan: string;
+  category?: WorkoutCategory;
   sets: StrengthSet[];
+  durationMinutes?: number; // Optional session time for sRPE
+  isLegExercise?: boolean;
 }
 
 export interface RunSession {
@@ -52,15 +57,20 @@ export interface RunSession {
   avgHeartRate: number; // bpm
   runningType?: RunningType;
   blocks?: RunningIntervalBlock[];
-  rpe?: number; // scale 1-10 (fallback without HR sensor: duration * (rpe / 2))
-  thresholdPace?: number; // default 4.75 min/km if not provided
+  rpe?: number; // scale 1-10
+  sRpe?: number; // Universal sRPE metric (durasiMenit * rpe)
+  trimp?: number; // Edwards TRIMP score
+  thresholdPace?: number; // default min/km
+  isOverridden?: boolean; // Logged if user overrides an interference warning
 }
 
 export interface DailyLog {
   tanggal: string; // YYYY-MM-DD
   strengthWorkouts: StrengthExercise[];
   runningWorkouts: RunSession[];
-  totalLoadScore: number;
+  totalLoadScore: number; // Primary sRPE load
+  volumeLoadSecondary?: number; // Sum of weight * reps
+  runningTrimpSecondary?: number; // Sum of Edwards TRIMP
 }
 
 export interface ReadinessCheckIn {
@@ -69,26 +79,75 @@ export interface ReadinessCheckIn {
   legFatigue: boolean;
   energyLevel: 'low' | 'moderate' | 'high';
   restingHeartRate?: number;
+  hrvRmssd?: number; // Optional Heart Rate Variability (ms)
+  tendonJointPain?: 0 | 1 | 2 | 3; // 0 = None, 1 = Mild, 2 = Noticeable, 3 = Severe
+  tendonPainArea?: string; // e.g. "Patellar", "Achilles", "Hamstring"
 }
 
-export type ACWRStatus = 'safe' | 'optimal' | 'danger_overtraining';
+export interface UserProfile {
+  age: number;
+  weightKg: number;
+  heightCm: number;
+  maxHr?: number;
+  restingHrBaseline: number;
+  hrMaxFormula?: 'tanaka' | 'gellish' | 'custom';
+}
+
+export type ACWRStatus =
+  | 'insufficient_data'
+  | 'undertraining'
+  | 'sweet_spot'
+  | 'warning'
+  | 'danger';
+
+export type ACWRMethod = 'rolling_coupled' | 'rolling_uncoupled' | 'ewma';
 
 export interface ACWRResult {
   acuteLoad: number;
   chronicLoad: number;
   ratio: number;
   status: ACWRStatus;
+  method: ACWRMethod;
+  daysCollected: number;
+  coldStartProgressPercent: number;
+  weeklySpikeAlert: boolean;
+  weeklySpikePercent: number;
+}
+
+export interface SoftGuardrailResult {
+  level: 'none' | 'caution' | 'high_risk';
+  canOverride: boolean;
+  warningTitle: string;
+  warningMessage: string;
+  suggestedAction: string;
+  conflictDirection: 'legs_to_run' | 'run_to_legs' | 'none';
+  allowedRunningTypes: RunningType[];
 }
 
 export interface RecommendationResult {
   targetCategory: WorkoutCategory;
   warningMessage?: string;
-  volumeAdjustmentPercent: number; // e.g. -30, -25, -15, 0
+  volumeAdjustmentPercent: number; // e.g. -20, -30, -40, 0
+  guardrail: SoftGuardrailResult;
   workoutDetail: {
     title: string;
     rationale: string;
-    speedRunLocked: boolean;
+    speedRunLocked: boolean; // Retained for compatibility: true if caution/high_risk and not overridden
     suggestedAction: string;
     allowedRunningTypes?: RunningType[];
   };
+  tendonWarning?: string;
+}
+
+export interface OneRepMaxEstimate {
+  epley: number;
+  brzycki: number;
+  average: number;
+}
+
+export interface WeeklyMuscleVolume {
+  category: WorkoutCategory;
+  hardSets: number; // Sets with RPE >= 7.0
+  totalVolumeKg: number;
+  sRpeTotal: number;
 }

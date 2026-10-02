@@ -76,7 +76,8 @@ console.log('✅ ACWR Engine verified!\n');
 
 // 4. Test Smart Adaptive Recommendation (Leg Day trained 18 hours ago)
 console.log('--- [4] Smart Hybrid Split Logic Test (Leg Fatigue Active) ---');
-const readinessScore = calculateReadinessScore(mockReadinessToday);
+const readinessResult = calculateReadinessScore(mockReadinessToday);
+const readinessScore = readinessResult.score;
 console.log(`Calculated Daily Readiness Score: ${readinessScore}/100`);
 const lastLegsHours = 18; // Leg day finished 18h ago
 const recLegFatigued = getWorkoutRecommendation(acwr.ratio, mockReadinessToday, lastLegsHours);
@@ -100,7 +101,7 @@ console.log(`Danger Status: ${dangerAcwr.status}`);
 console.log(`Auto High-Intensity Locked: ${dangerRec.workoutDetail.speedRunLocked}`);
 console.log(`Recommended Deload Action: ${dangerRec.workoutDetail.title} (${dangerRec.targetCategory})`);
 console.log(`Volume Adjustment: ${dangerRec.volumeAdjustmentPercent}%`);
-console.assert(dangerAcwr.status === 'danger_overtraining', 'Should trigger danger_overtraining');
+console.assert(dangerAcwr.status === 'danger', 'Should trigger danger status');
 console.assert(dangerRec.targetCategory === 'mobility_recovery', 'Should force recovery intensity');
 console.assert(dangerRec.volumeAdjustmentPercent <= -25, 'Should cut volume by at least 25%');
 console.log('✅ Danger Zone Deload Protection verified!\n');

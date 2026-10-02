@@ -12,8 +12,10 @@ import {
   AthleteContext,
   ChatMessage,
   askGeminiCoach,
-  getStoredApiKey,
-  saveStoredApiKey,
+  getAiCoachConfig,
+  saveAiCoachConfig,
+  getEnvApiKey,
+  AiCoachConfig,
 } from '@/lib/ai/geminiCoach';
 
 interface GeminiCoachWidgetProps {
@@ -43,16 +45,21 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [coachConfig, setCoachConfig] = useState<AiCoachConfig>({
+    mode: 'byok',
+    byokApiKey: '',
+    proxyUrl: '',
+    sendTelemetry: true,
+  });
   const [hasApiKey, setHasApiKey] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Load existing API key on mount
+  // Load existing AI coach config on mount
   useEffect(() => {
-    const key = getStoredApiKey();
-    setHasApiKey(Boolean(key));
-    setApiKeyInput(key);
+    const cfg = getAiCoachConfig();
+    setCoachConfig(cfg);
+    setHasApiKey(Boolean((cfg.mode === 'byok' && cfg.byokApiKey) || (cfg.mode === 'proxy' && cfg.proxyUrl)));
   }, []);
 
   // Handle external prompt passed e.g. from PostWorkoutDebriefModal
@@ -70,12 +77,6 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isOpen, isLoading]);
-
-  const handleSaveKey = () => {
-    saveStoredApiKey(apiKeyInput);
-    setHasApiKey(Boolean(apiKeyInput.trim()));
-    setShowKeyModal(false);
-  };
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputValue).trim();
@@ -301,7 +302,7 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
             </div>
           </div>
 
-          {/* Inline API Key Config Box (Collapsible) */}
+          {/* Inline API Key & Proxy Config Box (Collapsible) */}
           {showKeyModal && (
             <div
               style={{
@@ -311,60 +312,159 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
                 fontSize: '0.78rem',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.4rem' }}>
-                <span style={{ fontWeight: 700, color: '#FFFFFF' }}>Google Gemini API Key</span>
-                <a
-                  href="https://aistudio.google.com/app/apikey"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    color: 'var(--accent-neon)',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.2rem',
-                    fontSize: '0.72rem',
-                  }}
-                >
-                  Get Free Key <ExternalLink size={10} />
-                </a>
-              </div>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.72rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>
-                Enter your Google AI Studio API key to enable live generation. Key is stored locally in your browser.
-              </p>
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
-                <input
-                  type="password"
-                  placeholder="AIzaSy..."
-                  value={apiKeyInput}
-                  onChange={(e) => setApiKeyInput(e.target.value)}
+              {/* Mode Selection */}
+              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                <button
+                  onClick={() => setCoachConfig((prev) => ({ ...prev, mode: 'byok' }))}
                   style={{
                     flex: 1,
-                    background: 'var(--bg-surface)',
-                    border: '1px solid var(--border-default)',
+                    padding: '0.35rem',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
-                    padding: '0.35rem 0.55rem',
-                    fontSize: '0.8rem',
-                    outline: 'none',
-                  }}
-                />
-                <button
-                  onClick={handleSaveKey}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--accent-neon)',
-                    color: '#09090b',
+                    background: coachConfig.mode === 'byok' ? 'rgba(204, 255, 0, 0.15)' : 'var(--bg-surface)',
+                    border: coachConfig.mode === 'byok' ? '1px solid var(--accent-neon)' : '1px solid var(--border-default)',
+                    color: coachConfig.mode === 'byok' ? '#FFFFFF' : 'var(--text-muted)',
                     fontWeight: 700,
-                    fontSize: '0.78rem',
-                    border: 'none',
+                    fontSize: '0.75rem',
                     cursor: 'pointer',
                   }}
                 >
-                  Save
+                  Mode BYOK (Lokal)
+                </button>
+                <button
+                  onClick={() => setCoachConfig((prev) => ({ ...prev, mode: 'proxy' }))}
+                  style={{
+                    flex: 1,
+                    padding: '0.35rem',
+                    borderRadius: 'var(--radius-sm)',
+                    background: coachConfig.mode === 'proxy' ? 'rgba(204, 255, 0, 0.15)' : 'var(--bg-surface)',
+                    border: coachConfig.mode === 'proxy' ? '1px solid var(--accent-neon)' : '1px solid var(--border-default)',
+                    color: coachConfig.mode === 'proxy' ? '#FFFFFF' : 'var(--text-muted)',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Mode Proxy Backend
                 </button>
               </div>
+
+              {coachConfig.mode === 'byok' ? (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <span style={{ fontWeight: 700, color: '#FFFFFF' }}>Google Gemini API Key</span>
+                    <a
+                      href="https://aistudio.google.com/app/apikey"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        color: 'var(--accent-neon)',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.2rem',
+                        fontSize: '0.7rem',
+                      }}
+                    >
+                      Dapatkan Key Gratis <ExternalLink size={10} />
+                    </a>
+                  </div>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>
+                    Key disimpan privat di peramban lokal Anda. Atau otomatis terbaca dari file <code>.env</code> (<code>VITE_GEMINI_API_KEY</code>).
+                  </p>
+                  {getEnvApiKey() && (
+                    <div style={{ fontSize: '0.68rem', color: 'var(--accent-neon)', marginBottom: '0.4rem', fontWeight: 600 }}>
+                      Kunci terdeteksi otomatis dari environment (.env)
+                    </div>
+                  )}
+                  <input
+                    type="password"
+                    placeholder={getEnvApiKey() ? "Terhubung dari .env (atau ketik untuk override)" : "AIzaSy... (atau atur di file .env)"}
+                    value={coachConfig.byokApiKey}
+                    onChange={(e) => setCoachConfig((prev) => ({ ...prev, byokApiKey: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-default)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: '#FFFFFF',
+                      padding: '0.4rem 0.55rem',
+                      fontSize: '0.8rem',
+                      outline: 'none',
+                      marginBottom: '0.65rem',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </>
+              ) : (
+                <>
+                  <span style={{ fontWeight: 700, color: '#FFFFFF', display: 'block', marginBottom: '0.3rem' }}>
+                    URL Endpoint Proxy Pribadi
+                  </span>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>
+                    Gunakan serverless function (Cloudflare Worker/Vercel) dengan rate limit sendiri.
+                  </p>
+                  <input
+                    type="url"
+                    placeholder="https://my-proxy.workers.dev/chat"
+                    value={coachConfig.proxyUrl}
+                    onChange={(e) => setCoachConfig((prev) => ({ ...prev, proxyUrl: e.target.value }))}
+                    style={{
+                      width: '100%',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-default)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: '#FFFFFF',
+                      padding: '0.4rem 0.55rem',
+                      fontSize: '0.8rem',
+                      outline: 'none',
+                      marginBottom: '0.65rem',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </>
+              )}
+
+              {/* Privacy Toggle: Send Telemetry */}
+              <label
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.73rem',
+                  color: 'var(--text-secondary)',
+                  cursor: 'pointer',
+                  marginBottom: '0.75rem',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={coachConfig.sendTelemetry}
+                  onChange={(e) => setCoachConfig((prev) => ({ ...prev, sendTelemetry: e.target.checked }))}
+                  style={{ accentColor: 'var(--accent-neon)' }}
+                />
+                <span>Kirim data agregat latihan (ACWR, beban, kesiapan) ke AI Coach</span>
+              </label>
+
+              <button
+                onClick={() => {
+                  saveAiCoachConfig(coachConfig);
+                  setHasApiKey(Boolean((coachConfig.mode === 'byok' && coachConfig.byokApiKey) || (coachConfig.mode === 'proxy' && coachConfig.proxyUrl)));
+                  setShowKeyModal(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '0.45rem',
+                  borderRadius: 'var(--radius-sm)',
+                  background: 'var(--accent-neon)',
+                  color: '#09090b',
+                  fontWeight: 700,
+                  fontSize: '0.78rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Simpan Pengaturan AI Coach
+              </button>
             </div>
           )}
 

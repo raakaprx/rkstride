@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Dumbbell,
   Timer,
@@ -14,14 +14,16 @@ import {
   ChevronDown,
   ChevronUp,
   Zap,
+  TrendingUp,
 } from 'lucide-react';
-import { StrengthExercise, RunSession, RunningType } from '@/types/workout';
+import { StrengthExercise, RunSession, RunningType, ACWRStatus } from '@/types/workout';
 import {
   calculateStrengthLoad,
   calculateRunningLoad,
   RUNNING_PRESETS,
   ZONE_WEIGHTS,
 } from '@/lib/engine/workload';
+import { evaluateDoubleProgression } from '@/lib/engine/doubleProgression';
 import {
   EXERCISE_CATALOG,
   ExerciseCategory,
@@ -39,7 +41,7 @@ interface WorkoutLoggerProps {
   ) => {
     draftLoad: number;
     projectedACWR: number;
-    projectedStatus: 'safe' | 'optimal' | 'danger_overtraining';
+    projectedStatus: ACWRStatus;
     isOverloaded: boolean;
     legConflict: boolean;
     advice: string;
@@ -49,7 +51,7 @@ interface WorkoutLoggerProps {
   onWorkoutCompletedDebrief?: (data: {
     sessionLoad: number;
     projectedACWR: number;
-    acwrStatus: 'safe' | 'optimal' | 'danger_overtraining';
+    acwrStatus: ACWRStatus;
     hasLegWorkout: boolean;
     hasRunWorkout: boolean;
     hasUpperWorkout: boolean;
@@ -108,6 +110,46 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 
   const [includeRunning, setIncludeRunning] = useState(true);
   const [includeStrength, setIncludeStrength] = useState(true);
+
+  // Interactive Rest Timer State
+  const [restSecondsRemaining, setRestSecondsRemaining] = useState<number | null>(null);
+
+  // Audio notification when rest timer completes (Web Audio API - offline & asset-free)
+  const playTimerChime = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const audioCtx = new AudioCtx();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch {
+      // AudioContext unavailable
+    }
+  };
+
+  useEffect(() => {
+    if (restSecondsRemaining === null) return;
+    if (restSecondsRemaining <= 0) {
+      playTimerChime();
+      setRestSecondsRemaining(null);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setRestSecondsRemaining((prev) => (prev !== null && prev > 0 ? prev - 1 : null));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [restSecondsRemaining]);
 
   // Filter Catalog
   const filteredCatalog = useMemo(() => {
@@ -850,29 +892,92 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     </table>
                   </div>
 
-                  <div style={{ marginTop: '0.75rem' }}>
-                    <button
-                      onClick={() => handleAddSet(exIdx)}
-                      style={{
-                        background: 'var(--bg-surface)',
-                        border: '1px solid var(--border-default)',
-                        borderRadius: 'var(--radius-sm)',
-                        color: 'var(--text-secondary)',
-                        fontSize: '0.78rem',
-                        fontWeight: 600,
-                        padding: '0.35rem 0.75rem',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.3rem',
-                        transition: 'var(--transition-fast)',
-                      }}
-                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
-                    >
-                      <Plus size={14} /> Add Set
-                    </button>
+                  {/* Exercise Actions & Rest Timer */}
+                  <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <button
+                        onClick={() => handleAddSet(exIdx)}
+                        style={{
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border-default)',
+                          borderRadius: 'var(--radius-sm)',
+                          color: 'var(--text-secondary)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          padding: '0.35rem 0.75rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          transition: 'var(--transition-fast)',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+                      >
+                        <Plus size={14} /> Add Set
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setRestSecondsRemaining(90);
+                        }}
+                        style={{
+                          background: 'var(--bg-surface)',
+                          border: '1px solid var(--border-default)',
+                          borderRadius: 'var(--radius-sm)',
+                          color: 'var(--text-secondary)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          padding: '0.35rem 0.65rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.3rem',
+                          transition: 'var(--transition-fast)',
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
+                      >
+                        <Timer size={13} style={{ color: 'var(--accent-neon)' }} />
+                        <span>Rest 90s</span>
+                      </button>
+                    </div>
+
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                      Double Progression (8-10 reps @ RPE &le; 8)
+                    </span>
                   </div>
+
+                  {/* Double Progression Suggestion Badge */}
+                  {(() => {
+                    const prog = evaluateDoubleProgression(exercise.namaGerakan, exercise.sets, 8, 10);
+                    return (
+                      <div
+                        style={{
+                          marginTop: '0.75rem',
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: prog.shouldIncreaseWeight ? 'rgba(204, 255, 0, 0.08)' : 'var(--bg-surface)',
+                          border: prog.shouldIncreaseWeight ? '1px solid rgba(204, 255, 0, 0.3)' : '1px solid var(--border-subtle)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          flexWrap: 'wrap',
+                          gap: '0.5rem',
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                          <TrendingUp size={14} style={{ color: prog.shouldIncreaseWeight ? 'var(--accent-neon)' : 'var(--text-muted)' }} />
+                          <span style={{ fontSize: '0.75rem', color: '#FFFFFF', fontWeight: 600 }}>
+                            {prog.message}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: '0.72rem', color: prog.shouldIncreaseWeight ? 'var(--accent-neon)' : 'var(--text-muted)', fontWeight: 700 }}>
+                          {prog.nextSessionGoal}
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               );
             })}
@@ -1369,6 +1474,67 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           Save &amp; Log Today&apos;s Workout
         </button>
       </div>
+
+      {/* Floating Interactive Rest Timer Bar */}
+      {restSecondsRemaining !== null && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '1.5rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 45,
+            background: 'var(--bg-secondary)',
+            border: '2px solid var(--accent-neon)',
+            borderRadius: 'var(--radius-full)',
+            padding: '0.65rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '1rem',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.7), 0 0 15px rgba(204,255,0,0.2)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Timer size={18} style={{ color: 'var(--accent-neon)' }} />
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#FFFFFF' }}>
+              Istirahat Antar Set: {Math.floor(restSecondsRemaining / 60)}:{(restSecondsRemaining % 60).toString().padStart(2, '0')}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <button
+              onClick={() => setRestSecondsRemaining((prev) => (prev || 0) + 30)}
+              style={{
+                padding: '0.25rem 0.55rem',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                color: '#FFFFFF',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              +30s
+            </button>
+            <button
+              onClick={() => setRestSecondsRemaining(null)}
+              style={{
+                padding: '0.25rem 0.65rem',
+                borderRadius: 'var(--radius-full)',
+                background: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid #EF4444',
+                color: '#EF4444',
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Selesai
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

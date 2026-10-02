@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useWorkoutEngine } from './hooks/useWorkoutEngine';
 import { HeaderNavbar } from './components/HeaderNavbar';
 import { WorkloadAdvisorCard } from './components/WorkloadAdvisorCard';
@@ -8,17 +8,49 @@ import { SmartwatchSyncCard } from './components/SmartwatchSyncCard';
 import { Footer } from './components/Footer';
 import { PostWorkoutDebriefModal, PostWorkoutDebriefData } from './components/PostWorkoutDebriefModal';
 import { GeminiCoachWidget } from './components/GeminiCoachWidget';
+import { AboutDisclaimerModal } from './components/AboutDisclaimerModal';
+import { OnboardingDisclaimerModal } from './components/OnboardingDisclaimerModal';
+import { DataManagementModal } from './components/DataManagementModal';
+import { PeriodizationTaperCard } from './components/PeriodizationTaperCard';
+import { NutritionBodyCompCard } from './components/NutritionBodyCompCard';
+import { TrendsDashboardCard } from './components/TrendsDashboardCard';
+import { OnboardingProfileModal } from './components/OnboardingProfileModal';
 import { AthleteContext } from './lib/ai/geminiCoach';
+import { db, seedInitialDataIfEmpty } from './lib/db/database';
+import { UserProfile } from './types/workout';
+import { RaceTargetConfig } from './types/productFeatures';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'training' | 'schedule' | 'smartwatch'>('training');
+  const [activeTab, setActiveTab] = useState<'training' | 'trends' | 'nutrition' | 'schedule' | 'smartwatch'>('training');
+
+  // Modals state
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  // Athlete Profile & Race Target State
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    age: 28,
+    weightKg: 72,
+    heightCm: 175,
+    restingHrBaseline: 52,
+    maxHr: 190,
+    hrMaxFormula: 'tanaka',
+  });
+
+  const [raceConfig, setRaceConfig] = useState<RaceTargetConfig>({
+    eventName: 'Jakarta Half Marathon',
+    category: 'half_marathon',
+    raceDate: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  });
 
   // Post-Workout Celebration Modal State
   const [isDebriefOpen, setIsDebriefOpen] = useState(false);
   const [debriefData, setDebriefData] = useState<PostWorkoutDebriefData>({
     sessionLoad: 0,
     projectedACWR: 1.0,
-    acwrStatus: 'optimal',
+    acwrStatus: 'sweet_spot',
     hasLegWorkout: false,
     hasRunWorkout: false,
     hasUpperWorkout: false,
@@ -29,6 +61,7 @@ export default function App() {
   const [externalCoachPrompt, setExternalCoachPrompt] = useState<string>('');
 
   const {
+    history,
     acwrResult,
     recommendation,
     readinessScore,
@@ -45,7 +78,47 @@ export default function App() {
     applyPreset,
     calculateProjectedImpact,
     logTodayWorkout,
+    reloadFromDb,
   } = useWorkoutEngine();
+
+  // Initialize Dexie IndexedDB baseline seed and check onboarding disclaimer consent
+  useEffect(() => {
+    const initAppPersistence = async () => {
+      await seedInitialDataIfEmpty();
+      try {
+        const storedProfile = await db.userProfile.get('current_user');
+        if (storedProfile) {
+          setUserProfile(storedProfile);
+        }
+        const storedRace = await db.appSettings.get('targetRaceConfig');
+        if (storedRace && storedRace.value) {
+          setRaceConfig(storedRace.value);
+        }
+        const acceptedLocal = localStorage.getItem('rkstride_disclaimer_accepted');
+        const acceptedDbSetting = await db.appSettings.get('disclaimerAccepted');
+        if (!acceptedLocal && (!acceptedDbSetting || !acceptedDbSetting.value)) {
+          setIsOnboardingOpen(true);
+        }
+      } catch (err) {
+        console.error('Error checking stored settings state:', err);
+      }
+    };
+    initAppPersistence();
+  }, []);
+
+  const handleAcceptDisclaimer = async () => {
+    try {
+      localStorage.setItem('rkstride_disclaimer_accepted', 'true');
+      await db.appSettings.put({
+        key: 'disclaimerAccepted',
+        value: true,
+        updatedAt: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.error('Failed to persist disclaimer acceptance:', err);
+    }
+    setIsOnboardingOpen(false);
+  };
 
   // Dynamic Athlete Context for Google Gemini AI Coach
   const athleteContext: AthleteContext = useMemo(() => ({
@@ -77,6 +150,9 @@ export default function App() {
         setActiveTab={setActiveTab}
         smartwatchState={smartwatchState}
         onOpenSmartwatchModal={() => setActiveTab('smartwatch')}
+        onOpenDataModal={() => setIsDataModalOpen(true)}
+        onOpenAboutModal={() => setIsAboutModalOpen(true)}
+        onOpenProfileModal={() => setIsProfileModalOpen(true)}
       />
 
       {/* Main Container */}
@@ -95,6 +171,14 @@ export default function App() {
         {/* Tab 1: Menu Utama - Latihan & Evaluasi Beban */}
         {activeTab === 'training' && (
           <>
+            {/* Kartu Target Kompetisi & Tapering Dinamis */}
+            {raceConfig.category !== 'none' && (
+              <PeriodizationTaperCard
+                raceConfig={raceConfig}
+                onEditRaceConfig={() => setIsProfileModalOpen(true)}
+              />
+            )}
+
             {/* Kartu Evaluasi Beban (ACWR & Rekomendasi Pintar) */}
             <WorkloadAdvisorCard
               acwr={acwrResult}
@@ -115,7 +199,21 @@ export default function App() {
           </>
         )}
 
-        {/* Tab 2: Jadwal Mingguan Kustom */}
+        {/* Tab 2: Dashboard Tren ACWR & Beban Kerja 28 Hari */}
+        {activeTab === 'trends' && (
+          <TrendsDashboardCard history={history} />
+        )}
+
+        {/* Tab 3: Nutrisi & Kebutuhan Energi Atlet Hibrida */}
+        {activeTab === 'nutrition' && (
+          <NutritionBodyCompCard
+            userProfile={userProfile}
+            todayWorkoutDurationMinutes={debriefData.totalDurationMin || 45}
+            todayWorkoutCaloriesBurned={Math.round((debriefData.sessionLoad || 250) * 1.5)}
+          />
+        )}
+
+        {/* Tab 4: Jadwal Mingguan Kustom */}
         {activeTab === 'schedule' && (
           <ScheduleCustomizer
             weeklySchedule={weeklySchedule}
@@ -125,7 +223,7 @@ export default function App() {
           />
         )}
 
-        {/* Tab 3: Integrasi Jam Pintar Universal (Smartwatch Hub) */}
+        {/* Tab 5: Integrasi Jam Pintar Universal (Smartwatch Hub) */}
         {activeTab === 'smartwatch' && (
           <SmartwatchSyncCard
             smartwatchState={smartwatchState}
@@ -153,6 +251,38 @@ export default function App() {
         athleteContext={athleteContext}
         externalPrompt={externalCoachPrompt}
         onClearExternalPrompt={() => setExternalCoachPrompt('')}
+      />
+
+      {/* Scientific Basis & Non-Medical Disclaimer Modal */}
+      <AboutDisclaimerModal
+        isOpen={isAboutModalOpen}
+        onClose={() => setIsAboutModalOpen(false)}
+      />
+
+      {/* First-Run Onboarding Non-Medical Disclaimer Modal */}
+      <OnboardingDisclaimerModal
+        isOpen={isOnboardingOpen}
+        onAccept={handleAcceptDisclaimer}
+        onOpenAboutDetails={() => {
+          setIsOnboardingOpen(false);
+          setIsAboutModalOpen(true);
+        }}
+      />
+
+      {/* Offline Data Management, JSON/CSV Export & Zod Import Modal */}
+      <DataManagementModal
+        isOpen={isDataModalOpen}
+        onClose={() => setIsDataModalOpen(false)}
+        onDataImported={() => {
+          reloadFromDb();
+        }}
+      />
+
+      {/* Athlete Physiology Profile & Target Race Modal */}
+      <OnboardingProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onProfileUpdated={(updated) => setUserProfile(updated)}
       />
 
       {/* Minimalist Dark Footer */}

@@ -1,53 +1,150 @@
+/**
+ * RKStride - Sports Science & Hybrid Workload Engine
+ * Pure, deterministic mathematical functions for ACWR, sRPE, Karvonen HRR,
+ * Edwards TRIMP, bidirectional soft interference guardrails, personal baseline readiness,
+ * 1RM estimations, and weekly muscle volume.
+ */
+
 import {
   StrengthExercise,
   RunSession,
   DailyLog,
   ReadinessCheckIn,
   ACWRResult,
+  ACWRStatus,
+  ACWRMethod,
   RecommendationResult,
   HeartRateZone,
   RunningType,
   RunningIntervalBlock,
+  UserProfile,
+  SoftGuardrailResult,
+  OneRepMaxEstimate,
+  WeeklyMuscleVolume,
+  WorkoutCategory,
+  StrengthSet,
 } from '@/types/workout';
 
-/**
- * Heart Rate Zone Weights (Workload Stress Factor per Minute)
- * Zone 1: Active Recovery (50-60% HRmax) -> 1.0 pts/min
- * Zone 2: Aerobic Base (60-70% HRmax) -> 1.2 pts/min
- * Zone 3: Aerobic Tempo (70-80% HRmax) -> 1.5 pts/min
- * Zone 4: Lactate Threshold / Norwegian 4x4 (85-95% HRmax) -> 2.2 pts/min
- * Zone 5: Anaerobic / VO2 Max Intervals (>90% HRmax) -> 3.5 pts/min
- */
-export const ZONE_WEIGHTS: Record<HeartRateZone, number> = {
-  1: 1.0,
-  2: 1.2,
-  3: 1.5,
-  4: 2.2,
-  5: 3.5,
-};
+import {
+  ACWR_THRESHOLDS,
+  ACWR_COLD_START_MIN_DAYS,
+  EWMA_LAMBDA,
+  WEEKLY_LOAD_SPIKE_THRESHOLD_PERCENT,
+  DELOAD_ATTENUATION,
+  SRPE_CONFIG,
+  EDWARDS_ZONE_WEIGHTS,
+  KARVONEN_PERCENTAGES,
+  PHYSIOLOGICAL_DEFAULTS,
+  INTERFERENCE_GUARDRAIL,
+  READINESS_Z_WEIGHTS,
+  HARD_SET_MIN_RPE,
+} from './constants';
+
+export const ZONE_WEIGHTS = EDWARDS_ZONE_WEIGHTS;
+
+// =============================================================================
+// 1. HEART RATE & KARVONEN (HEART RATE RESERVE) PHYSIOLOGY
+// =============================================================================
 
 /**
- * Standard Running Spectrum Presets
+ * Estimate Maximum Heart Rate based on evidence-based formulas
+ * Tanaka et al. (2001): 208 - (0.7 * age)
+ * Gellish et al. (2007): 207 - (0.7 * age)
  */
+export function estimateMaxHeartRate(
+  age: number,
+  formula: 'tanaka' | 'gellish' = 'tanaka'
+): number {
+  const safeAge = Math.max(10, Math.min(100, age));
+  if (formula === 'gellish') {
+    return Math.round(207 - 0.7 * safeAge);
+  }
+  return Math.round(208 - 0.7 * safeAge);
+}
+
+/**
+ * Calculate personalized Heart Rate Zones using Karvonen Heart Rate Reserve (HRR) formula:
+ * Target HR = RHR + Percentage * (HRmax - RHR)
+ */
+export function calculateKarvonenHeartRateZones(
+  profile?: Partial<UserProfile>
+): Record<HeartRateZone, { min: number; max: number; label: string }> {
+  const age = profile?.age ?? PHYSIOLOGICAL_DEFAULTS.DEFAULT_AGE;
+  const rhr = profile?.restingHrBaseline ?? PHYSIOLOGICAL_DEFAULTS.DEFAULT_RESTING_HR;
+  const maxHr = profile?.maxHr ?? estimateMaxHeartRate(age, profile?.hrMaxFormula === 'gellish' ? 'gellish' : 'tanaka');
+  const hrr = Math.max(30, maxHr - rhr);
+
+  const getBpm = (fraction: number) => Math.round(rhr + fraction * hrr);
+
+  return {
+    1: {
+      min: getBpm(KARVONEN_PERCENTAGES.ZONE_1.min),
+      max: getBpm(KARVONEN_PERCENTAGES.ZONE_1.max),
+      label: 'Zone 1: Active Recovery (50-60% HRR)',
+    },
+    2: {
+      min: getBpm(KARVONEN_PERCENTAGES.ZONE_2.min),
+      max: getBpm(KARVONEN_PERCENTAGES.ZONE_2.max),
+      label: 'Zone 2: Aerobic Base (60-70% HRR)',
+    },
+    3: {
+      min: getBpm(KARVONEN_PERCENTAGES.ZONE_3.min),
+      max: getBpm(KARVONEN_PERCENTAGES.ZONE_3.max),
+      label: 'Zone 3: Aerobic Tempo (70-80% HRR)',
+    },
+    4: {
+      min: getBpm(KARVONEN_PERCENTAGES.ZONE_4.min),
+      max: getBpm(KARVONEN_PERCENTAGES.ZONE_4.max),
+      label: 'Zone 4: Anaerobic Threshold (80-90% HRR)',
+    },
+    5: {
+      min: getBpm(KARVONEN_PERCENTAGES.ZONE_5.min),
+      max: maxHr,
+      label: 'Zone 5: VO2 Max / Anaerobic (90-100% HRR)',
+    },
+  };
+}
+
+/**
+ * Determine Heart Rate Zone from Average Heart Rate (bpm)
+ * Evaluates against personalized Karvonen zones if profile is available.
+ */
+export function getHeartRateZoneFromBpm(
+  bpm: number,
+  profile?: Partial<UserProfile>
+): HeartRateZone {
+  const zones = calculateKarvonenHeartRateZones(profile);
+
+  if (bpm < zones[2].min) return 1;
+  if (bpm < zones[3].min) return 2;
+  if (bpm < zones[4].min) return 3;
+  if (bpm < zones[5].min) return 4;
+  return 5;
+}
+
+// =============================================================================
+// 2. RUNNING PRESETS & PROTOCOLS (NORWEGIAN 4x4 ACCORDING TO PROTOCOL)
+// =============================================================================
+
 export const RUNNING_PRESETS = {
   norwegian_4x4: {
     id: 'norwegian_4x4',
     name: 'Norwegian 4x4 (VO2 Max Protocol)',
     type: 'norwegian_4x4' as RunningType,
-    description: '10m Z2 warmup + 4x(4m Z4 @ 85-95% + 3m Z2 recovery) + 10m Z1 cooldown',
-    durationMinutes: 48,
+    description: '10m Z2 warmup + 4x(4m Z4 @ 85-95% HRmax + 3m Z2 recovery) + 6m Z1 cooldown (Helgerud et al., 2007)',
+    durationMinutes: 44,
     estimatedDistanceKm: 7.2,
     blocks: [
-      { zone: 2 as HeartRateZone, durationMinutes: 10, description: 'Warm-up (Zone 2)' },
-      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 1 (Zone 4)' },
-      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 1 (Zone 2)' },
-      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 2 (Zone 4)' },
-      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 2 (Zone 2)' },
-      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 3 (Zone 4)' },
-      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 3 (Zone 2)' },
-      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 4 (Zone 4)' },
-      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 4 (Zone 2)' },
-      { zone: 1 as HeartRateZone, durationMinutes: 10, description: 'Cool-down (Zone 1)' },
+      { zone: 2 as HeartRateZone, durationMinutes: 10, description: 'Warm-up (Zone 2 @ 60-70% HRR)' },
+      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 1 (Zone 4 @ 85-95% HRmax)' },
+      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 1 (Zone 2 @ 60-70% HRR)' },
+      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 2 (Zone 4 @ 85-95% HRmax)' },
+      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 2 (Zone 2 @ 60-70% HRR)' },
+      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 3 (Zone 4 @ 85-95% HRmax)' },
+      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 3 (Zone 2 @ 60-70% HRR)' },
+      { zone: 4 as HeartRateZone, durationMinutes: 4, description: 'Interval 4 (Zone 4 @ 85-95% HRmax)' },
+      { zone: 2 as HeartRateZone, durationMinutes: 3, description: 'Active Recovery 4 (Zone 2 @ 60-70% HRR)' },
+      { zone: 1 as HeartRateZone, durationMinutes: 6, description: 'Cool-down Flush (Zone 1 @ 50-60% HRR)' },
     ] as RunningIntervalBlock[],
   },
   easy_run: {
@@ -58,14 +155,14 @@ export const RUNNING_PRESETS = {
     durationMinutes: 45,
     estimatedDistanceKm: 7.5,
     blocks: [
-      { zone: 2 as HeartRateZone, durationMinutes: 45, description: 'Zone 2 Steady Aerobic' },
+      { zone: 2 as HeartRateZone, durationMinutes: 45, description: 'Zone 2 Steady Aerobic Base' },
     ] as RunningIntervalBlock[],
   },
   recovery_run: {
     id: 'recovery_run',
     name: 'Active Recovery Flush (Zone 1)',
     type: 'recovery' as RunningType,
-    description: '30 min light flush (max 35 min) for tissue regeneration',
+    description: '30 min light flush for tissue regeneration and lactate clearance',
     durationMinutes: 30,
     estimatedDistanceKm: 4.5,
     blocks: [
@@ -120,229 +217,691 @@ export const RUNNING_PRESETS = {
   },
 };
 
+// =============================================================================
+// 3. WORKLOAD QUANTIFICATION (sRPE UNIVERSAL & SECONDARY METRICS)
+// =============================================================================
+
 /**
- * Determine Heart Rate Zone from Average Heart Rate (bpm)
+ * Universal Foster Session RPE (sRPE)
+ * Formula: durationMinutes * rpe (scale 1-10)
+ * Reference: Foster et al. (2001)
  */
-export function getHeartRateZoneFromBpm(bpm: number): HeartRateZone {
-  if (bpm < 130) return 1;
-  if (bpm <= 150) return 2;
-  if (bpm <= 165) return 3;
-  if (bpm <= 178) return 4;
-  return 5;
+export function calculateSessionRpe(durationMinutes: number, rpe: number): number {
+  const clampedRpe = Math.min(Math.max(rpe, SRPE_CONFIG.MIN_RPE), SRPE_CONFIG.MAX_RPE);
+  const safeDuration = Math.max(0, durationMinutes);
+  return Math.round(safeDuration * clampedRpe);
 }
 
 /**
- * 1. Calculate Strength Volume Load:
- *    Formula: sum(bebanKg * reps) * (RPE / 10) per set.
- *    Normalized by 0.1 factor to align with daily cardiovascular scale.
+ * Secondary Metric for Resistance Training: Volume Load (kg x repetitions)
  */
-export function calculateStrengthLoad(exercises: StrengthExercise[]): number {
+export function calculateStrengthVolumeLoad(exercises: StrengthExercise[]): number {
+  if (!exercises || exercises.length === 0) return 0;
+  let totalVolume = 0;
+  for (const ex of exercises) {
+    if (!ex.sets) continue;
+    for (const set of ex.sets) {
+      if (set.isWarmup) continue;
+      totalVolume += Math.max(0, set.bebanKg) * Math.max(0, set.reps);
+    }
+  }
+  return Math.round(totalVolume);
+}
+
+/**
+ * Primary Metric for Resistance Training: Universal sRPE Workload
+ * If explicit duration is not logged, estimates duration based on set count
+ * (SRPE_CONFIG.ESTIMATED_MINUTES_PER_STRENGTH_SET = 2.5 min/set).
+ */
+export function calculateStrengthLoad(
+  exercises: StrengthExercise[],
+  explicitSessionDurationMinutes?: number
+): number {
   if (!exercises || exercises.length === 0) return 0;
 
-  let totalRawScore = 0;
+  let totalSets = 0;
+  let weightedRpeSum = 0;
 
-  for (const exercise of exercises) {
-    if (!exercise.sets || exercise.sets.length === 0) continue;
-
-    for (const set of exercise.sets) {
-      const clampedRpe = Math.min(Math.max(set.rpe, 1), 10);
-      const volume = set.bebanKg * set.reps;
-      const setLoad = volume * (clampedRpe / 10);
-      totalRawScore += setLoad;
+  for (const ex of exercises) {
+    if (!ex.sets) continue;
+    for (const set of ex.sets) {
+      const clampedRpe = Math.min(Math.max(set.rpe || 7, SRPE_CONFIG.MIN_RPE), SRPE_CONFIG.MAX_RPE);
+      weightedRpeSum += clampedRpe;
+      totalSets++;
     }
   }
 
-  return Math.round(totalRawScore * 0.1);
+  if (totalSets === 0) return 0;
+
+  const avgRpe = weightedRpeSum / totalSets;
+  const duration = explicitSessionDurationMinutes ?? Math.round(totalSets * SRPE_CONFIG.ESTIMATED_MINUTES_PER_STRENGTH_SET);
+
+  return calculateSessionRpe(duration, avgRpe);
 }
 
 /**
- * 2. Calculate Running Workload Score:
- *    A. Block-based Accumulation (Primary):
- *       Total Load = sum(blockDurationMinutes * zoneWeight)
- *       Zone Weights: Z1=1.0, Z2=1.2, Z3=1.5, Z4=2.2, Z5=3.5
- *    B. Sensorless Fallback (RPE-based):
- *       DurationMinutes * (RPE / 2)
- *    C. Continuous Heart Rate Fallback:
- *       DurationMinutes * ZONE_WEIGHTS[getHeartRateZoneFromBpm(avgHR)]
+ * Secondary Metric for Running: Edwards TRIMP (Training Impulse)
+ * Formula: sum(blockDurationMinutes * zoneWeight)
+ * Edwards multipliers: Z1=1.0, Z2=2.0, Z3=3.0, Z4=4.0, Z5=5.0
+ * Reference: Edwards (1993)
  */
-export function calculateRunningLoad(run: RunSession): number {
-  if (!run || run.durasiMenit <= 0) return 0;
+export function calculateEdwardsTrimp(
+  run: RunSession,
+  customWeights?: Record<HeartRateZone, number>
+): number {
+  const weights = customWeights || EDWARDS_ZONE_WEIGHTS;
 
-  // A. Block-based Accumulation
   if (run.blocks && run.blocks.length > 0) {
     const rawTotal = run.blocks.reduce((sum, block) => {
-      const weight = ZONE_WEIGHTS[block.zone] || 1.2;
+      const weight = weights[block.zone] ?? 2.0;
       return sum + block.durationMinutes * weight;
     }, 0);
     return Math.round(rawTotal * 10) / 10;
   }
 
-  // B. Fallback without Heart Rate Sensor (RPE Scale 1–10)
-  if (run.rpe && run.rpe > 0 && (!run.avgHeartRate || run.avgHeartRate <= 0)) {
-    const clampedRpe = Math.min(Math.max(run.rpe, 1), 10);
-    return Math.round(run.durasiMenit * (clampedRpe / 2) * 10) / 10;
-  }
-
-  // C. Continuous Heart Rate Session
+  // Fallback using average Heart Rate if blocks are not specified
   if (run.avgHeartRate && run.avgHeartRate > 0) {
     const zone = getHeartRateZoneFromBpm(run.avgHeartRate);
-    const weight = ZONE_WEIGHTS[zone];
+    const weight = weights[zone] ?? 2.0;
     return Math.round(run.durasiMenit * weight * 10) / 10;
   }
 
   // Default fallback (Zone 2 pace)
-  return Math.round(run.durasiMenit * 1.2 * 10) / 10;
+  return Math.round(run.durasiMenit * (weights[2] ?? 2.0) * 10) / 10;
 }
 
 /**
- * 3. Calculate Acute to Chronic Workload Ratio (ACWR):
- *    - acuteLoad: 7-day average load
- *    - chronicLoad: 28-day average load
- *    - ratio: acuteLoad / chronicLoad
- *    Classifications:
- *    - ratio < 0.8: 'safe' (Under-training / Safe to ramp up)
- *    - 0.8 <= ratio <= 1.3: 'optimal' (Optimal sweet spot)
- *    - ratio > 1.4: 'danger_overtraining' (High injury risk)
+ * Primary Metric for Running: Universal sRPE Workload
+ * If RPE is provided: durationMinutes * RPE.
+ * Fallback with sensor: maps HR zone to equivalent RPE.
  */
-export function calculateACWR(history28Days: DailyLog[]): ACWRResult {
-  const loads: number[] = history28Days.map((log) => log.totalLoadScore);
+export function calculateRunningLoad(run: RunSession): number {
+  if (!run || run.durasiMenit <= 0) return 0;
 
+  // 1. Direct sRPE if RPE is recorded
+  if (run.rpe && run.rpe > 0) {
+    return calculateSessionRpe(run.durasiMenit, run.rpe);
+  }
+
+  // 2. Block-based derived RPE fallback
+  if (run.blocks && run.blocks.length > 0) {
+    const totalWeightedRpe = run.blocks.reduce((sum, block) => {
+      // Map Zone 1->5, Zone 2->6, Zone 3->7, Zone 4->8.5, Zone 5->9.5
+      const zoneToRpe: Record<HeartRateZone, number> = { 1: 5, 2: 6, 3: 7, 4: 8.5, 5: 9.5 };
+      return sum + block.durationMinutes * zoneToRpe[block.zone];
+    }, 0);
+    return Math.round(totalWeightedRpe);
+  }
+
+  // 3. Heart rate derived RPE
+  if (run.avgHeartRate && run.avgHeartRate > 0) {
+    const zone = getHeartRateZoneFromBpm(run.avgHeartRate);
+    const zoneToRpe: Record<HeartRateZone, number> = { 1: 5, 2: 6, 3: 7, 4: 8.5, 5: 9.5 };
+    return calculateSessionRpe(run.durasiMenit, zoneToRpe[zone]);
+  }
+
+  // Default moderate RPE 6
+  return calculateSessionRpe(run.durasiMenit, 6);
+}
+
+// =============================================================================
+// 4. ACWR (ACUTE:CHRONIC WORKLOAD RATIO) ENGINE
+// =============================================================================
+
+/**
+ * Detect weekly workload spikes (Weekly Load Increase > 15%)
+ * Compares current 7 days with previous 7 days (days 7..13).
+ */
+export function detectWeeklyLoadSpike(history28Days: DailyLog[]): {
+  spikeAlert: boolean;
+  spikePercent: number;
+} {
+  if (!history28Days || history28Days.length < 14) {
+    return { spikeAlert: false, spikePercent: 0 };
+  }
+
+  const currentWeekLoad = history28Days.slice(0, 7).reduce((sum, l) => sum + (l.totalLoadScore || 0), 0);
+  const previousWeekLoad = history28Days.slice(7, 14).reduce((sum, l) => sum + (l.totalLoadScore || 0), 0);
+
+  if (previousWeekLoad <= 0) {
+    return { spikeAlert: false, spikePercent: 0 };
+  }
+
+  const percentChange = Math.round(((currentWeekLoad - previousWeekLoad) / previousWeekLoad) * 100);
+  const spikeAlert = percentChange > WEEKLY_LOAD_SPIKE_THRESHOLD_PERCENT;
+
+  return { spikeAlert, spikePercent: percentChange };
+}
+
+/**
+ * Calculate Exponentially Weighted Moving Average (EWMA) for a load series
+ * Formula: EWMA_t = Load_t * lambda + (1 - lambda) * EWMA_{t-1}
+ * Reference: Williams et al. (2017)
+ */
+export function calculateEWMALoad(loadsChronological: number[], lambda: number): number {
+  if (loadsChronological.length === 0) return 0;
+
+  let ewma = loadsChronological[0];
+  for (let i = 1; i < loadsChronological.length; i++) {
+    ewma = loadsChronological[i] * lambda + (1 - lambda) * ewma;
+  }
+  return Math.round(ewma * 10) / 10;
+}
+
+/**
+ * Comprehensive ACWR Calculation Engine
+ * Supports:
+ * - Method 1: 'rolling_coupled' (7-day vs 28-day coupled rolling average)
+ * - Method 2: 'rolling_uncoupled' (7-day acute vs 21-day prior uncoupled chronic)
+ * - Method 3: 'ewma' (Exponentially Weighted Moving Average)
+ *
+ * Cold-Start Safety:
+ * - Requires at least ACWR_COLD_START_MIN_DAYS (21 days) of data to classify risk zones.
+ * - Under 21 days is flagged as 'insufficient_data' with exact collection progress.
+ *
+ * Risk Zones without Gaps:
+ * - < 0.8: 'undertraining'
+ * - 0.8 - 1.3: 'sweet_spot'
+ * - 1.3 - 1.5: 'warning'
+ * - > 1.5: 'danger'
+ */
+export function calculateACWR(
+  history28Days: DailyLog[],
+  method: ACWRMethod = 'rolling_coupled'
+): ACWRResult {
+  const validLogs = history28Days || [];
+  const daysCollected = validLogs.filter((l) => l.totalLoadScore !== undefined).length;
+  const isColdStart = daysCollected < ACWR_COLD_START_MIN_DAYS;
+  const coldStartProgressPercent = Math.min(100, Math.round((daysCollected / ACWR_COLD_START_MIN_DAYS) * 100));
+
+  const loads: number[] = validLogs.map((log) => log.totalLoadScore || 0);
   while (loads.length < 28) {
     loads.push(0);
   }
 
-  const acuteSlice = loads.slice(0, 7);
-  const acuteSum = acuteSlice.reduce((sum, val) => sum + val, 0);
-  const acuteLoad = Math.round((acuteSum / 7) * 10) / 10;
+  let acuteLoad = 0;
+  let chronicLoad = 0;
 
-  const chronicSlice = loads.slice(0, 28);
-  const chronicSum = chronicSlice.reduce((sum, val) => sum + val, 0);
-  const chronicLoad = Math.round((chronicSum / 28) * 10) / 10;
+  if (method === 'ewma') {
+    // Reverse loads so array is chronological: oldest (day 27) -> today (day 0)
+    const chronologicalLoads = [...loads.slice(0, 28)].reverse();
+    acuteLoad = calculateEWMALoad(chronologicalLoads, EWMA_LAMBDA.ACUTE);
+    chronicLoad = calculateEWMALoad(chronologicalLoads, EWMA_LAMBDA.CHRONIC);
+  } else if (method === 'rolling_uncoupled') {
+    // Uncoupled: Acute = average of days 0..6 (7 days), Chronic = average of days 7..27 (21 days prior)
+    const acuteSum = loads.slice(0, 7).reduce((sum, val) => sum + val, 0);
+    acuteLoad = Math.round((acuteSum / 7) * 10) / 10;
+
+    const chronicSlice = loads.slice(7, 28);
+    const chronicSum = chronicSlice.reduce((sum, val) => sum + val, 0);
+    chronicLoad = Math.round((chronicSum / 21) * 10) / 10;
+  } else {
+    // Default coupled: Acute = days 0..6 (7 days), Chronic = days 0..27 (28 days)
+    const acuteSum = loads.slice(0, 7).reduce((sum, val) => sum + val, 0);
+    acuteLoad = Math.round((acuteSum / 7) * 10) / 10;
+
+    const chronicSum = loads.slice(0, 28).reduce((sum, val) => sum + val, 0);
+    chronicLoad = Math.round((chronicSum / 28) * 10) / 10;
+  }
 
   let ratio = 1.0;
   if (chronicLoad > 0) {
     ratio = Math.round((acuteLoad / chronicLoad) * 100) / 100;
   }
 
-  let status: ACWRResult['status'] = 'optimal';
-  if (ratio < 0.8) {
-    status = 'safe';
-  } else if (ratio >= 0.8 && ratio <= 1.3) {
-    status = 'optimal';
-  } else if (ratio > 1.4) {
-    status = 'danger_overtraining';
+  // Zone Classification without Gaps
+  let status: ACWRStatus;
+  if (isColdStart) {
+    status = 'insufficient_data';
+  } else if (ratio < ACWR_THRESHOLDS.UNDERTRAINING_MAX) {
+    status = 'undertraining';
+  } else if (ratio <= ACWR_THRESHOLDS.SWEET_SPOT_MAX) {
+    status = 'sweet_spot';
+  } else if (ratio <= ACWR_THRESHOLDS.WARNING_MAX) {
+    status = 'warning';
   } else {
-    status = 'optimal';
+    status = 'danger';
   }
+
+  const { spikeAlert, spikePercent } = detectWeeklyLoadSpike(validLogs);
 
   return {
     acuteLoad,
     chronicLoad,
     ratio,
     status,
+    method,
+    daysCollected,
+    coldStartProgressPercent,
+    weeklySpikeAlert: spikeAlert,
+    weeklySpikePercent: spikePercent,
+  };
+}
+
+// =============================================================================
+// 5. BIDIRECTIONAL SOFT INTERFERENCE GUARDRAIL
+// =============================================================================
+
+export interface EvaluateGuardrailParams {
+  lastLegDayHoursAgo: number;
+  lastFastRunHoursAgo?: number;
+  intendedActivity: 'running' | 'legs' | 'upper_push_pull' | 'rest';
+  runningType?: RunningType;
+  runningDurationMinutes?: number;
+  muscleSoreness: 1 | 2 | 3 | 4 | 5;
+  legFatigue: boolean;
+  readinessScore: number;
+  isOverridden?: boolean;
+}
+
+/**
+ * Graded, Bidirectional Soft Guardrail
+ * Direction 1: Heavy Legs -> High-Intensity Running (48h window)
+ * Direction 2: High-Intensity Running -> Heavy Lower Body Lifting (24h window)
+ * Safe rule: Zone 1 or Zone 2 aerobic running <= 45 minutes is ALWAYS allowed.
+ */
+export function evaluateSoftGuardrail(params: EvaluateGuardrailParams): SoftGuardrailResult {
+  const {
+    lastLegDayHoursAgo,
+    lastFastRunHoursAgo = 999,
+    intendedActivity,
+    runningType,
+    runningDurationMinutes = 30,
+    muscleSoreness,
+    legFatigue,
+    readinessScore,
+    isOverridden = false,
+  } = params;
+
+  // Safe Exemption: Zone 1 or Zone 2 running <= 45 minutes is ALWAYS safe
+  const isAerobicFlush =
+    (runningType === 'recovery' || runningType === 'easy') &&
+    runningDurationMinutes <= INTERFERENCE_GUARDRAIL.SAFE_AEROBIC_RECOVERY_MAX_MINUTES;
+
+  if (isAerobicFlush) {
+    return {
+      level: 'none',
+      canOverride: true,
+      warningTitle: 'Sesi Pemulihan Aerobik Aman',
+      warningMessage: 'Lari Zone 1-2 berdurasi <= 45 menit aman dilakukan untuk mempercepat klirens laktat dan regenerasi miofibril.',
+      suggestedAction: 'Jaga detak jantung tetap berada di bawah ambang Zone 2 (kecepatan berbicara santai).',
+      conflictDirection: 'none',
+      allowedRunningTypes: ['recovery', 'easy'],
+    };
+  }
+
+  // Direction 1: Legs -> Fast Running (< 48 hours)
+  if (
+    intendedActivity === 'running' &&
+    lastLegDayHoursAgo < INTERFERENCE_GUARDRAIL.LEGS_TO_FAST_RUN_HOURS &&
+    (runningType === 'norwegian_4x4' || runningType === 'intervals' || runningType === 'tempo')
+  ) {
+    const isHighRisk = legFatigue || muscleSoreness >= 4 || readinessScore < 50;
+
+    return {
+      level: isHighRisk ? 'high_risk' : 'caution',
+      canOverride: true,
+      warningTitle: isHighRisk
+        ? 'Indikator Risiko Tinggi: Pemulihan Tendon & Otot Kaki'
+        : 'Waspada: Jendela Pemulihan Kaki Sedang Berjalan',
+      warningMessage: `Latihan kaki terakhir dilakukan ${lastLegDayHoursAgo} jam lalu (DOMS ${muscleSoreness}/5, Kesiapan ${readinessScore}/100). Menjalankan sesi lari berkecepatan tinggi dapat meningkatkan stres mekanis pada tendon patela dan menghambat adaptasi hipertrofi via persinyalan AMPK/mTORC1.`,
+      suggestedAction: isOverridden
+        ? 'Anda memilih tetap lanjut: Lakukan pemanasan dinamis 15 menit dan segera hentikan jika timbul nyeri sendi tajam.'
+        : 'Disarankan mengalihkan sesi ke lari santai Zone 1/2 (< 45 menit) atau latihan kekuatan tubuh bagian atas (Upper Body Push/Pull).',
+      conflictDirection: 'legs_to_run',
+      allowedRunningTypes: isOverridden
+        ? ['recovery', 'easy', 'tempo', 'norwegian_4x4', 'intervals']
+        : ['recovery', 'easy'],
+    };
+  }
+
+  // Direction 2: High-Intensity Run -> Heavy Legs (< 24 hours)
+  if (
+    intendedActivity === 'legs' &&
+    lastFastRunHoursAgo < INTERFERENCE_GUARDRAIL.FAST_RUN_TO_LEGS_HOURS
+  ) {
+    const isHighRisk = legFatigue || readinessScore < 55;
+
+    return {
+      level: isHighRisk ? 'high_risk' : 'caution',
+      canOverride: true,
+      warningTitle: isHighRisk
+        ? 'Indikator Risiko: Kelelahan Neuromuskular Pasca Lari Cepat'
+        : 'Waspada: Pemulihan Pasca Sesi Lari Cepat',
+      warningMessage: `Sesi lari intensitas tinggi (Interval/Tempo) selesai ${lastFastRunHoursAgo} jam lalu. Beban angkatan squat/deadlift berat saat glikogen otot kaki dan kekakuan tendon belum pulih dapat menurunkan kapasitas stabilisasi sendi.`,
+      suggestedAction: isOverridden
+        ? 'Anda memilih tetap lanjut: Turunkan beban kerja (RPE target <= 7) dan prioritaskan teknik gerakan.'
+        : 'Pertimbangkan mengganti menu hari ini ke Upper Body atau deload mobility kaki.',
+      conflictDirection: 'run_to_legs',
+      allowedRunningTypes: ['recovery', 'easy'],
+    };
+  }
+
+  return {
+    level: 'none',
+    canOverride: true,
+    warningTitle: 'Jalur Latihan Terbuka',
+    warningMessage: 'Tidak ada benturan fisiologis antara riwayat sesi kaki dan lari yang terdeteksi.',
+    suggestedAction: 'Aman untuk mengeksekusi menu latihan sesuai rencana jadwal.',
+    conflictDirection: 'none',
+    allowedRunningTypes: ['recovery', 'easy', 'tempo', 'norwegian_4x4', 'intervals', 'long_run'],
+  };
+}
+
+// =============================================================================
+// 6. PERSONAL BASELINE BIO-READINESS (Z-SCORE)
+// =============================================================================
+
+export interface ReadinessScoreResult {
+  score: number;
+  isProvisional: boolean;
+  statusLabel: string;
+  tendonAlert?: string;
+}
+
+/**
+ * Calculate personalized readiness score (0-100) using individual baseline Z-Scores.
+ * If data history < 7 days, returns a provisional estimation.
+ * If tendon pain >= 2, generates targeted load reduction advice.
+ */
+export function calculateReadinessScore(
+  today: ReadinessCheckIn,
+  history14to28Days?: ReadinessCheckIn[]
+): ReadinessScoreResult {
+  const history = (history14to28Days || []).filter((h) => h !== undefined);
+  const isProvisional = history.length < 7;
+
+  let baseScore = 100;
+
+  if (isProvisional) {
+    // Population-based provisional heuristic
+    if (today.sleepHours < 5) baseScore -= 30;
+    else if (today.sleepHours < 6.5) baseScore -= 18;
+    else if (today.sleepHours < 7.5) baseScore -= 8;
+
+    baseScore -= (today.muscleSoreness - 1) * 10;
+    if (today.legFatigue) baseScore -= 10;
+
+    if (today.energyLevel === 'low') baseScore -= 20;
+    else if (today.energyLevel === 'moderate') baseScore -= 8;
+
+    if (today.restingHeartRate && today.restingHeartRate > 60) {
+      baseScore -= Math.min(15, (today.restingHeartRate - 60) * 1.5);
+    }
+  } else {
+    // Personal Baseline Z-Score (Mean & Standard Deviation)
+    const sleepValues = history.map((h) => h.sleepHours);
+    const rhrValues = history.map((h) => h.restingHeartRate || 55);
+    const hrvValues = history.map((h) => h.hrvRmssd || 45);
+
+    const calcMeanStd = (arr: number[]) => {
+      const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+      const variance = arr.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / (arr.length || 1);
+      return { mean, std: Math.sqrt(variance) || 1 };
+    };
+
+    const sleepStats = calcMeanStd(sleepValues);
+    const rhrStats = calcMeanStd(rhrValues);
+    const hrvStats = calcMeanStd(hrvValues);
+
+    const zSleep = (today.sleepHours - sleepStats.mean) / sleepStats.std;
+    const zRhr = -( (today.restingHeartRate || 55) - rhrStats.mean ) / rhrStats.std; // Lower RHR is positive
+    const zHrv = today.hrvRmssd ? (today.hrvRmssd - hrvStats.mean) / hrvStats.std : 0;
+
+    const subjectivePenalty = (today.muscleSoreness - 1) * 0.4 + (today.legFatigue ? 0.6 : 0) + (today.energyLevel === 'low' ? 0.8 : today.energyLevel === 'moderate' ? 0.2 : -0.3);
+
+    const compositeZ =
+      zSleep * READINESS_Z_WEIGHTS.SLEEP_DURATION +
+      zRhr * READINESS_Z_WEIGHTS.RESTING_HR +
+      zHrv * READINESS_Z_WEIGHTS.HRV_RMSSD -
+      subjectivePenalty * READINESS_Z_WEIGHTS.SUBJECTIVE_DOMS_FATIGUE;
+
+    // Normalizing Z-Score: Mean 50 + (Z * 16)
+    baseScore = Math.round(50 + compositeZ * 16);
+  }
+
+  const finalScore = Math.max(10, Math.min(100, baseScore));
+
+  let statusLabel = 'Optimal';
+  if (finalScore < 45) statusLabel = 'Kelelahan Tinggi';
+  else if (finalScore < 65) statusLabel = 'Moderat';
+
+  let tendonAlert: string | undefined;
+  if (today.tendonJointPain && today.tendonJointPain >= 2) {
+    const area = today.tendonPainArea || 'sendi / tendon';
+    tendonAlert = `Peringatan Nyeri Jaringan: Nyeri ${area} terdeteksi di tingkat ${today.tendonJointPain}/3. Kurangi beban kompresif dan hilangkan latihan pliometrik/lari cepat hingga nyeri mereda.`;
+  }
+
+  return {
+    score: finalScore,
+    isProvisional,
+    statusLabel,
+    tendonAlert,
+  };
+}
+
+// =============================================================================
+// 7. 1RM (ONE REP MAX) ESTIMATIONS & MUSCLE VOLUME SUMMARY
+// =============================================================================
+
+/**
+ * 1RM Estimation via Epley (1985) and Brzycki (1993) formulas
+ * Epley: weight * (1 + reps / 30)
+ * Brzycki: weight * (36 / (37 - reps))
+ */
+export function estimate1RM(weightKg: number, reps: number): OneRepMaxEstimate {
+  if (weightKg <= 0 || reps <= 0) {
+    return { epley: 0, brzycki: 0, average: 0 };
+  }
+
+  if (reps === 1) {
+    return { epley: weightKg, brzycki: weightKg, average: weightKg };
+  }
+
+  const epley = Math.round(weightKg * (1 + reps / 30) * 10) / 10;
+  const brzycki = reps < 37
+    ? Math.round(weightKg * (36 / (37 - reps)) * 10) / 10
+    : epley;
+
+  const average = Math.round(((epley + brzycki) / 2) * 10) / 10;
+
+  return { epley, brzycki, average };
+}
+
+/**
+ * Detect Personal Record (PR) for an exercise compared against historical logs
+ */
+export function detectPersonalRecord(
+  exerciseName: string,
+  newSets: StrengthSet[],
+  history: DailyLog[]
+): { isPR: boolean; previousBest1RM: number; newEstimated1RM: number } {
+  let newBest = 0;
+  for (const s of newSets) {
+    const est = estimate1RM(s.bebanKg, s.reps).average;
+    if (est > newBest) newBest = est;
+  }
+
+  let historicalBest = 0;
+  for (const log of history) {
+    for (const ex of log.strengthWorkouts) {
+      if (ex.namaGerakan.toLowerCase() === exerciseName.toLowerCase()) {
+        for (const s of ex.sets) {
+          const est = estimate1RM(s.bebanKg, s.reps).average;
+          if (est > historicalBest) historicalBest = est;
+        }
+      }
+    }
+  }
+
+  const isPR = newBest > historicalBest && historicalBest > 0;
+  return {
+    isPR,
+    previousBest1RM: historicalBest,
+    newEstimated1RM: newBest,
   };
 }
 
 /**
- * 4. Calculate Bio-Readiness Score (0 - 100)
+ * Summarize weekly productive volume per muscle category
+ * Counts hard sets (RPE >= HARD_SET_MIN_RPE), volume load, and sRPE.
  */
-export function calculateReadinessScore(readiness: ReadinessCheckIn): number {
-  let score = 100;
+export function calculateWeeklyMuscleVolume(
+  history7Days: DailyLog[]
+): Record<string, WeeklyMuscleVolume> {
+  const result: Record<string, WeeklyMuscleVolume> = {
+    push: { category: 'push', hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 },
+    pull: { category: 'pull', hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 },
+    legs: { category: 'legs', hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 },
+    arms: { category: 'arms', hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 },
+    core: { category: 'core', hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 },
+  };
 
-  if (readiness.sleepHours < 5) score -= 30;
-  else if (readiness.sleepHours < 6.5) score -= 18;
-  else if (readiness.sleepHours < 7.5) score -= 8;
+  for (const log of history7Days) {
+    for (const ex of log.strengthWorkouts) {
+      const cat = ex.category || (
+        /bench|press|dip|push/i.test(ex.namaGerakan) ? 'push' :
+        /pull|row|chin|deadlift/i.test(ex.namaGerakan) ? 'pull' :
+        /squat|lunge|leg|calf|quad/i.test(ex.namaGerakan) ? 'legs' :
+        /curl|tricep|bicep/i.test(ex.namaGerakan) ? 'arms' : 'core'
+      );
 
-  score -= (readiness.muscleSoreness - 1) * 10;
+      if (!result[cat]) {
+        result[cat] = { category: cat as WorkoutCategory, hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 };
+      }
 
-  if (readiness.legFatigue) score -= 10;
-
-  if (readiness.energyLevel === 'low') score -= 20;
-  else if (readiness.energyLevel === 'moderate') score -= 8;
-
-  if (readiness.restingHeartRate && readiness.restingHeartRate > 60) {
-    score -= Math.min(15, (readiness.restingHeartRate - 60) * 1.5);
+      for (const set of ex.sets) {
+        if (set.rpe >= HARD_SET_MIN_RPE) {
+          result[cat].hardSets++;
+        }
+        result[cat].totalVolumeKg += Math.round(set.bebanKg * set.reps);
+        result[cat].sRpeTotal += calculateSessionRpe(SRPE_CONFIG.ESTIMATED_MINUTES_PER_STRENGTH_SET, set.rpe);
+      }
+    }
   }
 
-  return Math.max(10, Math.min(100, Math.round(score)));
+  return result;
 }
 
+// =============================================================================
+// 8. ADAPTIVE WORKLOAD RECOMMENDATION ENGINE
+// =============================================================================
+
 /**
- * 5. Adaptive Hybrid Workout Recommendation Engine:
- *    - Rule 1 (ACWR Overload Guardrail): ACWR > 1.4 triggers emergency deload (-30% volume, high intensity locked)
- *    - Rule 2 (PPL & Running Coexistence / 48h Window): Legs trained < 48h locks intervals, Norwegian 4x4, and tempo.
- *    - Rule 3 (Energy Depletion): Low energy cuts volume by 15-20%
- *    - Rule 4 (Optimal Sweet Spot): ACWR 0.8-1.3 & legs fresh (>48h) unlocks Norwegian 4x4, VO2 max intervals, or tempo.
+ * Adaptive Sports Science Workout Advisor
+ * Combines ACWR status (with dynamic deload attenuation -20% to -40%),
+ * soft interference guardrail, and tendon alerts.
  */
 export function getWorkoutRecommendation(
   acwrRatio: number,
   readiness: ReadinessCheckIn,
-  lastLegDayHoursAgo: number
+  lastLegDayHoursAgo: number,
+  lastFastRunHoursAgo: number = 999
 ): RecommendationResult {
-  // Guardrail 1: ACWR Danger Zone (Priority 1 - Injury Prevention)
-  if (acwrRatio > 1.4) {
+  const readinessResult = calculateReadinessScore(readiness);
+  const guardrail = evaluateSoftGuardrail({
+    lastLegDayHoursAgo,
+    lastFastRunHoursAgo,
+    intendedActivity: 'running',
+    runningType: 'norwegian_4x4',
+    runningDurationMinutes: 44,
+    muscleSoreness: readiness.muscleSoreness,
+    legFatigue: readiness.legFatigue,
+    readinessScore: readinessResult.score,
+  });
+
+  // 1. Danger Zone: ACWR > 1.5 (High acute spike)
+  if (acwrRatio > ACWR_THRESHOLDS.DANGER_THRESHOLD) {
+    const deloadPercent = readinessResult.score < 50
+      ? DELOAD_ATTENUATION.AGGRESSIVE
+      : DELOAD_ATTENUATION.MODERATE;
+
     return {
       targetCategory: 'mobility_recovery',
-      warningMessage: `🚨 ACWR OVERTRAINING WARNING: Acute:Chronic Workload Ratio (${acwrRatio}) exceeds safe threshold (> 1.4). Acute workload spike detected with severe injury and soft-tissue breakdown risk.`,
-      volumeAdjustmentPercent: -30,
+      warningMessage: `Indikator Risiko Lonjakan Beban: Rasio ACWR (${acwrRatio}) berada di Zona Bahaya (> 1.5). Terdeteksi kenaikan beban latihan akut yang signifikan.`,
+      volumeAdjustmentPercent: deloadPercent,
+      guardrail,
       workoutDetail: {
-        title: 'Active Mobility & Deload Recovery Protocol',
-        rationale: `ACWR spike (${acwrRatio} > 1.4) triggered an emergency deload. Strength volume cut by 30% and all high-intensity speed sessions are locked.`,
+        title: 'Protokol Deload & Mobilitas Aktif',
+        rationale: `Rasio ACWR (${acwrRatio}) mengindikasikan lonjakan beban akut. Volume latihan disesuaikan ${deloadPercent}% untuk menjaga homeostasis jaringan lunak.`,
         speedRunLocked: true,
-        suggestedAction: 'Perform 30-min thoracic/hip mobility, foam rolling, dynamic stretching, and ensure optimal hydration. Restrict any cardio to Zone 1 light active flush (< 30 min).',
+        suggestedAction: 'Fokus pada mobilitas panggul dan toraks, foam rolling, serta hidrasi. Batasi kardio hanya pada Zone 1 lari pemulihan (< 30 menit).',
         allowedRunningTypes: ['recovery'],
       },
+      tendonWarning: readinessResult.tendonAlert,
     };
   }
 
-  // Guardrail 2: 48-Hour Leg Recovery Window (PPL & Running Coexistence)
-  if (lastLegDayHoursAgo < 48) {
-    const isSevereFatigue = readiness.legFatigue || readiness.muscleSoreness >= 3;
-    const isLowEnergy = readiness.energyLevel === 'low';
-    const volumeCut = isLowEnergy ? -15 : 0;
+  // 2. Warning Zone: 1.3 < ACWR <= 1.5
+  if (acwrRatio > ACWR_THRESHOLDS.SWEET_SPOT_MAX) {
+    const deloadPercent = readinessResult.score < 60
+      ? DELOAD_ATTENUATION.MODERATE
+      : DELOAD_ATTENUATION.MILD;
 
-    return {
-      targetCategory: 'push',
-      warningMessage: `⚠️ 48-HOUR LEG RECOVERY WINDOW: Leg day completed ${lastLegDayHoursAgo} hours ago (DOMS level ${readiness.muscleSoreness}/5). High-intensity running (Norwegian 4x4, Track Intervals, Tempo) and heavy leg lifting are locked to protect patellar tendons and hamstrings.`,
-      volumeAdjustmentPercent: volumeCut,
-      workoutDetail: {
-        title: 'Hypertrophy Upper Body Push & Torso Strength',
-        rationale: `Lower extremity motor units are undergoing myofibrillar repair (${lastLegDayHoursAgo}h post-leg session). Workload is redirected entirely to Upper Body Push.`,
-        speedRunLocked: true,
-        suggestedAction: isSevereFatigue
-          ? 'Focus on Flat Dumbbell Bench Press (3x8 @RPE 8), Overhead Press (3x10), and Dips. No running or only light Zone 1 flush (< 25 min).'
-          : 'Focus on Upper Body Push exercises. Light Zone 2 Easy Run (conversational, < 35 min) permitted if desired.',
-        allowedRunningTypes: ['recovery', 'easy'],
-      },
-    };
-  }
-
-  // Guardrail 3: Energy Depletion
-  if (readiness.energyLevel === 'low') {
     return {
       targetCategory: 'run_easy',
-      warningMessage: 'Low energy level reported. Training volume reduced by 15% to prevent Central Nervous System (CNS) burnout.',
-      volumeAdjustmentPercent: -15,
+      warningMessage: `Zona Waspada ACWR (${acwrRatio}): Beban latihan sedang berakselerasi mendekati batas aman atas.`,
+      volumeAdjustmentPercent: deloadPercent,
+      guardrail,
       workoutDetail: {
-        title: 'Zone 2 Conversational Aerobic Base Flush',
-        rationale: 'Low readiness requires low-stress cardiovascular stimulation without accumulating neuromuscular fatigue.',
-        speedRunLocked: true,
-        suggestedAction: '35–45 min steady Zone 2 run (Heart Rate < 140 bpm) at constant conversational pace, or light upper body pull work (RPE 6).',
+        title: 'Stabilisasi Beban Aerobik Zone 2',
+        rationale: 'Beban akut berada pada batas atas zona adaptasi. Direkomendasikan menjaga intensitas tanpa menambah volume secara agresif.',
+        speedRunLocked: guardrail.level !== 'none',
+        suggestedAction: 'Lari stabil Zone 2 selama 35-45 menit atau latihan kekuatan tubuh bagian atas dengan RPE 6-7.',
         allowedRunningTypes: ['recovery', 'easy'],
       },
+      tendonWarning: readinessResult.tendonAlert,
     };
   }
 
-  // Optimal Scenario (Sweet Spot: ACWR 0.8 - 1.3 & Legs Fresh > 48h)
+  // 3. Interference Guardrail Active (< 48 hours post-legs)
+  if (guardrail.level !== 'none') {
+    return {
+      targetCategory: 'push',
+      warningMessage: guardrail.warningMessage,
+      volumeAdjustmentPercent: readiness.energyLevel === 'low' ? -15 : 0,
+      guardrail,
+      workoutDetail: {
+        title: 'Hipertrofi Otot Bagian Atas (Push & Core)',
+        rationale: guardrail.warningMessage,
+        speedRunLocked: true,
+        suggestedAction: guardrail.suggestedAction,
+        allowedRunningTypes: guardrail.allowedRunningTypes,
+      },
+      tendonWarning: readinessResult.tendonAlert,
+    };
+  }
+
+  // 4. Low Energy / Readiness Depleted
+  if (readiness.energyLevel === 'low' || readinessResult.score < 50) {
+    return {
+      targetCategory: 'run_easy',
+      warningMessage: 'Skor kesiapan tubuh rendah. Volume latihan dikurangi 15-20% untuk memulihkan sistem saraf pusat (CNS).',
+      volumeAdjustmentPercent: -20,
+      guardrail,
+      workoutDetail: {
+        title: 'Pemulihan Aktif Zone 2 & Mobilitas',
+        rationale: 'Kesiapan tubuh rendah membutuhkan stimulasi kardiovaskular rendah stres tanpa menambah kelelahan neuromuskular.',
+        speedRunLocked: true,
+        suggestedAction: '30-40 menit lari santai Zone 2 atau latihan pemulihan peregangan dinamis.',
+        allowedRunningTypes: ['recovery', 'easy'],
+      },
+      tendonWarning: readinessResult.tendonAlert,
+    };
+  }
+
+  // 5. Sweet Spot (ACWR 0.8 - 1.3 & Legs Fresh > 48h)
   return {
     targetCategory: 'norwegian_4x4',
     volumeAdjustmentPercent: 0,
+    guardrail,
     workoutDetail: {
-      title: 'Norwegian 4x4 Interval Protocol & VO2 Max Booster',
-      rationale: `Optimal ACWR sweet spot (${acwrRatio}) and lower body fully recovered (${lastLegDayHoursAgo}h post-leg session). Prime window for VO2 max cardiorespiratory adaptation.`,
+      title: 'Protokol Interval Norwegian 4x4 (Peningkatan VO2 Max)',
+      rationale: `ACWR berada di Sweet Spot optimal (${acwrRatio}) dan otot kaki telah pulih (${lastLegDayHoursAgo} jam). Kondisi prima untuk stimulus adaptasi kardiorespirasi.`,
       speedRunLocked: false,
-      suggestedAction: 'Execute Norwegian 4x4: 10m Z2 warmup (12 pts), 4x(4m @ 85-95% HRmax Z4 + 3m active recovery Z2 = 49.6 pts), 10m Z1 cooldown (10 pts). Total running load: ~72 pts.',
+      suggestedAction: 'Eksekusi Norwegian 4x4: 10m pemanasan Z2, 4x(4m Z4 @ 85-95% HRmax + 3m pemulihan aktif Z2), 6m pendinginan Z1. Total durasi 44 menit.',
       allowedRunningTypes: ['norwegian_4x4', 'intervals', 'tempo', 'easy', 'long_run'],
     },
+    tendonWarning: readinessResult.tendonAlert,
   };
 }

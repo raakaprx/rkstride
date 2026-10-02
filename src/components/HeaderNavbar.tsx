@@ -1,12 +1,15 @@
 import React from 'react';
-import { Activity, Watch, Calendar, Dumbbell } from 'lucide-react';
+import { Activity, Watch, Calendar, Dumbbell, Database, Info, TrendingUp, Apple, User } from 'lucide-react';
 import { SmartwatchDeviceState } from '@/lib/engine/smartwatch';
 
 interface HeaderNavbarProps {
-  activeTab: 'training' | 'schedule' | 'smartwatch';
-  setActiveTab: (tab: 'training' | 'schedule' | 'smartwatch') => void;
+  activeTab: 'training' | 'trends' | 'nutrition' | 'schedule' | 'smartwatch';
+  setActiveTab: (tab: 'training' | 'trends' | 'nutrition' | 'schedule' | 'smartwatch') => void;
   smartwatchState: SmartwatchDeviceState;
   onOpenSmartwatchModal: () => void;
+  onOpenDataModal?: () => void;
+  onOpenAboutModal?: () => void;
+  onOpenProfileModal?: () => void;
 }
 
 export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
@@ -14,6 +17,9 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
   setActiveTab,
   smartwatchState,
   onOpenSmartwatchModal,
+  onOpenDataModal,
+  onOpenAboutModal,
+  onOpenProfileModal,
 }) => {
   return (
     <header
@@ -141,6 +147,48 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('trends')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.45rem 0.85rem',
+              borderRadius: 'calc(var(--radius-md) - 2px)',
+              border: 'none',
+              background: activeTab === 'trends' ? 'var(--bg-surface-elevated)' : 'transparent',
+              color: activeTab === 'trends' ? '#FFFFFF' : 'var(--text-secondary)',
+              fontWeight: activeTab === 'trends' ? 700 : 500,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            <TrendingUp size={15} style={{ color: activeTab === 'trends' ? 'var(--accent-neon)' : 'inherit' }} />
+            <span>ACWR Trends</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('nutrition')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.45rem 0.85rem',
+              borderRadius: 'calc(var(--radius-md) - 2px)',
+              border: 'none',
+              background: activeTab === 'nutrition' ? 'var(--bg-surface-elevated)' : 'transparent',
+              color: activeTab === 'nutrition' ? '#FFFFFF' : 'var(--text-secondary)',
+              fontWeight: activeTab === 'nutrition' ? 700 : 500,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              transition: 'var(--transition-fast)',
+            }}
+          >
+            <Apple size={15} style={{ color: activeTab === 'nutrition' ? 'var(--accent-neon)' : 'inherit' }} />
+            <span>Nutrition &amp; TDEE</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('schedule')}
             style={{
               display: 'flex',
@@ -183,8 +231,42 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
           </button>
         </nav>
 
-        {/* Smartwatch Status Badge */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        {/* Right Action Badges & Modal Triggers */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+          {/* Athlete Profile & Target Race Trigger */}
+          {onOpenProfileModal && (
+            <button
+              onClick={onOpenProfileModal}
+              title="Atur Profil Fisiologi & Target Lomba"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.45rem 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.borderColor = 'var(--border-strong)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--border-default)';
+              }}
+            >
+              <User size={13} style={{ color: 'var(--accent-neon)' }} />
+              <span>Profile &amp; Race</span>
+            </button>
+          )}
+
+          {/* Smartwatch Status Badge */}
           <button
             onClick={onOpenSmartwatchModal}
             title="Open Smartwatch Sync & Biometric Hub"
@@ -230,6 +312,72 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               </span>
             )}
           </button>
+
+          {/* Backup / Export / Import Trigger */}
+          {onOpenDataModal && (
+            <button
+              onClick={onOpenDataModal}
+              title="Backup, Export & Import Local Data"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.45rem 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.borderColor = 'var(--border-strong)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--border-default)';
+              }}
+            >
+              <Database size={13} style={{ color: 'var(--accent-neon)' }} />
+              <span>Backup</span>
+            </button>
+          )}
+
+          {/* Scientific Disclaimer & About Trigger */}
+          {onOpenAboutModal && (
+            <button
+              onClick={onOpenAboutModal}
+              title="About RKStride & Sports Science Disclaimer"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.45rem 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.borderColor = 'var(--border-strong)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--border-default)';
+              }}
+            >
+              <Info size={13} style={{ color: 'var(--accent-neon)' }} />
+              <span>Science &amp; About</span>
+            </button>
+          )}
         </div>
       </div>
     </header>

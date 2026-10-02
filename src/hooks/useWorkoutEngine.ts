@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   DailyLog,
   ReadinessCheckIn,
@@ -25,11 +25,49 @@ import {
 } from '@/lib/engine/smartwatch';
 import { mock28DaysWorkoutHistory, mockReadinessToday } from '@/data/mockWorkoutHistory';
 import { defaultWeeklySchedule, scheduleTemplates } from '@/data/defaultSchedule';
+import { db } from '@/lib/db/database';
 
 export function useWorkoutEngine() {
   const [history, setHistory] = useState<DailyLog[]>(mock28DaysWorkoutHistory);
-  const [todayReadiness, setTodayReadiness] = useState<ReadinessCheckIn>(mockReadinessToday);
+  const [todayReadiness, setTodayReadinessState] = useState<ReadinessCheckIn>(mockReadinessToday);
   const [weeklySchedule, setWeeklySchedule] = useState<ScheduledDay[]>(defaultWeeklySchedule);
+
+  // Reload all states from Dexie IndexedDB
+  const reloadFromDb = useCallback(async () => {
+    try {
+      const logs = await db.workoutLogs.toArray();
+      if (logs && logs.length > 0) {
+        logs.sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+        setHistory(logs);
+      }
+      const todayStr = new Date().toISOString().split('T')[0];
+      const readiness = await db.dailyReadiness.get(todayStr);
+      if (readiness) {
+        setTodayReadinessState(readiness);
+      }
+      const schedule = await db.weeklySchedule.toArray();
+      if (schedule && schedule.length > 0) {
+        schedule.sort((a, b) => a.dayIndex - b.dayIndex);
+        setWeeklySchedule(schedule);
+      }
+    } catch (err) {
+      console.error('Error reloading from Dexie DB:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    reloadFromDb();
+  }, [reloadFromDb]);
+
+  // Persist readiness updates to Dexie IndexedDB
+  const setTodayReadiness = useCallback((newReadiness: ReadinessCheckIn | ((prev: ReadinessCheckIn) => ReadinessCheckIn)) => {
+    setTodayReadinessState((prev) => {
+      const updated = typeof newReadiness === 'function' ? newReadiness(prev) : newReadiness;
+      const todayStr = new Date().toISOString().split('T')[0];
+      db.dailyReadiness.put({ ...updated, tanggal: todayStr }).catch(console.error);
+      return updated;
+    });
+  }, []);
 
   // Universal Smartwatch Connection State
   const [smartwatchState, setSmartwatchState] = useState<SmartwatchDeviceState>({
@@ -64,9 +102,10 @@ export function useWorkoutEngine() {
   }, [acwrResult.ratio, lastLegsTrainedHoursAgo, todayReadiness]);
 
   // Composite readiness score (0 - 100)
-  const readinessScore = useMemo(() => {
+  const readinessResult = useMemo(() => {
     return calculateReadinessScore(todayReadiness);
   }, [todayReadiness]);
+  const readinessScore = readinessResult.score;
 
   // Weekly schedule conflict detector
   const scheduleConflicts = useMemo<ScheduleConflict[]>(() => {
@@ -111,18 +150,23 @@ export function useWorkoutEngine() {
 
   // Mengubah jadwal satu hari tertentu
   const updateDaySchedule = useCallback((dayIndex: number, updates: Partial<ScheduledDay>) => {
-    setWeeklySchedule((prev) =>
-      prev.map((day) => (day.dayIndex === dayIndex ? { ...day, ...updates } : day))
-    );
+    setWeeklySchedule((prev) => {
+      const next = prev.map((day) => (day.dayIndex === dayIndex ? { ...day, ...updates } : day));
+      const target = next.find((d) => d.dayIndex === dayIndex);
+      if (target) {
+        db.weeklySchedule.put(target).catch(console.error);
+      }
+      return next;
+    });
   }, []);
 
   // Menerapkan template jadwal yang tersedia
-  const applyScheduleTemplate = useCallback((templateId: string) => {
+  const applyScheduleTemplate = useCallback(async (templateId: string) => {
     const tpl = scheduleTemplates.find((t) => t.id === templateId);
     if (!tpl) return;
 
-    setWeeklySchedule((prev) =>
-      prev.map((existingDay, idx) => {
+    setWeeklySchedule((prev) => {
+      const next = prev.map((existingDay, idx) => {
         const tplDay = tpl.schedule[idx];
         if (!tplDay) return existingDay;
         return {
@@ -132,8 +176,10 @@ export function useWorkoutEngine() {
           targetDurationMinutes: tplDay.targetDurationMinutes,
           isRestDay: tplDay.isRestDay,
         };
-      })
-    );
+      });
+      db.weeklySchedule.bulkPut(next).catch(console.error);
+      return next;
+    });
   }, []);
 
   // Hubungkan Smartwatch via Bluetooth
@@ -222,17 +268,21 @@ export function useWorkoutEngine() {
       const projectedChronic = projectedLoads.slice(0, 28).reduce((a, b) => a + b, 0) / 28;
       const projectedRatio = projectedChronic > 0 ? Math.round((projectedAcute / projectedChronic) * 100) / 100 : 1.0;
 
-      let projectedStatus: ACWRResult['status'] = 'optimal';
+      let projectedStatus: ACWRResult['status'] = 'sweet_spot';
       let isOverloaded = false;
       let advice = 'Planned workload is in the optimal athletic adaptation zone (Sweet Spot 0.8 - 1.3).';
 
-      if (projectedRatio > 1.4) {
-        projectedStatus = 'danger_overtraining';
+      if (projectedRatio > 1.5) {
+        projectedStatus = 'danger';
         isOverloaded = true;
-        advice = `⚠️ ACWR SPIKE ALERT: Projected ratio (${projectedRatio}) exceeds safety threshold (> 1.4). Reduce sets or cardio intensity to prevent soft-tissue overtraining.`;
+        advice = `⚠️ INDIKATOR RISIKO LONJAKAN BEBAN: Rasio proyeksi (${projectedRatio}) berada di Zona Bahaya (> 1.5). Kurangi volume atau intensitas kardio.`;
+      } else if (projectedRatio > 1.3) {
+        projectedStatus = 'warning';
+        isOverloaded = false;
+        advice = `Zona Waspada (${projectedRatio} ACWR). Beban mendekati batas atas adaptasi. Monitor tingkat kelelahan secara berkala.`;
       } else if (projectedRatio < 0.8) {
-        projectedStatus = 'safe';
-        advice = `Light stimulus (${projectedRatio} ACWR). Safe for progressive overload or additional volume if energy permits.`;
+        projectedStatus = 'undertraining';
+        advice = `Stimulus ringan (${projectedRatio} ACWR). Aman untuk progressive overload bertahap.`;
       }
 
       const hasLegExerciseInDraft = draftStrength.some((ex) =>
@@ -273,15 +323,28 @@ export function useWorkoutEngine() {
         load += params.runningSessions.reduce((acc, curr) => acc + calculateRunningLoad(curr), 0);
       }
 
+      const todayStr = new Date().toISOString().split('T')[0];
+      const newEntry: DailyLog = {
+        tanggal: todayStr,
+        strengthWorkouts: params.strengthExercises || [],
+        runningWorkouts: params.runningSessions || [],
+        totalLoadScore: load,
+      };
+
       setHistory((prev) => {
         const updated = [...prev];
-        updated[0] = {
-          tanggal: new Date().toISOString().split('T')[0],
-          strengthWorkouts: params.strengthExercises || [],
-          runningWorkouts: params.runningSessions || [],
-          totalLoadScore: load,
-        };
+        const existingIdx = updated.findIndex((u) => u.tanggal === todayStr);
+        if (existingIdx >= 0) {
+          updated[existingIdx] = newEntry;
+        } else {
+          updated.unshift(newEntry);
+        }
         return updated;
+      });
+
+      // Asynchronously persist to local IndexedDB
+      db.workoutLogs.put(newEntry).catch((err) => {
+        console.error('Failed to save workout log to IndexedDB:', err);
       });
     },
     []
@@ -305,5 +368,6 @@ export function useWorkoutEngine() {
     applyPreset,
     calculateProjectedImpact,
     logTodayWorkout,
+    reloadFromDb,
   };
 }

@@ -114,4 +114,18 @@ export const scheduleTemplates: ScheduleTemplate[] = [
       { dayName: 'Minggu', category: 'run_tempo', title: 'Weekend Tempo Run 8km', targetDurationMinutes: 45, isRestDay: false },
     ],
   },
+  {
+    id: 'tpl-office-hybrid',
+    name: 'Pekerja Kantoran Hybrid (9-to-5 Efficient)',
+    description: 'Sesi latihan ringkas 35-45 menit di hari kerja yang menghemat waktu, leg day hari Jumat, dan long run aerobik di akhir pekan.',
+    schedule: [
+      { dayName: 'Senin', category: 'push', title: 'Express Upper Push (45m)', targetDurationMinutes: 45, isRestDay: false },
+      { dayName: 'Selasa', category: 'run_easy', title: 'Post-Work Easy Run (35m)', targetDurationMinutes: 35, isRestDay: false },
+      { dayName: 'Rabu', category: 'pull', title: 'Desk Decompression Pull (45m)', targetDurationMinutes: 45, isRestDay: false },
+      { dayName: 'Kamis', category: 'mobility_recovery', title: 'Mobility & Spine Flush', targetDurationMinutes: 25, isRestDay: true },
+      { dayName: 'Jumat', category: 'legs', title: 'Friday Night Leg Power (50m)', targetDurationMinutes: 50, isRestDay: false },
+      { dayName: 'Sabtu', category: 'push', title: 'Upper Torso & Core (40m)', targetDurationMinutes: 40, isRestDay: false },
+      { dayName: 'Minggu', category: 'run_long', title: 'Sunday Morning Long Run (65m)', targetDurationMinutes: 65, isRestDay: false },
+    ],
+  },
 ];

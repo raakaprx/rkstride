@@ -28,13 +28,19 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
   readinessScore,
   lastLegsHoursAgo,
 }) => {
-  const isDanger = acwr.status === 'danger_overtraining' || acwr.ratio > 1.4;
-  const isOptimal = acwr.status === 'optimal' && !isDanger;
+  const isColdStart = acwr.status === 'insufficient_data';
+  const isDanger = acwr.status === 'danger' || acwr.ratio > 1.5;
+  const isWarning = acwr.status === 'warning' || (acwr.ratio > 1.3 && acwr.ratio <= 1.5);
+  const isSweetSpot = acwr.status === 'sweet_spot' || (acwr.ratio >= 0.8 && acwr.ratio <= 1.3 && !isDanger && !isWarning);
 
   // Status warna
-  const statusColor = isDanger
+  const statusColor = isColdStart
+    ? 'var(--text-muted)'
+    : isDanger
     ? 'var(--color-danger)'
-    : isOptimal
+    : isWarning
+    ? 'var(--color-warning)'
+    : isSweetSpot
     ? 'var(--color-success)'
     : 'var(--accent-neon)';
 
@@ -47,11 +53,19 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
       style={{
         background: 'var(--bg-surface)',
         borderRadius: 'var(--radius-lg)',
-        border: isDanger ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid var(--border-default)',
+        border: isDanger
+          ? '1px solid rgba(239, 68, 68, 0.35)'
+          : isWarning
+          ? '1px solid rgba(245, 158, 11, 0.35)'
+          : '1px solid var(--border-default)',
         borderLeft: isDanger
           ? '3px solid var(--color-danger)'
-          : isOptimal
+          : isWarning
+          ? '3px solid var(--color-warning)'
+          : isSweetSpot
           ? '3px solid var(--color-success)'
+          : isColdStart
+          ? '3px solid var(--text-muted)'
           : '3px solid var(--accent-neon)',
         padding: '1.75rem',
         boxShadow: 'var(--shadow-elevation-2)',
@@ -90,7 +104,9 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                 fontWeight: 700,
                 background: isDanger
                   ? 'var(--color-danger-bg)'
-                  : isOptimal
+                  : isWarning
+                  ? 'var(--color-warning-bg)'
+                  : isSweetSpot
                   ? 'var(--color-success-bg)'
                   : 'var(--accent-neon-subtle)',
                 color: statusColor,
@@ -98,7 +114,15 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                 letterSpacing: '0.04em',
               }}
             >
-              {isDanger ? 'OVERTRAINING RISK' : isOptimal ? 'OPTIMAL LOAD (SWEET SPOT)' : 'LIGHT STIMULUS'}
+              {isColdStart
+                ? `DATA BELUM CUKUP (${acwr.daysCollected}/21 HARI)`
+                : isDanger
+                ? 'ZONA BAHAYA: LONJAKAN AKUT'
+                : isWarning
+                ? 'ZONA WASPADA: PANTAU KETAT'
+                : isSweetSpot
+                ? 'SWEET SPOT (ADAPTASI OPTIMAL)'
+                : 'UNDERTRAINING / DETRAINING'}
             </span>
           </div>
 
@@ -112,20 +136,30 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               gap: '0.6rem',
             }}
           >
-            {isDanger ? (
+            {isColdStart ? (
+              <>
+                <Activity size={22} style={{ color: 'var(--text-muted)' }} />
+                Pengumpulan Data Baseline ({acwr.coldStartProgressPercent}% Selesai)
+              </>
+            ) : isDanger ? (
               <>
                 <AlertTriangle size={22} style={{ color: 'var(--color-danger)' }} />
-                Warning: Acute Overtraining Spike Detected
+                Indikator Risiko Lonjakan Beban Latihan Akut
               </>
-            ) : isOptimal ? (
+            ) : isWarning ? (
+              <>
+                <AlertTriangle size={22} style={{ color: 'var(--color-warning)' }} />
+                Beban Latihan Mendekati Batas Atas Adaptasi
+              </>
+            ) : isSweetSpot ? (
               <>
                 <CheckCircle2 size={22} style={{ color: 'var(--color-success)' }} />
-                Workload is Optimal &amp; Balanced
+                Beban Latihan Optimal &amp; Berimbang
               </>
             ) : (
               <>
                 <TrendingUp size={22} style={{ color: 'var(--accent-neon)' }} />
-                Capacity Ready for Progressive Overload
+                Kapasitas Siap untuk Progressive Overload Bertahap
               </>
             )}
           </h2>
@@ -374,11 +408,11 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           >
             {lastLegsHoursAgo < 48 ? (
               <span style={{ color: 'var(--color-warning)' }}>
-                ⚠️ High-speed running (Norwegian 4x4, Intervals, Tempo) &amp; heavy squats are locked to protect knee tendons and hamstrings.
+                Perhatian: Sesi lari cepat (Norwegian 4x4, interval, tempo) dan squat berat dibatasi untuk pemulihan tendon patela dan hamstring.
               </span>
             ) : (
               <span style={{ color: 'var(--color-success)' }}>
-                ✅ Lower body has cleared the 48-hour recovery window. High-intensity running and leg sessions are safe to execute.
+                Otot kaki telah melewati jendela pemulihan 48 jam. Sesi lari intensitas tinggi dan latihan kaki siap dieksekusi.
               </span>
             )}
           </div>
@@ -416,25 +450,79 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
         </div>
 
         <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.35rem' }}>
-          {recommendation.workoutDetail.title}
+          {recommendation.workoutDetail?.title || 'Evaluasi Beban Harian'}
         </div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '0.75rem' }}>
-          {recommendation.workoutDetail.rationale}
+          {recommendation.workoutDetail?.rationale || 'Rekomendasi disesuaikan dengan adaptasi kronis dan kebugaran harian.'}
         </div>
 
-        <div
-          style={{
-            background: 'var(--bg-surface)',
-            padding: '0.75rem 1rem',
-            borderRadius: 'var(--radius-sm)',
-            borderLeft: '3px solid var(--accent-neon)',
-            fontSize: '0.82rem',
-            color: '#FFFFFF',
-            lineHeight: 1.5,
-          }}
-        >
-          <strong style={{ color: 'var(--accent-neon)' }}>Actionable Plan:</strong> {recommendation.workoutDetail.suggestedAction}
-        </div>
+        {recommendation.workoutDetail?.suggestedAction && (
+          <div
+            style={{
+              background: 'var(--bg-surface)',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-sm)',
+              borderLeft: '3px solid var(--accent-neon)',
+              fontSize: '0.82rem',
+              color: '#FFFFFF',
+              lineHeight: 1.5,
+            }}
+          >
+            <strong style={{ color: 'var(--accent-neon)' }}>Actionable Plan:</strong> {recommendation.workoutDetail.suggestedAction}
+          </div>
+        )}
+
+        {/* Tendon / Joint Load Warning if Active */}
+        {recommendation.tendonWarning && (
+          <div
+            style={{
+              marginTop: '0.75rem',
+              padding: '0.65rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              fontSize: '0.8rem',
+              color: 'var(--color-danger)',
+              lineHeight: 1.4,
+            }}
+          >
+            <strong>Peringatan Jaringan Lunak:</strong> {recommendation.tendonWarning}
+          </div>
+        )}
+
+        {/* Weekly Workload Spike Alert (> 15% Increase) */}
+        {acwr.weeklySpikeAlert && (
+          <div
+            style={{
+              marginTop: '0.75rem',
+              padding: '0.65rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              background: 'rgba(245, 158, 11, 0.1)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              fontSize: '0.8rem',
+              color: 'var(--color-warning)',
+              lineHeight: 1.4,
+            }}
+          >
+            <strong>Peringatan Lonjakan Mingguan:</strong> Beban latihan minggu ini naik +{acwr.weeklySpikePercent}% dibanding minggu sebelumnya (melebihi ambang batas aman 15%). Monitor respon pemulihan sistem saraf.
+          </div>
+        )}
+      </div>
+
+      {/* Non-Medical Decision Support Disclaimer */}
+      <div
+        style={{
+          marginTop: '1.25rem',
+          padding: '0.75rem 1rem',
+          borderRadius: 'var(--radius-sm)',
+          background: 'rgba(255, 255, 255, 0.02)',
+          border: '1px solid var(--border-subtle)',
+          fontSize: '0.74rem',
+          color: 'var(--text-muted)',
+          lineHeight: 1.5,
+        }}
+      >
+        <strong style={{ color: 'var(--text-secondary)' }}>Disclaimer Non-Medis:</strong> Metrik beban kerja (ACWR) dan skor kesiapan adalah indikator risiko beban mekanis serta alat bantu keputusan latihan atletik, bukan diagnosis medis atau penjamin pencegahan cedera. Konsultasikan dengan fisioterapis atau tenaga medis jika mengalami nyeri sendi tajam atau gejala tidak wajar.
       </div>
     </div>
   );
