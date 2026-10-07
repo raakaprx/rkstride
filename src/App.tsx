@@ -201,15 +201,16 @@ export default function App() {
 
         {/* Tab 2: Dashboard Tren ACWR & Beban Kerja 28 Hari */}
         {activeTab === 'trends' && (
-          <TrendsDashboardCard history={history} />
+          <TrendsDashboardCard history={history} onNavigateToLogger={() => setActiveTab('training')} />
         )}
 
         {/* Tab 3: Nutrisi & Kebutuhan Energi Atlet Hibrida */}
         {activeTab === 'nutrition' && (
           <NutritionBodyCompCard
             userProfile={userProfile}
-            todayWorkoutDurationMinutes={debriefData.totalDurationMin || 45}
-            todayWorkoutCaloriesBurned={Math.round((debriefData.sessionLoad || 250) * 1.5)}
+            todayWorkoutDurationMinutes={debriefData.totalDurationMin || 0}
+            todayWorkoutCaloriesBurned={debriefData.sessionLoad > 0 ? Math.round(debriefData.sessionLoad * 1.5) : 0}
+            isWorkoutEstimated={!(debriefData.sessionLoad > 0)}
           />
         )}
 

@@ -33,9 +33,9 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
   const [connecting, setConnecting] = useState(false);
   const [btStatus, setBtStatus] = useState<string | null>(null);
 
-  // Form check-in state
+  // Form check-in state (slider defaults are input starting points, not measurements)
   const [localSleep, setLocalSleep] = useState(readiness.sleepHours);
-  const [localRhr, setLocalRhr] = useState(readiness.restingHeartRate || 52);
+  const [localRhr, setLocalRhr] = useState(readiness.restingHeartRate ?? 52);
   const [localSoreness, setLocalSoreness] = useState<1 | 2 | 3 | 4 | 5>(readiness.muscleSoreness);
   const [localLegFatigue, setLocalLegFatigue] = useState(readiness.legFatigue);
   const [localEnergy, setLocalEnergy] = useState<'low' | 'moderate' | 'high'>(readiness.energyLevel);
@@ -121,7 +121,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               Smartwatch Integration Hub
             </h2>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Universal compatibility: Garmin, Apple Watch, Xiaomi Band, Samsung Galaxy, Coros, Polar &amp; Strava
+              Bluetooth HR (0x180D) + impor file .fit / .gpx / .tcx / .json / .csv
             </div>
           </div>
         </div>
@@ -143,10 +143,10 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               Connected Device
             </div>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#FFFFFF' }}>
-              {smartwatchState.deviceName}
+              {smartwatchState.connected ? smartwatchState.deviceName : 'Belum terhubung'}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--color-success)' }}>
-              {smartwatchState.lastSyncTime}
+            <div style={{ fontSize: '0.72rem', color: smartwatchState.connected ? 'var(--color-success)' : 'var(--text-muted)' }}>
+              {smartwatchState.connected ? smartwatchState.lastSyncTime : 'Hubungkan perangkat atau isi check-in pagi'}
             </div>
           </div>
 
@@ -501,11 +501,11 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
             <UploadCloud size={22} style={{ color: 'var(--accent-neon)' }} />
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
-              Import Workout File (Garmin, Apple Health, Strava, Xiaomi, Coros)
+              Impor File Latihan (.fit / .gpx / .tcx / .json / .csv)
             </h3>
           </div>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-            Export activity files from your watch companion app and upload `.fit`, `.gpx`, `.tcx`, `.json`, or `.csv` files directly.
+            Ekspor file aktivitas dari aplikasi pendamping jam Anda lalu unggah di sini.
           </p>
 
           <label
@@ -529,7 +529,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               Drop FIT / GPX / TCX / JSON / CSV File Here or Browse
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-              Compatible with Garmin Connect, Apple Health Export, Strava Activity, Mi Fitness, and Coros
+              Format ekspor standar aplikasi pendamping jam
             </span>
             <input type="file" accept=".json,.csv,.fit,.gpx,.tcx" onChange={handleFileUpload} style={{ display: 'none' }} />
           </label>

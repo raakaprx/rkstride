@@ -7,7 +7,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import { DailyLog, ReadinessCheckIn, UserProfile } from '@/types/workout';
 import { ScheduledDay } from '@/types/schedule';
-import { mock28DaysWorkoutHistory, mockReadinessToday } from '@/data/mockWorkoutHistory';
 import { defaultWeeklySchedule } from '@/data/defaultSchedule';
 
 export interface AppSettingItem {
@@ -47,24 +46,15 @@ export class RKStrideDatabase extends Dexie {
 export const db = new RKStrideDatabase();
 
 /**
- * Seed initial baseline data if database is empty on first launch
+ * Seed initial baseline data if database is empty on first launch.
+ * Phase 1 (kejujuran data): NO workout logs, NO readiness history,
+ * NO smartwatch state are seeded. A fresh user starts empty so the
+ * ACWR cold-start guard can fire and no fabricated numbers are shown.
+ * Only the default weekly schedule template, a neutral athlete profile,
+ * and default app settings are created.
  */
 export async function seedInitialDataIfEmpty(): Promise<void> {
   try {
-    const logsCount = await db.workoutLogs.count();
-    if (logsCount === 0) {
-      await db.workoutLogs.bulkAdd(mock28DaysWorkoutHistory);
-    }
-
-    const readinessCount = await db.dailyReadiness.count();
-    if (readinessCount === 0) {
-      const todayStr = new Date().toISOString().split('T')[0];
-      await db.dailyReadiness.add({
-        ...mockReadinessToday,
-        tanggal: todayStr,
-      });
-    }
-
     const scheduleCount = await db.weeklySchedule.count();
     if (scheduleCount === 0) {
       await db.weeklySchedule.bulkAdd(defaultWeeklySchedule);

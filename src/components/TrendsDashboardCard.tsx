@@ -5,9 +5,10 @@ import { calculateACWR } from '@/lib/engine/workload';
 
 interface TrendsDashboardCardProps {
   history: DailyLog[];
+  onNavigateToLogger?: () => void;
 }
 
-export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ history }) => {
+export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ history, onNavigateToLogger }) => {
   // Compute rolling ACWR for each day in history (chronological order)
   const chartData = useMemo(() => {
     // Clone and reverse so oldest is first
@@ -124,6 +125,48 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
         </div>
       </div>
 
+      {/* Empty-history state: no sessions logged yet */}
+      {history.length === 0 ? (
+        <div
+          style={{
+            background: 'var(--bg-surface)',
+            border: '1px dashed var(--border-default)',
+            borderRadius: 'var(--radius-md)',
+            padding: '2rem 1.5rem',
+            textAlign: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}
+        >
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF' }}>
+            Belum ada data latihan
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '420px', lineHeight: 1.5 }}>
+            Catat sesi pertama Anda di tab Workout &amp; Workload. Grafik tren ACWR akan terbentuk setelah Anda mencatat latihan (minimal 21 hari untuk rasio yang bermakna).
+          </div>
+          {onNavigateToLogger && (
+            <button
+              onClick={onNavigateToLogger}
+              style={{
+                marginTop: '0.25rem',
+                padding: '0.6rem 1.25rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--accent-neon)',
+                color: '#09090b',
+                fontWeight: 800,
+                fontSize: '0.85rem',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Catat sesi pertama
+            </button>
+          )}
+        </div>
+      ) : (
+      <>
       {/* SVG Interactive Chart Canvas */}
       <div
         style={{
@@ -299,6 +342,8 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
           </div>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

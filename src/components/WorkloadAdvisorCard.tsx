@@ -337,9 +337,16 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 <Heart size={14} style={{ color: '#ef4444' }} /> Resting HR
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#FFFFFF', marginTop: '0.25rem' }}>
-                {readiness.restingHeartRate || 52} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>bpm</span>
-              </div>
+              {readiness.restingHeartRate != null ? (
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#FFFFFF', marginTop: '0.25rem' }}>
+                  {readiness.restingHeartRate} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>bpm</span>
+                </div>
+              ) : (
+                <div style={{ marginTop: '0.25rem' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-muted)' }}>—</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Belum diukur</div>
+                </div>
+              )}
             </div>
 
             <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
@@ -418,6 +425,24 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Empty-history guidance: fresh user has no logged sessions yet */}
+      {acwr.daysCollected === 0 && (
+        <div
+          style={{
+            padding: '0.85rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            background: 'var(--accent-neon-subtle)',
+            border: '1px solid rgba(204, 255, 0, 0.25)',
+            fontSize: '0.85rem',
+            color: 'var(--text-secondary)',
+            lineHeight: 1.5,
+          }}
+        >
+          <strong style={{ color: 'var(--accent-neon)' }}>Belum ada data latihan.</strong>{' '}
+          Catat sesi pertama Anda pada modul Workout Logger di bawah untuk mulai membangun baseline beban kerja (minimal 21 hari untuk rasio ACWR yang bermakna).
+        </div>
+      )}
 
       {/* Daily Smart Recommendation Card */}
       <div

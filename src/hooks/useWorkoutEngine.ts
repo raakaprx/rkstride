@@ -23,13 +23,24 @@ import {
   parseUniversalSmartwatchFile,
   SMARTWATCH_SAMPLE_PRESETS,
 } from '@/lib/engine/smartwatch';
-import { mock28DaysWorkoutHistory, mockReadinessToday } from '@/data/mockWorkoutHistory';
 import { defaultWeeklySchedule, scheduleTemplates } from '@/data/defaultSchedule';
 import { db } from '@/lib/db/database';
 
+/**
+ * Neutral readiness for a fresh user (no measurements yet).
+ * restingHeartRate is intentionally omitted so the UI renders
+ * "Belum diukur" instead of a fabricated fallback number.
+ */
+export const neutralReadiness: ReadinessCheckIn = {
+  sleepHours: 7,
+  muscleSoreness: 2,
+  legFatigue: false,
+  energyLevel: 'moderate',
+};
+
 export function useWorkoutEngine() {
-  const [history, setHistory] = useState<DailyLog[]>(mock28DaysWorkoutHistory);
-  const [todayReadiness, setTodayReadinessState] = useState<ReadinessCheckIn>(mockReadinessToday);
+  const [history, setHistory] = useState<DailyLog[]>([]);
+  const [todayReadiness, setTodayReadinessState] = useState<ReadinessCheckIn>(neutralReadiness);
   const [weeklySchedule, setWeeklySchedule] = useState<ScheduledDay[]>(defaultWeeklySchedule);
 
   // Reload all states from Dexie IndexedDB
@@ -69,15 +80,16 @@ export function useWorkoutEngine() {
     });
   }, []);
 
-  // Universal Smartwatch Connection State
+  // Smartwatch connection state. Phase 1: default to NOT connected.
+  // No fabricated device name, battery, sync time, or heart rate.
   const [smartwatchState, setSmartwatchState] = useState<SmartwatchDeviceState>({
-    connected: true,
-    deviceName: 'Garmin Forerunner 965',
-    brand: 'garmin',
-    batteryLevel: 82,
-    liveHeartRate: 64,
-    lastSyncTime: 'Synced 07:15 Today',
-    source: 'preset',
+    connected: false,
+    deviceName: 'Belum terhubung',
+    brand: 'generic',
+    batteryLevel: undefined,
+    liveHeartRate: undefined,
+    lastSyncTime: 'Belum ada sinkronisasi',
+    source: 'manual_sync',
   });
 
   // Hours since last leg day session

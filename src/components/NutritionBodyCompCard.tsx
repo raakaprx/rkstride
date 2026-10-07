@@ -8,12 +8,14 @@ interface NutritionBodyCompCardProps {
   userProfile: UserProfile;
   todayWorkoutDurationMinutes?: number;
   todayWorkoutCaloriesBurned?: number;
+  isWorkoutEstimated?: boolean;
 }
 
 export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
   userProfile,
-  todayWorkoutDurationMinutes = 45,
-  todayWorkoutCaloriesBurned = 320,
+  todayWorkoutDurationMinutes = 0,
+  todayWorkoutCaloriesBurned = 0,
+  isWorkoutEstimated = false,
 }) => {
   const [goal, setGoal] = useState<NutritionGoal>('maintenance');
   const [activityLevel, setActivityLevel] = useState<DailyActivityLevel>('lightly_active');
@@ -150,6 +152,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
           </div>
           <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
             BMR: {plan.bmr} | TDEE: {plan.tdee}
+            {isWorkoutEstimated && ' (kalori latihan: estimasi kasar sRPE x 1.5)'}
           </div>
         </div>
 

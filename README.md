@@ -45,8 +45,8 @@ Platform manajemen beban latihan atletik hibrida (*hybrid athletics*) yang mengi
   - Sanitasi telemetri: Data riwayat beban dianonimkan sebelum dikirimkan ke model.
 - **Design System Standar Atletik**:
   - Dark mode pekat (`#09090b` kanvas, `#18181c` permukaan, aksen volt `#CCFF00`).
-  - Nol emoji pada antarmuka produksi; tipografi tegas dan hierarki visual berbasis data.
-  - Lolos uji audit aksesibilitas WCAG AA (axe-core).
+  - Tipografi tegas dan hierarki visual berbasis data.
+  - Audit aksesibilitas WCAG AA (axe-core) untuk 4 kartu utama.
 
 ---
 
@@ -58,12 +58,13 @@ d:/p/
 │   └── science.md             # Dokumentasi matematis & referensi ilmiah lengkap
 ├── src/
 │   ├── components/            # Komponen UI atletik
-│   │   ├── Dashboard.tsx
 │   │   ├── WorkloadAdvisorCard.tsx
 │   │   ├── TrendsDashboardCard.tsx
 │   │   ├── NutritionBodyCompCard.tsx
 │   │   ├── PeriodizationTaperCard.tsx
 │   │   ├── WorkoutLogger.tsx
+│   │   ├── ScheduleCustomizer.tsx
+│   │   ├── SmartwatchSyncCard.tsx
 │   │   ├── GeminiCoachWidget.tsx
 │   │   ├── AboutDisclaimerModal.tsx
 │   │   ├── DataManagementModal.tsx
@@ -82,7 +83,9 @@ d:/p/
 │   │       ├── nutrition.ts   # BMR, TDEE, Makro, Hidrasi
 │   │       ├── periodization.ts # Fase kompetisi & tapering
 │   │       ├── doubleProgression.ts # Rekomendasi kenaikan beban
-│   │       └── test-engine.ts # Skrip verifikasi CLI mandiri
+│   │       └── ... (engine murni, tanpa dependensi DOM)
+│   ├── scripts/
+│   │   └── test-engine.ts     # Skrip verifikasi CLI mandiri (39 test)
 │   ├── test/
 │   │   ├── setup.ts           # Konfigurasi JSDOM, AudioContext, MatchMedia mocks
 │   │   └── a11y.test.tsx      # Pengujian aksesibilitas otomatis axe-core
@@ -109,7 +112,7 @@ Untuk mengaktifkan asisten AI bawaan melalui server:
 ```env
 VITE_GEMINI_API_KEY=masukkan_api_key_gemini_anda_di_sini
 ```
-*(Catatan: Pengguna juga dapat memasukkan API Key secara langsung melalui antarmuka modal pengaturan di aplikasi tanpa menyimpan ke file konfigurasi)*
+*(Catatan: kunci API saat ini dibaca dari environment variable. Modal pengaturan API key di dalam aplikasi direncanakan pada Phase 5.)*
 
 ### 4. Menjalankan Server Development
 ```bash
@@ -129,7 +132,7 @@ Hasil build siap di-*deploy* pada direktori `dist/`.
 
 RKStride dilengkapi dengan suite pengujian komprehensif yang mencakup unit test, property-based testing (fast-check), pengujian integrasi komponen (RTL), dan audit aksesibilitas (axe-core).
 
-### Menjalankan Suite Vitest Lengkap (64 Test)
+### Menjalankan Suite Vitest Lengkap (71 Test)
 ```bash
 npm test
 ```
@@ -139,6 +142,7 @@ Suite ini memverifikasi:
 - `src/lib/engine/__tests__/nutrition.test.ts` (9 unit test mesin nutrisi)
 - `src/lib/engine/__tests__/periodization.test.ts` (5 unit test periodisasi & taper)
 - `src/lib/engine/__tests__/doubleProgression.test.ts` (5 unit test progresi beban)
+- `src/lib/ai/__tests__/geminiCoach.test.ts` (7 test filter domain, red-flag medis & engine offline)
 - `src/components/__tests__/WorkoutLogger.test.tsx` (4 test interaksi form & katalog)
 - `src/components/__tests__/Dashboard.test.tsx` (6 test variasi status beban historis)
 - `src/test/a11y.test.tsx` (4 audit aksesibilitas WCAG AA axe-core)
