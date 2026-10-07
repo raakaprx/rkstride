@@ -51,15 +51,17 @@ const LOCAL_STORAGE_KEY_CONFIG = 'rkstride_ai_coach_config';
  */
 export function getEnvApiKey(): string {
   try {
-    if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
-      return String(import.meta.env.VITE_GEMINI_API_KEY).trim();
+    const meta = typeof import.meta !== 'undefined' ? (import.meta as any) : undefined;
+    if (meta && meta.env && meta.env.VITE_GEMINI_API_KEY) {
+      return String(meta.env.VITE_GEMINI_API_KEY).trim();
     }
   } catch {
     // Ignore
   }
   try {
-    if (typeof process !== 'undefined' && process.env && (process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY)) {
-      return String(process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY).trim();
+    const proc = typeof process !== 'undefined' ? process : undefined;
+    if (proc && proc.env && (proc.env.VITE_GEMINI_API_KEY || proc.env.GEMINI_API_KEY)) {
+      return String(proc.env.VITE_GEMINI_API_KEY || proc.env.GEMINI_API_KEY).trim();
     }
   } catch {
     // Ignore
@@ -158,19 +160,26 @@ export function checkMedicalRedFlags(prompt: string): string | null {
 }
 
 const IN_DOMAIN_KEYWORDS = [
-  'beban', 'acwr', 'workload', 'training', 'latihan', 'jadwal',
-  'lari', 'run', 'squat', 'leg', 'kaki', 'push', 'pull', 'bench',
-  'deadlift', 'recovery', 'pemulihan', 'otot', 'soreness', 'doms',
-  'norwegian', '4x4', 'tempo', 'interval', 'vo2', 'trimp', 'rpe',
-  'tidur', 'sleep', 'rhr', 'detak jantung', 'hrv', 'protein', 'nutrisi',
-  'hidrasi', 'deload', 'progression', 'reps', 'set', '1rm',
+  'beban', 'acwr', 'workload', 'volume', 'intensitas', 'intensity',
+  'training', 'latihan', 'jadwal', 'menu', 'saran', 'rekomen', 'rekomendasi',
+  'besok', 'hari ini', 'pagi', 'sore', 'malam', 'program', 'plan', 'workout',
+  'olahraga', 'olga', 'gym', 'fitness', 'angkat', 'cardio', 'kardio',
+  'lari', 'run', 'jogging', 'sprint', 'tempo', 'interval', 'norwegian', '4x4',
+  'vo2', 'zone', 'zona', 'pace', 'km', 'speed', 'jarak', 'durasi',
+  'squat', 'leg', 'legs', 'kaki', 'push', 'pull', 'bench', 'deadlift', 'dada',
+  'punggung', 'bahu', 'tangan', 'lengan', 'overhead', 'row', 'curl',
+  'recovery', 'pemulihan', 'otot', 'soreness', 'doms', 'capek', 'lelah', 'pegal',
+  'trimp', 'rpe', 'tidur', 'sleep', 'rhr', 'detak jantung', 'denyut', 'bpm', 'hrv',
+  'protein', 'nutrisi', 'nutrition', 'karbo', 'makan', 'hidrasi', 'minum',
+  'elektrolit', 'deload', 'progression', 'progres', 'reps', 'set', '1rm',
+  'istirahat', 'target', 'boleh',
 ];
 
 export function isQueryInSportsDomain(prompt: string): boolean {
-  const p = prompt.toLowerCase();
-  // Allow greetings and short queries
-  if (p.length < 15) return true;
-  return IN_DOMAIN_KEYWORDS.some((kw) => p.includes(kw));
+  const p = prompt.toLowerCase().trim();
+  const greetings = ['halo', 'hai', 'hi', 'hello', 'pagi', 'siang', 'sore', 'malam', 'thanks', 'terima kasih', 'makasih'];
+  if (greetings.some(g => p === g || p.startsWith(g + ' '))) return true;
+  return IN_DOMAIN_KEYWORDS.some((kw) => new RegExp('\\b' + kw.replace(/[.*+?^\$\{\}()|\[\]\\]/g, '\$&') + '\\b').test(p));
 }
 
 // =============================================================================
@@ -178,8 +187,9 @@ export function isQueryInSportsDomain(prompt: string): boolean {
 // =============================================================================
 
 export function buildSystemInstruction(ctx?: AthleteContext): string {
-  const baseInstruction = `You are the RKStride AI Athletic Coach, an elite exercise physiologist, strength & conditioning specialist (CSCS), and hybrid running coach.
+  const baseInstruction = `You are rkbot, an elite hybrid athletic coach, exercise physiologist, and sports science decision engine for RKStride.
 You coach athletes combining Push-Pull-Legs (PPL) resistance training and cardiovascular running (from Zone 2 aerobic base to Norwegian 4x4 VO2 Max intervals).
+Always introduce and refer to yourself simply as "rkbot". Never mention Google, Gemini, or underlying AI models.
 
 CORE PRINCIPLES & SAFEGUARDS:
 1. NON-MEDICAL DISCLAIMER & BOUNDARY:
@@ -189,8 +199,10 @@ CORE PRINCIPLES & SAFEGUARDS:
    - ACWR (Dr. Tim Gabbett): Sweet Spot (0.8 - 1.3), Warning (1.3 - 1.5), Danger (> 1.5 triggers deload -20% to -40%).
    - Concurrent Training Interference (Hickson / Baar): 48-hour recovery window between leg day and high-speed running (Norwegian 4x4, track intervals, tempo). Zone 1-2 easy recovery running (<= 45 min) is always permitted.
    - Foster Session RPE (sRPE): Universal workload metric (duration * RPE).
-3. COACHING VOICE:
-   Motivating, disciplined, concise, structured with bullet points. Always prioritize tissue adaptation and long-term athletic sustainability.`;
+3. COACHING VOICE & STYLE:
+   - Always respond in natural, authoritative, motivating Indonesian language.
+   - Answer directly to the point. Never include technical notes, meta-disclaimers, or footnotes like "Catatan:".
+   - Keep answers clear, well-structured, and immediately actionable for the athlete.`;
 
   if (!ctx) {
     return `${baseInstruction}\n\nNOTE: The user has disabled biometric telemetry sharing. Answer athletic questions based strictly on general sports science principles without personalized context.`;
@@ -231,18 +243,77 @@ export function generateOfflineSportsScienceResponse(
 
   // 2. Out of domain scope check
   if (!isQueryInSportsDomain(prompt)) {
-    return `### Spesialisasi Pelatih Olahraga RKStride
+    return `### Lingkup Pelatih Olahraga (rkbot)
 
-Maaf, sebagai asisten pelatih performa atletik hibrida, keahlian saya berfokus pada:
+Halo! Sebagai asisten pelatih performa atletik hibrida, keahlian saya berfokus pada:
 - **Manajemen Beban Latihan (ACWR)** dan pencegahan kelelahan akut.
-- **Jadwal Hibrida & Interference Effect** (menggabungkan Push-Pull-Legs dengan lari).
+- **Jadwal Hibrida & Interference Effect** (kombinasi Push-Pull-Legs dengan lari).
 - **Protokol Lari Kardiorespirasi** (Norwegian 4x4, Zona 2 aerobik, tempo).
 - **Nutrisi & Hidrasi Pemulihan** pasca latihan.
 
-Silakan ajukan pertanyaan seputar rencana latihan, pemulihan, atau analisis beban fisik Anda!`;
+Silakan tanyakan menu latihan, jadwal besok, atau analisis beban fisik Anda!`;
   }
 
   const p = prompt.toLowerCase();
+
+  // 3. Smart Daily / Tomorrow Recommendation Handler
+  if (
+    p.includes('rekomen') ||
+    p.includes('saran') ||
+    p.includes('besok') ||
+    p.includes('menu') ||
+    p.includes('jadwal') ||
+    p.includes('program')
+  ) {
+    const legHours = ctx?.lastLegsHoursAgo ?? 999;
+    const isLegLocked = legHours < 48;
+    const acwr = ctx?.acwrRatio ?? 1.0;
+    const readiness = ctx?.readinessScore ?? 80;
+
+    if (acwr > 1.5) {
+      return `### Rekomendasi Menu Latihan Besok (rkbot)
+
+Status Beban Latihan: Lonjakan Akut (ACWR ${acwr}).
+Kesiapan Fisik: ${readiness}/100.
+
+Menu Utama yang Dianjurkan Besok:
+- Active Recovery & Mobility: Sesi peregangan dinamis, foam rolling, atau jalan santai selama 30 menit.
+- Hindari beban intensitas tinggi untuk mencegah kelelahan berlebih pada sistem saraf pusat.
+
+Tujuan: Menurunkan rasio beban akut ke zona aman tanpa menghilangkan adaptasi kebugaran.`;
+    }
+
+    if (isLegLocked) {
+      return `### Rekomendasi Menu Latihan Besok (rkbot)
+
+Status Pemulihan Kaki: ${legHours < 900 ? `${legHours} jam` : '> 72 jam'} pasca Leg Day (Proteksi 48 Jam Aktif).
+Rasio ACWR: ${acwr} | Kesiapan Fisik: ${readiness}/100.
+
+Menu Utama yang Dianjurkan Besok:
+1. Latihan Beban Tubuh Bagian Atas (Push / Pull):
+   - Fokus: Bench press, pull-ups, overhead press, atau barbell rows.
+   - Intensitas: RPE 7-8 (sesuai target progresif beban).
+2. Kardio Pemulihan (Opsional):
+   - Lari santai aerobik Zona 2 (durasi 30-40 menit, pace percakapan) atau sepeda statis low-impact.
+
+Menu yang Dihindari Besok:
+- Sesi lari cepat (Norwegian 4x4, interval VO2 max, sprint tempo) dan latihan beban kaki berat (squat/deadlift) agar sintesis kolagen tendon patela dan paha tidak terganggu.`;
+    }
+
+    return `### Rekomendasi Menu Latihan Besok (rkbot)
+
+Status Pemulihan Kaki: Siap / Clear (> 48 jam pasca latihan kaki).
+Rasio ACWR: ${acwr} (Zona Optimal) | Kesiapan Fisik: ${readiness}/100.
+
+Menu Utama yang Dianjurkan Besok:
+1. Sesi Kardiorespirasi Intensitas Tinggi:
+   - Norwegian 4x4 Interval VO2 Max (4 ronde x 4 menit Zona 4 @ 85-95% HRmax, jeda 3 menit Zona 2).
+   - ATAU Tempo Run 30-45 menit pada ambang laktat.
+2. Alternatif Latihan Beban:
+   - Sesi Leg Day (Squat, Romanian Deadlift, Bulgarian Split Squats) dengan target beban progresif.
+
+Pastikan melakukan pemanasan mobilitas 10 menit sebelum memulai sesi berintensitas tinggi.`;
+  }
 
   if (p.includes('analisis') || p.includes('beban') || p.includes('acwr') || p.includes('workload')) {
     if (!ctx) {
@@ -283,12 +354,10 @@ ${
     : ctx.acwrRatio >= 0.8
     ? '**Rekomendasi Utama:** Anda berada di Sweet Spot ideal (0.8–1.3). Kapasitas adaptasi kardiorespirasi dan hipertrofi otot berada pada titik optimal.'
     : '**Rekomendasi Utama:** Beban Anda saat ini tergolong ringan. Aman untuk menerapkan progressive overload bertahap.'
-}
-
-*(Tip: Pasang Google Gemini API Key pada pengaturan untuk konsultasi interaktif online!)*`;
+}`;
   }
 
-  if (p.includes('lari') || p.includes('besok') || p.includes('run') || p.includes('leg') || p.includes('kaki')) {
+  if (p.includes('lari') || p.includes('run') || p.includes('leg') || p.includes('kaki')) {
     const legHours = ctx?.lastLegsHoursAgo ?? 999;
     const isLocked = legHours < 48;
 
@@ -304,9 +373,7 @@ Karena sesi latihan kaki baru berlangsung ${legHours} jam lalu, otot paha dan te
 - **Diperbolehkan:** Lari santai aerobik Zone 1 / Zone 2 (durasi <= 45 menit) atau alihkan ke menu Upper Body Push/Pull.`
     : `**Jendela Pemulihan Kaki Bersih (> 48 Jam):**
 Otot kaki Anda telah melewati ambang batas pemulihan minimum. Anda aman mengeksekusi sesi lari berintensitas tinggi seperti **Norwegian 4x4** atau **Tempo Run**, asalkan skor kesiapan tubuh tetap prima.`
-}
-
-*(Tip: Pasang Google Gemini API Key pada pengaturan untuk konsultasi interaktif online!)*`;
+}`;
   }
 
   if (p.includes('nutrisi') || p.includes('makan') || p.includes('protein') || p.includes('recovery')) {
@@ -322,7 +389,7 @@ Untuk mengoptimalkan sintesis protein otot (*MPS*) dan pengisian glikogen:
   if (p.includes('norwegian') || p.includes('4x4') || p.includes('vo2')) {
     return `### Panduan Eksekusi Protokol Norwegian 4x4 (Helgerud et al., 2007)
 
-Protokol dari *Norwegian University of Science and Technology* terbukti sangat efektif meningkatkan $VO_2 \max$:
+Protokol dari *Norwegian University of Science and Technology* terbukti sangat efektif meningkatkan $VO_2 \\max$:
 - **Pemanasan:** 10 menit di Zone 2 (60–70% HRR).
 - **Interval Utama:** 4 ronde x (4 menit di Zone 4 @ 85–95% HRmax).
 - **Pemulihan Aktif:** 3 menit lari santai di Zone 2 di antara setiap interval (total 4 kali).
@@ -332,15 +399,13 @@ Protokol dari *Norwegian University of Science and Technology* terbukti sangat e
 *Kunci Keberhasilan:* Jaga ritme agar denyut jantung bertahan stabil di 85–95% HRmax selama 4 menit interval, jangan biarkan berubah menjadi sprint anaerobik murni (Zone 5).`;
   }
 
-  return `### Panduan Pelatih Olahraga RKStride
+  return `### Panduan Pelatih Olahraga (rkbot)
 
-Terima kasih atas pertanyaan Anda! Sebagai sistem pendukung keputusan atlet hibrida:
-- Rasio ACWR saat ini: **${ctx?.acwrRatio ?? 'N/A'}** (${ctx?.acwrStatus ?? 'N/A'}).
-- Skor kesiapan tubuh: **${ctx?.readinessScore ?? 'N/A'}/100**.
+Sebagai sistem pendukung keputusan latihan atletik hibrida Anda:
+- **Rasio ACWR:** **${ctx?.acwrRatio ?? 'N/A'}** (${ctx?.acwrStatus ?? 'N/A'})
+- **Kesiapan Fisik:** **${ctx?.readinessScore ?? 'N/A'}/100**
 
-Untuk konsultasi dinamis multi-turn:
-1. Anda dapat memasukkan Google Gemini API Key di menu pengaturan AI Coach (Mode BYOK).
-2. Atau tanyakan analisis beban, jadwal lari, nutrisi, atau protokol Norwegian 4x4 melalui tombol instan di bawah.`;
+Anda dapat menanyakan rekomendasi beban latihan hari ini, jadwal lari pasca leg day, nutrisi pemulihan, atau protokol interval VO2 max.`;
 }
 
 // =============================================================================
@@ -383,8 +448,7 @@ export async function askGeminiCoach(
       throw new Error('Invalid JSON from proxy');
     } catch (err: any) {
       console.warn('Proxy failed, falling back to local engine:', err);
-      const offline = generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
-      return `${offline}\n\n*(Catatan: Proxy backend tidak merespons (${err.message}). Respon di atas dihasilkan oleh engine lokal RKStride.)*`;
+      return generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
     }
   }
 
@@ -414,24 +478,65 @@ export async function askGeminiCoach(
       parts: [{ text: userMessage }],
     });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents,
-      config: {
-        systemInstruction,
-        temperature: 0.7,
-      },
-    });
+    // Try robust candidate models in priority order: gemini-3.5-flash, gemini-flash-latest, gemini-3.1-flash-lite
+    const candidateModels = [
+      'gemini-3.5-flash',
+      'gemini-flash-latest',
+      'gemini-3.1-flash-lite',
+      'gemini-3.8-flash',
+    ];
 
-    const outputText = response.text || '';
-    if (!outputText) {
-      throw new Error('Empty response received from Gemini.');
+    let lastError: any = null;
+
+    for (const modelName of candidateModels) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          if (attempt > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 800));
+          }
+
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents,
+            config: {
+              systemInstruction,
+              temperature: 0.7,
+            },
+          });
+
+          const outputText = response.text || '';
+          if (outputText.trim()) {
+            return outputText.trim();
+          }
+        } catch (err: any) {
+          lastError = err;
+          const errMsg = String(err?.message || '');
+          const isRetryable =
+            errMsg.includes('503') ||
+            errMsg.includes('429') ||
+            errMsg.includes('UNAVAILABLE') ||
+            errMsg.includes('high demand') ||
+            errMsg.includes('404');
+          if (!isRetryable) {
+            break;
+          }
+        }
+      }
     }
 
-    return outputText;
+    console.warn('All Gemini models attempted, falling back to local engine:', lastError?.message || lastError);
+    return generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
   } catch (err: any) {
-    console.error('Gemini API Error:', err);
-    const offlineReply = generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
-    return `${offlineReply}\n\n*(Catatan koneksi: Terjadi kendala API key (${err.message || 'Error'}). Respon di atas dihasilkan oleh engine fisiologi lokal RKStride.)*`;
+    console.error('Gemini API Dispatch Error:', err);
+    return generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
   }
 }
+
+
+
+
+
+
+
+
+

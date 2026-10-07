@@ -38,6 +38,7 @@
   --border-subtle: rgba(255, 255, 255, 0.06);
   --border-default: #27272a;
   --border-hover: #3f3f46;
+  --border-strong: #3f3f46;
   --border-focus: #ccff00;
 
   /* Typography Scales */
@@ -96,6 +97,11 @@
   --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Spinner Animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Reset & Global Base */
 * {
   margin: 0;
@@ -127,3 +133,4 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--accent-neon);
   color: var(--text-inverse);
 }
+

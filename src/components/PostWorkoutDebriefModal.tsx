@@ -277,7 +277,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             }}
           >
             <Bot size={16} />
-            Ask Gemini AI Coach
+            Tanya rkbot
           </button>
 
           <button

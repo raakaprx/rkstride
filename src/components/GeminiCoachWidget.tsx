@@ -3,20 +3,89 @@ import {
   Bot,
   Send,
   Sparkles,
-  Key,
   Trash2,
-  ExternalLink,
   ChevronDown,
 } from 'lucide-react';
 import {
   AthleteContext,
   ChatMessage,
   askGeminiCoach,
-  getAiCoachConfig,
-  saveAiCoachConfig,
-  getEnvApiKey,
-  AiCoachConfig,
 } from '@/lib/ai/geminiCoach';
+
+function renderFormattedMessage(text: string) {
+  const lines = text.split('\n');
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+      {lines.map((line, lIdx) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return <div key={lIdx} style={{ height: '0.2rem' }} />;
+        }
+
+        // Heading: starts with # or ## or ###
+        if (trimmed.startsWith('#')) {
+          const cleanHeading = trimmed.replace(/^#+\s*/, '');
+          return (
+            <div
+              key={lIdx}
+              style={{
+                fontWeight: 800,
+                color: 'var(--accent-neon)',
+                fontSize: '0.85rem',
+                marginTop: lIdx > 0 ? '0.35rem' : 0,
+                marginBottom: '0.1rem',
+              }}
+            >
+              {cleanHeading}
+            </div>
+          );
+        }
+
+        // Bullet item: starts with -, *, or •
+        const isBullet = /^[-\*•]\s+/.test(trimmed);
+        const contentText = isBullet ? trimmed.replace(/^[-\*•]\s+/, '') : trimmed;
+
+        // Split text by bold markers **...**
+        const parts = contentText.split(/(\*\*[^*]+\*\*)/g);
+        const formattedParts = parts.map((part, pIdx) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const inner = part.slice(2, -2);
+            return (
+              <strong key={pIdx} style={{ fontWeight: 700, color: '#FFFFFF' }}>
+                {inner}
+              </strong>
+            );
+          }
+          return <span key={pIdx}>{part}</span>;
+        });
+
+        if (isBullet) {
+          return (
+            <div
+              key={lIdx}
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.4rem',
+                paddingLeft: '0.15rem',
+                lineHeight: 1.45,
+              }}
+            >
+              <span style={{ color: 'var(--accent-neon)', fontWeight: 800 }}>•</span>
+              <div style={{ flex: 1 }}>{formattedParts}</div>
+            </div>
+          );
+        }
+
+        return (
+          <div key={lIdx} style={{ lineHeight: 1.5 }}>
+            {formattedParts}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 interface GeminiCoachWidgetProps {
   athleteContext: AthleteContext;
@@ -34,33 +103,18 @@ export const GeminiCoachWidget: React.FC<GeminiCoachWidgetProps> = ({
     {
       id: 'welcome-msg',
       role: 'model',
-      text: `Halo! Saya **RKStride AI Athletic Coach** yang ditenagai oleh Google Gemini.
+      text: `Halo! Saya rkbot.
 
-Saya otomatis memantau rasio beban latihan Anda (**ACWR: ${athleteContext.acwrRatio}**), kesiapan fisik (${athleteContext.readinessScore}/100), dan status pemulihan otot kaki (${athleteContext.lastLegsHoursAgo < 900 ? `${athleteContext.lastLegsHoursAgo}h` : '> 72h'}).
+Saya memantau beban latihan Anda (ACWR: ${athleteContext.acwrRatio}), kesiapan fisik (${athleteContext.readinessScore}/100), dan pemulihan otot kaki (${athleteContext.lastLegsHoursAgo < 900 ? `${athleteContext.lastLegsHoursAgo} jam` : '> 72 jam'}).
 
-Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot Anda hari ini?`,
-      timestamp: 'Just now',
+Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan otot Anda?`,
+      timestamp: 'Baru saja',
     },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [coachConfig, setCoachConfig] = useState<AiCoachConfig>({
-    mode: 'byok',
-    byokApiKey: '',
-    proxyUrl: '',
-    sendTelemetry: true,
-  });
-  const [hasApiKey, setHasApiKey] = useState(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Load existing AI coach config on mount
-  useEffect(() => {
-    const cfg = getAiCoachConfig();
-    setCoachConfig(cfg);
-    setHasApiKey(Boolean((cfg.mode === 'byok' && cfg.byokApiKey) || (cfg.mode === 'proxy' && cfg.proxyUrl)));
-  }, []);
 
   // Handle external prompt passed e.g. from PostWorkoutDebriefModal
   useEffect(() => {
@@ -164,10 +218,10 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
           </div>
           <div style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>
-              Gemini AI Coach
+              rkbot
             </div>
             <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
-              Live Telemetry Connected
+              Pelatih Atletik Hibrida
             </div>
           </div>
           <span
@@ -232,19 +286,23 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                   <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#FFFFFF' }}>
-                    RKStride AI Coach
+                    rkbot
                   </span>
                   <span
                     style={{
                       fontSize: '0.62rem',
-                      padding: '0.1rem 0.4rem',
+                      padding: '0.1rem 0.45rem',
                       borderRadius: 'var(--radius-full)',
-                      background: hasApiKey ? 'var(--color-success-bg)' : 'rgba(204, 255, 0, 0.1)',
-                      color: hasApiKey ? 'var(--color-success)' : 'var(--accent-neon)',
+                      background: 'rgba(204, 255, 0, 0.12)',
+                      color: 'var(--accent-neon)',
                       fontWeight: 700,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
                     }}
                   >
-                    {hasApiKey ? 'Gemini 2.5 Live' : 'Smart Offline'}
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--accent-neon)' }} />
+                    Online
                   </span>
                 </div>
                 <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
@@ -253,26 +311,11 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
               </div>
             </div>
 
-            {/* Actions: Settings, Clear, Minimize */}
+            {/* Actions: Clear, Minimize */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
               <button
-                onClick={() => setShowKeyModal((prev) => !prev)}
-                title="Configure Google Gemini API Key"
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: hasApiKey ? 'var(--color-success)' : 'var(--text-muted)',
-                  cursor: 'pointer',
-                  padding: '0.35rem',
-                  borderRadius: 'var(--radius-sm)',
-                }}
-              >
-                <Key size={16} />
-              </button>
-
-              <button
                 onClick={() => setMessages([messages[0]])}
-                title="Clear Chat History"
+                title="Bersihkan Percakapan"
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -287,7 +330,7 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
 
               <button
                 onClick={() => setIsOpen(false)}
-                title="Minimize Coach"
+                title="Kecilkan Pelatih"
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -301,172 +344,6 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
               </button>
             </div>
           </div>
-
-          {/* Inline API Key & Proxy Config Box (Collapsible) */}
-          {showKeyModal && (
-            <div
-              style={{
-                background: 'var(--bg-surface-elevated)',
-                padding: '0.85rem 1rem',
-                borderBottom: '1px solid var(--border-default)',
-                fontSize: '0.78rem',
-              }}
-            >
-              {/* Mode Selection */}
-              <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
-                <button
-                  onClick={() => setCoachConfig((prev) => ({ ...prev, mode: 'byok' }))}
-                  style={{
-                    flex: 1,
-                    padding: '0.35rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: coachConfig.mode === 'byok' ? 'rgba(204, 255, 0, 0.15)' : 'var(--bg-surface)',
-                    border: coachConfig.mode === 'byok' ? '1px solid var(--accent-neon)' : '1px solid var(--border-default)',
-                    color: coachConfig.mode === 'byok' ? '#FFFFFF' : 'var(--text-muted)',
-                    fontWeight: 700,
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Mode BYOK (Lokal)
-                </button>
-                <button
-                  onClick={() => setCoachConfig((prev) => ({ ...prev, mode: 'proxy' }))}
-                  style={{
-                    flex: 1,
-                    padding: '0.35rem',
-                    borderRadius: 'var(--radius-sm)',
-                    background: coachConfig.mode === 'proxy' ? 'rgba(204, 255, 0, 0.15)' : 'var(--bg-surface)',
-                    border: coachConfig.mode === 'proxy' ? '1px solid var(--accent-neon)' : '1px solid var(--border-default)',
-                    color: coachConfig.mode === 'proxy' ? '#FFFFFF' : 'var(--text-muted)',
-                    fontWeight: 700,
-                    fontSize: '0.75rem',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Mode Proxy Backend
-                </button>
-              </div>
-
-              {coachConfig.mode === 'byok' ? (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
-                    <span style={{ fontWeight: 700, color: '#FFFFFF' }}>Google Gemini API Key</span>
-                    <a
-                      href="https://aistudio.google.com/app/apikey"
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        color: 'var(--accent-neon)',
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.2rem',
-                        fontSize: '0.7rem',
-                      }}
-                    >
-                      Dapatkan Key Gratis <ExternalLink size={10} />
-                    </a>
-                  </div>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>
-                    Key disimpan privat di peramban lokal Anda. Atau otomatis terbaca dari file <code>.env</code> (<code>VITE_GEMINI_API_KEY</code>).
-                  </p>
-                  {getEnvApiKey() && (
-                    <div style={{ fontSize: '0.68rem', color: 'var(--accent-neon)', marginBottom: '0.4rem', fontWeight: 600 }}>
-                      Kunci terdeteksi otomatis dari environment (.env)
-                    </div>
-                  )}
-                  <input
-                    type="password"
-                    placeholder={getEnvApiKey() ? "Terhubung dari .env (atau ketik untuk override)" : "AIzaSy... (atau atur di file .env)"}
-                    value={coachConfig.byokApiKey}
-                    onChange={(e) => setCoachConfig((prev) => ({ ...prev, byokApiKey: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border-default)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: '#FFFFFF',
-                      padding: '0.4rem 0.55rem',
-                      fontSize: '0.8rem',
-                      outline: 'none',
-                      marginBottom: '0.65rem',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </>
-              ) : (
-                <>
-                  <span style={{ fontWeight: 700, color: '#FFFFFF', display: 'block', marginBottom: '0.3rem' }}>
-                    URL Endpoint Proxy Pribadi
-                  </span>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.7rem', marginBottom: '0.5rem', lineHeight: 1.3 }}>
-                    Gunakan serverless function (Cloudflare Worker/Vercel) dengan rate limit sendiri.
-                  </p>
-                  <input
-                    type="url"
-                    placeholder="https://my-proxy.workers.dev/chat"
-                    value={coachConfig.proxyUrl}
-                    onChange={(e) => setCoachConfig((prev) => ({ ...prev, proxyUrl: e.target.value }))}
-                    style={{
-                      width: '100%',
-                      background: 'var(--bg-surface)',
-                      border: '1px solid var(--border-default)',
-                      borderRadius: 'var(--radius-sm)',
-                      color: '#FFFFFF',
-                      padding: '0.4rem 0.55rem',
-                      fontSize: '0.8rem',
-                      outline: 'none',
-                      marginBottom: '0.65rem',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                </>
-              )}
-
-              {/* Privacy Toggle: Send Telemetry */}
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.73rem',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  marginBottom: '0.75rem',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={coachConfig.sendTelemetry}
-                  onChange={(e) => setCoachConfig((prev) => ({ ...prev, sendTelemetry: e.target.checked }))}
-                  style={{ accentColor: 'var(--accent-neon)' }}
-                />
-                <span>Kirim data agregat latihan (ACWR, beban, kesiapan) ke AI Coach</span>
-              </label>
-
-              <button
-                onClick={() => {
-                  saveAiCoachConfig(coachConfig);
-                  setHasApiKey(Boolean((coachConfig.mode === 'byok' && coachConfig.byokApiKey) || (coachConfig.mode === 'proxy' && coachConfig.proxyUrl)));
-                  setShowKeyModal(false);
-                }}
-                style={{
-                  width: '100%',
-                  padding: '0.45rem',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--accent-neon)',
-                  color: '#09090b',
-                  fontWeight: 700,
-                  fontSize: '0.78rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                Simpan Pengaturan AI Coach
-              </button>
-            </div>
-          )}
 
           {/* Messages Container */}
           <div
@@ -502,11 +379,10 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
                       color: '#FFFFFF',
                       fontSize: '0.82rem',
                       lineHeight: 1.5,
-                      whiteSpace: 'pre-wrap',
                       wordBreak: 'break-word',
                     }}
                   >
-                    {msg.text}
+                    {renderFormattedMessage(msg.text)}
                   </div>
                   <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.2rem', padding: '0 0.2rem' }}>
                     {msg.timestamp}
@@ -518,7 +394,7 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
             {isLoading && (
               <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.8rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
                 <Sparkles size={14} style={{ color: 'var(--accent-neon)', animation: 'spin 1.5s linear infinite' }} />
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Coach is thinking...</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>rkbot sedang berpikir...</span>
               </div>
             )}
 
@@ -580,7 +456,7 @@ Ada yang bisa saya bantu terkait jadwal, intensitas lari, atau pemulihan otot An
           >
             <input
               type="text"
-              placeholder="Ask coach about ACWR, running, recovery..."
+              placeholder="Tanya rkbot seputar jadwal, lari, pemulihan..."
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
