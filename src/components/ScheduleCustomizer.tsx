@@ -148,6 +148,25 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
       )}
 
       {/* 7-Day Grid */}
+      {weeklySchedule.length === 0 ? (
+        <div
+          style={{
+            background: 'var(--bg-secondary)',
+            border: '1px dashed var(--border-default)',
+            borderRadius: 'var(--radius-md)',
+            padding: '2rem 1.5rem',
+            textAlign: 'center',
+            marginBottom: '1.5rem',
+          }}
+        >
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
+            Jadwal mingguan kosong
+          </div>
+          <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            Pilih salah satu template cepat di atas untuk mulai menyusun minggu latihan Anda.
+          </div>
+        </div>
+      ) : (
       <div
         style={{
           display: 'grid',
@@ -245,6 +264,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
           );
         })}
       </div>
+      )}
 
       {/* Editor Panel */}
       {editingDay && (

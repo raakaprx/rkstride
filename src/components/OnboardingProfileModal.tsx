@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User } from 'lucide-react';
 import { UserProfile } from '@/types/workout';
-import { RaceCategory } from '@/types/productFeatures';
+import { RaceCategory, RaceTargetConfig } from '@/types/productFeatures';
 import { db } from '@/lib/db/database';
 import { estimateMaxHeartRate } from '@/lib/engine/workload';
 import { Modal } from './ui/Modal';
@@ -9,7 +9,7 @@ import { Modal } from './ui/Modal';
 interface OnboardingProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onProfileUpdated?: (updated: UserProfile) => void;
+  onProfileUpdated?: (updated: UserProfile, race?: RaceTargetConfig) => void;
 }
 
 export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
@@ -31,6 +31,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
   });
 
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Load existing profile from IndexedDB on open
   useEffect(() => {
@@ -61,6 +62,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setSaveError(null);
     try {
       const dataToSave = {
         id: 'current_user',
@@ -70,24 +72,27 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
       await db.userProfile.put(dataToSave as any);
 
       // Also persist target race config into appSettings
+      let savedRace: RaceTargetConfig | undefined;
       if (profile.targetRaceDate && profile.targetRaceCategory) {
+        savedRace = {
+          eventName: profile.targetRaceName || 'Target Race',
+          category: profile.targetRaceCategory,
+          raceDate: profile.targetRaceDate,
+        };
         await db.appSettings.put({
           key: 'targetRaceConfig',
-          value: {
-            eventName: profile.targetRaceName || 'Target Race',
-            category: profile.targetRaceCategory,
-            raceDate: profile.targetRaceDate,
-          },
+          value: savedRace,
           updatedAt: new Date().toISOString(),
         });
       }
 
       if (onProfileUpdated) {
-        onProfileUpdated(dataToSave);
+        onProfileUpdated(dataToSave, savedRace);
       }
       onClose();
     } catch (err) {
       console.error('Failed to save profile to IndexedDB:', err);
+      setSaveError('Gagal menyimpan profil ke database lokal. Coba lagi.');
     } finally {
       setIsSaving(false);
     }
@@ -449,6 +454,20 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               {isSaving ? 'Menyimpan...' : 'Simpan Profil'}
             </button>
           </div>
+          {saveError && (
+            <div
+              style={{
+                padding: '0.65rem 0.85rem',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--color-danger-bg)',
+                border: '1px solid var(--color-danger)',
+                fontSize: '0.8rem',
+                color: 'var(--color-danger)',
+              }}
+            >
+              {saveError}
+            </div>
+          )}
         </form>
       </div>
     </Modal>

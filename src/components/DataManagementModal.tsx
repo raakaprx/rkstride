@@ -30,12 +30,15 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
 }) => {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [wipeBeforeImport, setWipeBeforeImport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
   // Handle Export to JSON
   const handleExportJson = async () => {
+    setExportError(null);
     try {
       const jsonString = await exportDatabaseToJson();
       const blob = new Blob([jsonString], { type: 'application/json' });
@@ -47,12 +50,13 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       URL.revokeObjectURL(url);
     } catch (err: any) {
       console.error('Export JSON error:', err);
-      alert('Gagal mengekspor data JSON: ' + err.message);
+      setExportError('Gagal mengekspor data JSON: ' + (err.message || 'kesalahan tak dikenal'));
     }
   };
 
   // Handle Export to CSV
   const handleExportCsv = async () => {
+    setExportError(null);
     try {
       const csvString = await exportWorkoutLogsToCsv();
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
@@ -64,7 +68,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       URL.revokeObjectURL(url);
     } catch (err: any) {
       console.error('Export CSV error:', err);
-      alert('Gagal mengekspor data CSV: ' + err.message);
+      setExportError('Gagal mengekspor data CSV: ' + (err.message || 'kesalahan tak dikenal'));
     }
   };
 
@@ -80,7 +84,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     reader.onload = async (event) => {
       const content = event.target?.result as string;
       if (content) {
-        const result = await importDatabaseFromJson(content);
+        const result = await importDatabaseFromJson(content, { wipeBeforeImport });
         setImportResult(result);
         setIsProcessing(false);
         if (result.success) {
@@ -303,6 +307,31 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
               Unggah file backup `.json` sebelumnya. Data divalidasi dengan Zod secara atomik untuk mencegah korupsi database.
             </p>
 
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.6rem',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                color: 'var(--text-primary)',
+                lineHeight: 1.4,
+                marginBottom: '1rem',
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={wipeBeforeImport}
+                onChange={(e) => setWipeBeforeImport(e.target.checked)}
+              />
+              <span>
+                Ganti seluruh data (hapus data lama dulu)
+                <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  Tanpa ini, data backup digabung dengan data yang sudah ada.
+                </span>
+              </span>
+            </label>
+
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -335,6 +364,23 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             />
           </div>
         </div>
+
+        {/* Export error banner (inline, never alert()) */}
+        {exportError && (
+          <div
+            style={{
+              marginBottom: '1rem',
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--color-danger-bg)',
+              border: '1px solid var(--color-danger)',
+              fontSize: '0.82rem',
+              color: 'var(--color-danger)',
+            }}
+          >
+            {exportError}
+          </div>
+        )}
 
         {/* Security & Privacy Notice */}
         <div

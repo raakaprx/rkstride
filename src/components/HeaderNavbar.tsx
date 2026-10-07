@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Watch, Calendar, Dumbbell, Database, Info, TrendingUp, Apple, User } from 'lucide-react';
+import { Activity, Watch, Calendar, Dumbbell, Database, Info, TrendingUp, Apple, User, Settings2 } from 'lucide-react';
 import { SmartwatchDeviceState } from '@/lib/engine/smartwatch';
 
 interface HeaderNavbarProps {
@@ -10,6 +10,7 @@ interface HeaderNavbarProps {
   onOpenDataModal?: () => void;
   onOpenAboutModal?: () => void;
   onOpenProfileModal?: () => void;
+  onOpenAiSettingsModal?: () => void;
 }
 
 export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
@@ -20,6 +21,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
   onOpenDataModal,
   onOpenAboutModal,
   onOpenProfileModal,
+  onOpenAiSettingsModal,
 }) => {
   return (
     <header
@@ -343,6 +345,39 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
             >
               <Database size={13} style={{ color: 'var(--accent-neon)' }} />
               <span>Backup</span>
+            </button>
+          )}
+
+          {/* AI Coach Settings Trigger */}
+          {onOpenAiSettingsModal && (
+            <button
+              onClick={onOpenAiSettingsModal}
+              title="Pengaturan AI Coach (API Key & Privasi)"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                padding: '0.45rem 0.75rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = 'var(--text-primary)';
+                e.currentTarget.style.borderColor = 'var(--border-strong)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = 'var(--text-secondary)';
+                e.currentTarget.style.borderColor = 'var(--border-default)';
+              }}
+            >
+              <Settings2 size={13} style={{ color: 'var(--accent-neon)' }} />
+              <span>AI Coach</span>
             </button>
           )}
 

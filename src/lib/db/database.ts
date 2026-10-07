@@ -5,7 +5,7 @@
  */
 
 import Dexie, { type EntityTable } from 'dexie';
-import { DailyLog, ReadinessCheckIn, UserProfile } from '@/types/workout';
+import { DailyLog, ReadinessCheckIn, UserProfile, ACWRStatus } from '@/types/workout';
 import { ScheduledDay } from '@/types/schedule';
 import { defaultWeeklySchedule } from '@/data/defaultSchedule';
 
@@ -20,6 +20,21 @@ export interface StoredReadinessLog extends ReadinessCheckIn {
 }
 
 /**
+ * Latest post-workout debrief (single row, id 'latest').
+ * Persisted so nutrition estimates and AI context survive reload (Phase 5).
+ */
+export interface StoredDebrief {
+  id: string;
+  sessionLoad: number;
+  projectedACWR: number;
+  acwrStatus: ACWRStatus;
+  hasLegWorkout: boolean;
+  hasRunWorkout: boolean;
+  hasUpperWorkout: boolean;
+  totalDurationMin: number;
+}
+
+/**
  * RKStride IndexedDB Database Class
  */
 export class RKStrideDatabase extends Dexie {
@@ -28,6 +43,7 @@ export class RKStrideDatabase extends Dexie {
   userProfile!: EntityTable<UserProfile & { id: string }, 'id'>;
   weeklySchedule!: EntityTable<ScheduledDay, 'dayIndex'>;
   appSettings!: EntityTable<AppSettingItem, 'key'>;
+  postWorkoutDebrief!: EntityTable<StoredDebrief, 'id'>;
 
   constructor() {
     super('RKStrideDB');
@@ -39,6 +55,16 @@ export class RKStrideDatabase extends Dexie {
       userProfile: 'id',
       weeklySchedule: 'dayIndex, category',
       appSettings: 'key',
+    });
+
+    // Schema Version 2: adds postWorkoutDebrief table (Phase 5)
+    this.version(2).stores({
+      workoutLogs: 'tanggal, totalLoadScore',
+      dailyReadiness: 'tanggal, sleepHours, restingHeartRate',
+      userProfile: 'id',
+      weeklySchedule: 'dayIndex, category',
+      appSettings: 'key',
+      postWorkoutDebrief: 'id',
     });
   }
 }

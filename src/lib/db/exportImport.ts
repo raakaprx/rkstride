@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { db, StoredReadinessLog } from './database';
 import { DailyLog, UserProfile } from '@/types/workout';
 import { ScheduledDay } from '@/types/schedule';
+import { getAiCoachConfig, saveAiCoachConfig } from '@/lib/ai/geminiCoach';
 
 // =============================================================================
 // 1. ZOD DATA CONTRACT SCHEMAS
@@ -90,6 +91,13 @@ export const ScheduledDaySchema = z.object({
   notes: z.string().optional(),
 });
 
+export const AiCoachConfigSchema = z.object({
+  mode: z.enum(['byok', 'proxy']),
+  byokApiKey: z.string(),
+  proxyUrl: z.string(),
+  sendTelemetry: z.boolean(),
+});
+
 export const RKStrideExportPayloadSchema = z.object({
   format: z.literal('RKStride_Backup'),
   version: z.number().int().positive(),
@@ -99,6 +107,7 @@ export const RKStrideExportPayloadSchema = z.object({
   dailyReadiness: z.array(ReadinessLogSchema).optional(),
   weeklySchedule: z.array(ScheduledDaySchema).optional(),
   appSettings: z.record(z.string(), z.any()).optional(),
+  aiCoachConfig: AiCoachConfigSchema.optional(),
 });
 
 export type RKStrideExportPayload = z.infer<typeof RKStrideExportPayloadSchema>;
@@ -131,6 +140,7 @@ export async function exportDatabaseToJson(): Promise<string> {
     dailyReadiness,
     weeklySchedule,
     appSettings,
+    aiCoachConfig: getAiCoachConfig(),
   };
 
   return JSON.stringify(payload, null, 2);
@@ -221,8 +231,14 @@ export interface ImportResult {
 /**
  * Import and validate JSON backup.
  * Rejects corrupt data and guarantees transaction safety.
+ * @param opts.wipeBeforeImport when true, existing workout logs, readiness,
+ * schedules and profile are cleared first (replace mode). appSettings are
+ * always merged so consent flags are never lost.
  */
-export async function importDatabaseFromJson(jsonContent: string): Promise<ImportResult> {
+export async function importDatabaseFromJson(
+  jsonContent: string,
+  opts?: { wipeBeforeImport?: boolean }
+): Promise<ImportResult> {
   let parsedRaw: unknown;
 
   try {
@@ -253,10 +269,18 @@ export async function importDatabaseFromJson(jsonContent: string): Promise<Impor
   }
 
   const payload = validationResult.data;
+  const wipe = opts?.wipeBeforeImport === true;
 
   try {
     // Atomic Transaction to replace/upsert data safely
     await db.transaction('rw', [db.workoutLogs, db.dailyReadiness, db.userProfile, db.weeklySchedule, db.appSettings], async () => {
+      if (wipe) {
+        await db.workoutLogs.clear();
+        await db.dailyReadiness.clear();
+        await db.weeklySchedule.clear();
+        await db.userProfile.clear();
+      }
+
       if (payload.workoutLogs && payload.workoutLogs.length > 0) {
         await db.workoutLogs.bulkPut(payload.workoutLogs as DailyLog[]);
       }
@@ -287,9 +311,19 @@ export async function importDatabaseFromJson(jsonContent: string): Promise<Impor
       }
     });
 
+    if (payload.aiCoachConfig) {
+      try {
+        saveAiCoachConfig(payload.aiCoachConfig);
+      } catch (err) {
+        console.error('Failed to restore AI Coach config from backup:', err);
+      }
+    }
+
     return {
       success: true,
-      message: `Berhasil mengimpor ${payload.workoutLogs.length} data riwayat latihan dan konfigurasi atlet.`,
+      message: wipe
+        ? `Berhasil menggantikan seluruh data dengan ${payload.workoutLogs.length} riwayat latihan dari backup.`
+        : `Berhasil mengimpor ${payload.workoutLogs.length} data riwayat latihan dan konfigurasi atlet (digabung dengan data lama).`,
       importedLogsCount: payload.workoutLogs.length,
     };
   } catch (err: any) {

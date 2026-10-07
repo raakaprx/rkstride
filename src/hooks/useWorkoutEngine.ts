@@ -43,6 +43,7 @@ export function useWorkoutEngine() {
   const [history, setHistory] = useState<DailyLog[]>([]);
   const [todayReadiness, setTodayReadinessState] = useState<ReadinessCheckIn>(neutralReadiness);
   const [weeklySchedule, setWeeklySchedule] = useState<ScheduledDay[]>(defaultWeeklySchedule);
+  const [dbError, setDbError] = useState<string | null>(null);
 
   // Reload all states from Dexie IndexedDB
   const reloadFromDb = useCallback(async () => {
@@ -62,8 +63,10 @@ export function useWorkoutEngine() {
         schedule.sort((a, b) => a.dayIndex - b.dayIndex);
         setWeeklySchedule(schedule);
       }
+      setDbError(null);
     } catch (err) {
       console.error('Error reloading from Dexie DB:', err);
+      setDbError('Database lokal tidak dapat dibaca. Data Anda aman; coba muat ulang halaman.');
     }
   }, []);
 
@@ -391,5 +394,6 @@ export function useWorkoutEngine() {
     calculateProjectedImpact,
     logTodayWorkout,
     reloadFromDb,
+    dbError,
   };
 }

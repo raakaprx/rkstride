@@ -15,6 +15,7 @@ import { PeriodizationTaperCard } from './components/PeriodizationTaperCard';
 import { NutritionBodyCompCard } from './components/NutritionBodyCompCard';
 import { TrendsDashboardCard } from './components/TrendsDashboardCard';
 import { OnboardingProfileModal } from './components/OnboardingProfileModal';
+import { AICoachSettingsModal } from './components/AICoachSettingsModal';
 import { AthleteContext } from './lib/ai/geminiCoach';
 import { db, seedInitialDataIfEmpty } from './lib/db/database';
 import { UserProfile } from './types/workout';
@@ -36,6 +37,7 @@ export default function App() {
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
 
   // Athlete Profile & Race Target State
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -87,6 +89,7 @@ export default function App() {
     calculateProjectedImpact,
     logTodayWorkout,
     reloadFromDb,
+    dbError,
   } = useWorkoutEngine();
 
   // Initialize Dexie IndexedDB baseline seed and check onboarding disclaimer consent
@@ -101,6 +104,11 @@ export default function App() {
         const storedRace = await db.appSettings.get('targetRaceConfig');
         if (storedRace && storedRace.value) {
           setRaceConfig(storedRace.value);
+        }
+        const storedDebrief = await db.postWorkoutDebrief.get('latest');
+        if (storedDebrief) {
+          const { id: _ignored, ...debrief } = storedDebrief;
+          setDebriefData(debrief);
         }
         const acceptedLocal = localStorage.getItem('rkstride_disclaimer_accepted');
         const acceptedDbSetting = await db.appSettings.get('disclaimerAccepted');
@@ -148,6 +156,9 @@ export default function App() {
   const handleWorkoutCompletedDebrief = (data: PostWorkoutDebriefData) => {
     setDebriefData(data);
     setIsDebriefOpen(true);
+    db.postWorkoutDebrief.put({ id: 'latest', ...data }).catch((err) => {
+      console.error('Failed to persist debrief data:', err);
+    });
   };
 
   return (
@@ -161,6 +172,7 @@ export default function App() {
         onOpenDataModal={() => setIsDataModalOpen(true)}
         onOpenAboutModal={() => setIsAboutModalOpen(true)}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
+        onOpenAiSettingsModal={() => setIsAiSettingsOpen(true)}
       />
 
       {/* Main Container */}
@@ -179,6 +191,21 @@ export default function App() {
         <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
           {tabTitles[activeTab]}
         </h1>
+        {/* Storage error banner (Phase 5: errors surface inline, never alert()) */}
+        {dbError && (
+          <div
+            style={{
+              padding: '0.75rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              background: 'var(--color-danger-bg)',
+              border: '1px solid var(--color-danger)',
+              fontSize: '0.85rem',
+              color: 'var(--color-danger)',
+            }}
+          >
+            <strong>Gagal memuat data lokal:</strong> {dbError}
+          </div>
+        )}
         {/* Tab 1: Menu Utama - Latihan & Evaluasi Beban */}
         {activeTab === 'training' && (
           <>
@@ -294,7 +321,16 @@ export default function App() {
       <OnboardingProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        onProfileUpdated={(updated) => setUserProfile(updated)}
+        onProfileUpdated={(updated, race) => {
+          setUserProfile(updated);
+          if (race) setRaceConfig(race);
+        }}
+      />
+
+      {/* AI Coach Settings (BYOK key, proxy, telemetry toggle) */}
+      <AICoachSettingsModal
+        isOpen={isAiSettingsOpen}
+        onClose={() => setIsAiSettingsOpen(false)}
       />
 
       {/* Minimalist Dark Footer */}
