@@ -5,6 +5,53 @@ Format changelog ini mengacu pada panduan [Keep a Changelog](https://keepachange
 
 ---
 
+## [Unreleased] - Fase 0-6 (2026-10-07)
+
+Program perbaikan bertahap berdasarkan audit: kejujuran data, guardrail PPL-lari
+end-to-end, aksesibilitas WCAG AA, sistem desain, persistensi, dan kebersihan rilis.
+
+### Fixed
+- Stabilisasi rilis: galat TypeScript pada test, filter domain AI coach yang bocor
+  (substring generik + ambang panjang), token desain hilang (`--border-strong`,
+  `@keyframes spin`), konfigurasi Vitest untuk Windows.
+- Ambang ACWR tunggal 1.4 (AGENTS.md) di seluruh engine, UI, dan dokumentasi
+  (`docs/science.md`); zona warning 1.3-1.5 dihapus dari engine.
+- Guardrail PPL-lari kini bekerja end-to-end: audit jadwal mingguan delegasi ke
+  `evaluateSoftGuardrail` (dua arah + Recovery Exemption), rekomendasi harian
+  menerima lari besok yang direncanakan, override eksplisit via modal
+  (advisory, tidak pernah hard-block, flag `isOverridden` tersimpan di sesi).
+- Cabang rekomendasi baru ACWR < 0.8 (progressive overload aman +5%).
+- Data jujur: seed 28 hari palsu dihapus (pengguna baru mulai kosong,
+  cold-start guard aktif); status perangkat palsu, fallback RHR, dan kalori
+  fabrikasi dihilangkan atau diberi label estimasi; klaim tak didukung dihapus.
+- Aksesibilitas: primitif `ui/Modal` (dialog, Escape, focus trap, kembalikan fokus)
+  untuk 6 modal; indikator fokus global; target sentuh 44px; font minimal 12px;
+  kontras `--text-muted` lolos AA (cek axe diaktifkan kembali); kartu hari jadwal
+  menjadi button; input file keyboard-accessible; hierarki h1/h2.
+- Race config tersimpan langsung tanpa reload; debrief persisten di Dexie (skema v2);
+  modal pengaturan AI Coach (BYOK, proxy, toggle telemetri); coach config masuk
+  backup JSON; impor mendukung mode ganti-semua; seluruh error tampil inline
+  (tanpa `alert()`).
+
+### Added
+- `DESIGN.md` (arah visual tertulis, dial ENERGY 2/RHYTHM 2/MOTION 1).
+- Primitif `ui/Button`, `ui/Card`, `ui/Badge`; token chart kategorikal; skala z-index terpusat.
+- Ikon PWA asli (`scripts/generate-pwa-icons.mjs`, tanpa dependensi) dan service
+  worker app-shell (`public/sw.js`, produksi saja).
+- Workflow CI (`.github/workflows/ci.yml`): build + 80 test Vitest + 39 test CLI.
+- `DELIVERY_GATE_REPORT.md` (bukti verifikasi R-35).
+
+### Removed
+- Kode mati: `MiBandSyncCard.tsx`, `lib/engine/mi-band.ts`, `lib/engine/test-engine.ts`
+  (duplikat yatim), prop `onQuickLogPreset`, seed pengaturan Dexie yang tak dibaca,
+  konstanta `READINESS_MIN_BASELINE_DAYS` yang tak dipakai.
+
+### Changed
+- Suite Vitest tumbuh 64 -> 80 test (ambang 1.4, audit jadwal, override hook);
+  CLI 39/39; `agents.md` diselaraskan ke stack aktual (Vite + React, bukan Next.js).
+
+---
+
 ## [2.0.0] - 2026-10-02
 
 Perombakan arsitektur besar-besaran berbasis *sports science*, penambahan penyimpanan lokal persisten (*IndexedDB*), sistem audit data Zod, kecerdasan buatan Gemini AI Coach yang aman dari red-flag medis, fitur nutrisi dan periodisasi, serta perluasan suite pengujian otomatis.

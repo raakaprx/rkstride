@@ -99,14 +99,10 @@ export async function seedInitialDataIfEmpty(): Promise<void> {
       });
     }
 
-    // Default privacy settings
+    // Default privacy settings (only keys the app actually reads)
     const settingsCount = await db.appSettings.count();
     if (settingsCount === 0) {
       await db.appSettings.bulkAdd([
-        { key: 'sendTelemetryToAiCoach', value: true, updatedAt: new Date().toISOString() },
-        { key: 'acwrMethod', value: 'rolling_coupled', updatedAt: new Date().toISOString() },
-        { key: 'aiCoachMode', value: 'byok', updatedAt: new Date().toISOString() }, // 'byok' or 'proxy'
-        { key: 'aiProxyUrl', value: '', updatedAt: new Date().toISOString() },
         { key: 'disclaimerAccepted', value: false, updatedAt: new Date().toISOString() },
       ]);
     }

@@ -19,7 +19,6 @@ interface WorkloadAdvisorCardProps {
   readiness: ReadinessCheckIn;
   readinessScore: number;
   lastLegsHoursAgo: number;
-  onQuickLogPreset?: () => void;
 }
 
 export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({

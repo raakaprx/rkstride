@@ -58,6 +58,7 @@ d:/p/
 │   └── science.md             # Dokumentasi matematis & referensi ilmiah lengkap
 ├── src/
 │   ├── components/            # Komponen UI atletik
+│   │   ├── ui/                # Primitif bersama: Modal, Button, Card, Badge
 │   │   ├── WorkloadAdvisorCard.tsx
 │   │   ├── TrendsDashboardCard.tsx
 │   │   ├── NutritionBodyCompCard.tsx
@@ -66,6 +67,8 @@ d:/p/
 │   │   ├── ScheduleCustomizer.tsx
 │   │   ├── SmartwatchSyncCard.tsx
 │   │   ├── GeminiCoachWidget.tsx
+│   │   ├── GuardrailOverrideModal.tsx
+│   │   ├── AICoachSettingsModal.tsx
 │   │   ├── AboutDisclaimerModal.tsx
 │   │   ├── DataManagementModal.tsx
 │   │   └── ...
@@ -132,26 +135,32 @@ Hasil build siap di-*deploy* pada direktori `dist/`.
 
 RKStride dilengkapi dengan suite pengujian komprehensif yang mencakup unit test, property-based testing (fast-check), pengujian integrasi komponen (RTL), dan audit aksesibilitas (axe-core).
 
-### Menjalankan Suite Vitest Lengkap (71 Test)
+### Menjalankan Suite Vitest Lengkap (80 Test)
 ```bash
 npm test
 ```
 Suite ini memverifikasi:
-- `src/lib/engine/__tests__/workload.test.ts` (26 unit test logika beban)
+- `src/lib/engine/__tests__/workload.test.ts` (33 unit test logika beban, ambang 1.4, audit jadwal)
 - `src/lib/engine/__tests__/workload.property.test.ts` (5 property-based test invariant batas numerik)
 - `src/lib/engine/__tests__/nutrition.test.ts` (9 unit test mesin nutrisi)
 - `src/lib/engine/__tests__/periodization.test.ts` (5 unit test periodisasi & taper)
 - `src/lib/engine/__tests__/doubleProgression.test.ts` (5 unit test progresi beban)
 - `src/lib/ai/__tests__/geminiCoach.test.ts` (7 test filter domain, red-flag medis & engine offline)
+- `src/hooks/__tests__/useWorkoutEngine.test.ts` (2 test persistensi flag override guardrail)
 - `src/components/__tests__/WorkoutLogger.test.tsx` (4 test interaksi form & katalog)
 - `src/components/__tests__/Dashboard.test.tsx` (6 test variasi status beban historis)
-- `src/test/a11y.test.tsx` (4 audit aksesibilitas WCAG AA axe-core)
+- `src/test/a11y.test.tsx` (4 audit aksesibilitas WCAG AA axe-core, termasuk kontras warna)
 
 ### Menjalankan Standalone Sports Science Engine CLI Suite (39 Test)
 ```bash
 npm run test:engine
 ```
 Suite deterministik berbasis CLI tanpa dependensi DOM untuk memverifikasi akurasi matematis seluruh formula fisiologis.
+
+### Dukungan Offline / PWA
+Build produksi (`npm run build`) menghasilkan ikon PWA (`public/pwa-*.png`,
+dibuat via `scripts/generate-pwa-icons.mjs`) dan service worker app-shell
+(`public/sw.js`, didaftarkan otomatis hanya pada mode produksi).
 
 ---
 

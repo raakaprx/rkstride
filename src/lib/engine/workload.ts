@@ -38,6 +38,7 @@ import {
   PHYSIOLOGICAL_DEFAULTS,
   INTERFERENCE_GUARDRAIL,
   READINESS_Z_WEIGHTS,
+  READINESS_PROVISIONAL_DAYS,
   HARD_SET_MIN_RPE,
 } from './constants';
 
@@ -697,7 +698,7 @@ export function calculateReadinessScore(
   history14to28Days?: ReadinessCheckIn[]
 ): ReadinessScoreResult {
   const history = (history14to28Days || []).filter((h) => h !== undefined);
-  const isProvisional = history.length < 7;
+  const isProvisional = history.length < READINESS_PROVISIONAL_DAYS;
 
   let baseScore = 100;
 

@@ -149,18 +149,17 @@ Impellizzeri et al. (2020) dan Lolli et al. (2019) mempublikasikan kritik tajam 
 #### Solusi RKStride:
 - **Perlindungan Cold-Start**: Sistem menolak menghasilkan rasio ACWR jika riwayat data $< 21$ hari, menandai status sebagai `"insufficient_data"` dan menampilkan persentase kematangan data ($N / 21 \times 100\%$).
 - **Bahasa Probabilistik Non-Deterministik**: UI tidak pernah mengklaim "mencegah cedera", melainkan "indikator risiko lonjakan beban kerja" dan "alat bantu keputusan".
-- **Dukungan Tiga Model**: Pengguna dapat memilih model *Coupled*, *Uncoupled*, atau *EWMA*.
+- **Dukungan Tiga Model**: Mesin menghitung model *Coupled* (Gabbett 2016), *Uncoupled* (Windt & Gabbett 2019), dan *EWMA* (Williams 2017). Pilihan model eksplisit di UI belum diekspos; seluruh tampilan memakai *Rolling Coupled* sebagai default.
 
 ### 2.4 Zona Toleransi Beban & Deteksi Lonjakan Mingguan
 
-Berdasarkan konsensus empiris Gabbett (2016) dan Blanch & Gabbett (2016):
+Berdasarkan konsensus empiris Gabbett (2016) dan Blanch & Gabbett (2016), dengan satu ambang guardrail 1.4 (AGENTS.md):
 
 | Rentang ACWR | Klasifikasi Status | Implikasi Fisiologis | Rekomendasi Sistem |
 | :--- | :--- | :--- | :--- |
-| $\text{ACWR} < 0.8$ | Under-training | Kapasitas kebugaran mengalami detraining atau pemulihan berlebih | Rekomendasi peningkatan beban bertahap |
-| $0.8 \le \text{ACWR} \le 1.3$ | Sweet Spot | Keseimbangan optimal stimulasi kebugaran dan kelelahan | Lanjutkan program latihan progresif |
-| $1.3 < \text{ACWR} \le 1.5$ | Warning Zone | Kelelahan mulai menumpuk melampaui adaptasi kronis | Pantau tidur dan kurangi volume aksesori |
-| $\text{ACWR} > 1.5$ | Danger Zone (Spike) | Lonjakan beban akut signifikan; risiko overload jaringan | Rekomendasi sesi Deload / Recovery (cut volume 20% - 40%) |
+| $\text{ACWR} < 0.8$ | Under-training | Kapasitas kebugaran mengalami detraining atau pemulihan berlebih | Rekomendasi peningkatan beban bertahap (+5% volume) |
+| $0.8 \le \text{ACWR} \le 1.4$ | Sweet Spot | Keseimbangan optimal stimulasi kebugaran dan kelelahan | Lanjutkan program latihan progresif |
+| $\text{ACWR} > 1.4$ | Danger Zone (Spike) | Lonjakan beban akut signifikan; risiko overload jaringan | Peringatan overtraining + sesi Deload / Recovery (cut volume 20% - 40%) |
 
 **Deteksi Lonjakan Beban Mingguan (*Weekly Spike Alert*):**
 Jika total beban 7 hari terkini ($W_0$) meningkat $> 15\%$ dibanding total beban 7 hari sebelumnya ($W_1$):

@@ -181,7 +181,6 @@ export const READINESS_Z_WEIGHTS = {
   SUBJECTIVE_DOMS_FATIGUE: 0.20, // Muscle soreness & systemic fatigue
 } as const;
 
-export const READINESS_MIN_BASELINE_DAYS = 14;
 export const READINESS_PROVISIONAL_DAYS = 7;
 
 // =============================================================================
