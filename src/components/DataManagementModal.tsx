@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   X,
   Database,
@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   FileText,
 } from 'lucide-react';
+import { Modal } from './ui/Modal';
 import {
   exportDatabaseToJson,
   exportWorkoutLogsToCsv,
@@ -29,6 +30,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
 }) => {
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
 
@@ -91,27 +93,13 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(9, 9, 11, 0.85)',
-        backdropFilter: 'blur(8px)',
-        padding: '1rem',
-      }}
-      onClick={onClose}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="600px" ariaLabel="Manajemen dan portabilitas data">
       <div
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-default)',
           borderTop: '3px solid var(--accent-neon)',
-          maxWidth: '600px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -119,7 +107,6 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           padding: '2rem',
           position: 'relative',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
@@ -192,11 +179,11 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             </p>
 
             {importResult.errorDetails && importResult.errorDetails.length > 0 && (
-              <div style={{ marginTop: '0.65rem', maxHeight: '140px', overflowY: 'auto' }}>
+              <div style={{ marginTop: '0.75rem', maxHeight: '140px', overflowY: 'auto' }}>
                 <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-danger)', marginBottom: '0.25rem' }}>
                   Rincian Validasi Skema (Zod):
                 </div>
-                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.74rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
                   {importResult.errorDetails.slice(0, 5).map((err, idx) => (
                     <li key={idx}>{err}</li>
                   ))}
@@ -316,7 +303,10 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
               Unggah file backup `.json` sebelumnya. Data divalidasi dengan Zod secara atomik untuk mencegah korupsi database.
             </p>
 
-            <label
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isProcessing}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -333,14 +323,16 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             >
               <Upload size={15} />
               <span>{isProcessing ? 'Memvalidasi...' : 'Pilih File Backup JSON'}</span>
-              <input
-                type="file"
-                accept=".json,application/json"
-                onChange={handleFileChange}
-                disabled={isProcessing}
-                style={{ display: 'none' }}
-              />
-            </label>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              onChange={handleFileChange}
+              disabled={isProcessing}
+              aria-label="Pilih file backup JSON"
+              style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}
+            />
           </div>
         </div>
 
@@ -359,6 +351,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           <strong>Kedaulatan Data:</strong> File backup JSON berisi salinan data biometrik Anda. Simpan file backup Anda di media penyimpanan yang aman.
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
+

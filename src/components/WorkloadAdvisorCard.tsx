@@ -88,7 +88,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
             <span
               style={{
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
                 fontWeight: 700,
@@ -99,7 +99,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
             </span>
             <span
               style={{
-                fontSize: '0.68rem',
+                fontSize: '0.75rem',
                 padding: '0.15rem 0.5rem',
                 borderRadius: 'var(--radius-full)',
                 fontWeight: 700,
@@ -179,7 +179,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Smartwatch Bio-Readiness
             </div>
             <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.2 }}>
@@ -198,7 +198,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               color: readinessScore >= 75 ? 'var(--color-success)' : readinessScore >= 50 ? 'var(--color-warning)' : 'var(--color-danger)',
               border: `1px solid ${readinessScore >= 75 ? 'rgba(16, 185, 129, 0.3)' : readinessScore >= 50 ? 'rgba(245, 158, 11, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`,
               fontWeight: 700,
-              fontSize: '0.72rem',
+              fontSize: '0.75rem',
               letterSpacing: '0.04em',
             }}
           >
@@ -211,7 +211,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
           gap: '1.25rem',
           marginBottom: '1.5rem',
         }}
@@ -227,7 +227,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ACWR Workload Ratio</span>
-            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Gabbett Athletic Model</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gabbett Athletic Model</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.4rem' }}>
@@ -299,7 +299,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                fontSize: '0.68rem',
+                fontSize: '0.75rem',
                 color: 'var(--text-muted)',
                 marginTop: '0.5rem',
               }}
@@ -406,7 +406,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           <div
             style={{
               marginTop: '0.85rem',
-              padding: '0.65rem',
+              padding: '0.75rem',
               borderRadius: 'var(--radius-sm)',
               background: 'var(--bg-surface)',
               fontSize: '0.78rem',
@@ -461,7 +461,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           {recommendation.volumeAdjustmentPercent !== 0 && (
             <span
               style={{
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 padding: '0.2rem 0.5rem',
                 borderRadius: 'var(--radius-sm)',
                 fontWeight: 700,
@@ -503,7 +503,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           <div
             style={{
               marginTop: '0.75rem',
-              padding: '0.65rem 0.85rem',
+              padding: '0.75rem 0.85rem',
               borderRadius: 'var(--radius-sm)',
               background: 'rgba(245, 158, 11, 0.08)',
               border: '1px solid rgba(245, 158, 11, 0.3)',
@@ -516,7 +516,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               {recommendation.workoutDetail.speedRunLocked && (
                 <span
                   style={{
-                    fontSize: '0.68rem',
+                    fontSize: '0.75rem',
                     fontWeight: 700,
                     padding: '0.15rem 0.5rem',
                     borderRadius: 'var(--radius-full)',
@@ -543,7 +543,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           <div
             style={{
               marginTop: '0.75rem',
-              padding: '0.65rem 0.85rem',
+              padding: '0.75rem 0.85rem',
               borderRadius: 'var(--radius-sm)',
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
@@ -561,7 +561,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           <div
             style={{
               marginTop: '0.75rem',
-              padding: '0.65rem 0.85rem',
+              padding: '0.75rem 0.85rem',
               borderRadius: 'var(--radius-sm)',
               background: 'rgba(245, 158, 11, 0.1)',
               border: '1px solid rgba(245, 158, 11, 0.3)',
@@ -583,7 +583,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           borderRadius: 'var(--radius-sm)',
           background: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid var(--border-subtle)',
-          fontSize: '0.74rem',
+          fontSize: '0.75rem',
           color: 'var(--text-muted)',
           lineHeight: 1.5,
         }}
@@ -593,3 +593,5 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
     </div>
   );
 };
+
+

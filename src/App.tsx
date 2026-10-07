@@ -23,6 +23,14 @@ import { RaceTargetConfig } from './types/productFeatures';
 export default function App() {
   const [activeTab, setActiveTab] = useState<'training' | 'trends' | 'nutrition' | 'schedule' | 'smartwatch'>('training');
 
+  const tabTitles: Record<typeof activeTab, string> = {
+    training: 'Latihan & Beban Kerja Hari Ini',
+    trends: 'Tren Beban Kerja ACWR',
+    nutrition: 'Nutrisi & Energi Atlet',
+    schedule: 'Jadwal Latihan Mingguan',
+    smartwatch: 'Smartwatch & Biometrik Harian',
+  };
+
   // Modals state
   const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
   const [isDataModalOpen, setIsDataModalOpen] = useState(false);
@@ -168,6 +176,9 @@ export default function App() {
           gap: '2rem',
         }}
       >
+        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+          {tabTitles[activeTab]}
+        </h1>
         {/* Tab 1: Menu Utama - Latihan & Evaluasi Beban */}
         {activeTab === 'training' && (
           <>

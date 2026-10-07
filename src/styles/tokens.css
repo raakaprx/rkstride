@@ -28,10 +28,10 @@
   --color-info: #38bdf8;
   --color-info-bg: rgba(56, 189, 248, 0.08);
 
-  /* Typography Colors */
+  /* Typography Colors (muted meets WCAG AA 4.5:1 on dark surfaces) */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-muted: #94a3b8;
   --text-inverse: #09090b;
 
   /* Borders & Dividers - Crisp & Subtle */
@@ -95,6 +95,12 @@
   --transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-normal: 240ms cubic-bezier(0.16, 1, 0.3, 1);
   --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Z-Index Scale (centralized stacking order) */
+  --z-chat: 50;
+  --z-modal: 100;
+  --z-toast: 200;
+  --z-tooltip: 300;
 }
 
 /* Spinner Animation */
@@ -126,6 +132,26 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.15;
   color: var(--text-primary);
   letter-spacing: -0.02em;
+}
+
+/* Visible keyboard focus indicator (WCAG 2.4.7). Never remove without replacement. */
+:focus-visible {
+  outline: 2px solid var(--accent-neon);
+  outline-offset: 2px;
+}
+
+/* Minimum touch target size (WCAG 2.5.8: 24px AA / 44px AAA).
+   44px guarantees comfortable touch use on mobile. */
+button {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent-neon);
 }
 
 /* Selection Color */

@@ -7,6 +7,7 @@ import {
   Database,
   Lock,
 } from 'lucide-react';
+import { Modal } from './ui/Modal';
 
 interface AboutDisclaimerModalProps {
   isOpen: boolean;
@@ -20,27 +21,13 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(9, 9, 11, 0.85)',
-        backdropFilter: 'blur(8px)',
-        padding: '1rem',
-      }}
-      onClick={onClose}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="680px" ariaLabel="Tentang RKStride dan batasan sains">
       <div
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-default)',
           borderTop: '3px solid var(--accent-neon)',
-          maxWidth: '680px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -48,7 +35,6 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
           padding: '2rem',
           position: 'relative',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
@@ -187,6 +173,6 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
           Saya Memahami Ketentuan Ini
         </button>
       </div>
-    </div>
+    </Modal>
   );
 };

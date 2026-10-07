@@ -75,11 +75,7 @@ describe('Accessibility (a11y) Automated Audits - axe-core', () => {
       />
     );
 
-    const results = await axe.run(container, {
-      rules: {
-        'color-contrast': { enabled: false },
-      },
-    });
+    const results = await axe.run(container);
 
     const criticalViolations = results.violations.filter(
       (v) => v.impact === 'critical' || v.impact === 'serious'
@@ -90,11 +86,7 @@ describe('Accessibility (a11y) Automated Audits - axe-core', () => {
   it('verifies TrendsDashboardCard has zero critical accessibility violations', async () => {
     const { container } = render(<TrendsDashboardCard history={[]} />);
 
-    const results = await axe.run(container, {
-      rules: {
-        'color-contrast': { enabled: false },
-      },
-    });
+    const results = await axe.run(container);
 
     const criticalViolations = results.violations.filter(
       (v) => v.impact === 'critical' || v.impact === 'serious'
@@ -111,11 +103,7 @@ describe('Accessibility (a11y) Automated Audits - axe-core', () => {
       />
     );
 
-    const results = await axe.run(container, {
-      rules: {
-        'color-contrast': { enabled: false },
-      },
-    });
+    const results = await axe.run(container);
 
     const criticalViolations = results.violations.filter(
       (v) => v.impact === 'critical' || v.impact === 'serious'
@@ -128,11 +116,7 @@ describe('Accessibility (a11y) Automated Audits - axe-core', () => {
       <PeriodizationTaperCard raceConfig={dummyRace} onEditRaceConfig={() => {}} />
     );
 
-    const results = await axe.run(container, {
-      rules: {
-        'color-contrast': { enabled: false },
-      },
-    });
+    const results = await axe.run(container);
 
     const criticalViolations = results.violations.filter(
       (v) => v.impact === 'critical' || v.impact === 'serious'

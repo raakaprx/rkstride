@@ -90,7 +90,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               </span>
               <span
                 style={{
-                  fontSize: '0.65rem',
+                  fontSize: '0.75rem',
                   padding: '0.15rem 0.45rem',
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--accent-neon-subtle)',
@@ -104,7 +104,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 Hybrid Engine
               </span>
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Push-Pull-Legs &amp; Running Workload Intelligence
             </div>
           </div>
@@ -383,3 +383,4 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
     </header>
   );
 };
+

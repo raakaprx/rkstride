@@ -98,9 +98,9 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             <TrendingUp size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
               Tren Beban Kerja &amp; Rasio ACWR (28 Hari)
-            </h3>
+            </h2>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Pemantauan beban akut (7 hari) terhadap beban kronis (28 hari) secara longitudinal
             </span>
@@ -108,7 +108,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
         </div>
 
         {/* Legend */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.72rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(204, 255, 0, 0.25)', border: '1px solid var(--accent-neon)' }} />
             <span style={{ color: 'var(--text-secondary)' }}>Sweet Spot (0.8 - 1.4)</span>
@@ -196,7 +196,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             strokeDasharray="4 4"
             strokeWidth="1"
           />
-          <text x={svgWidth - padding.right + 4} y={ySweetMin + 3} fill="var(--text-muted)" fontSize="9">
+          <text x={svgWidth - padding.right + 4} y={ySweetMin + 3} fill="var(--text-muted)" fontSize="12">
             0.8
           </text>
 
@@ -209,7 +209,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             strokeDasharray="4 4"
             strokeWidth="1"
           />
-          <text x={svgWidth - padding.right + 4} y={yDanger + 3} fill="#EF4444" fontSize="9">
+          <text x={svgWidth - padding.right + 4} y={yDanger + 3} fill="#EF4444" fontSize="12">
             1.4
           </text>
 
@@ -262,7 +262,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
               x={p.x}
               y={svgHeight - 10}
               fill="var(--text-muted)"
-              fontSize="9"
+              fontSize="12"
               textAnchor="middle"
             >
               {p.data.tanggal.slice(5)}
@@ -275,42 +275,42 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))',
           gap: '0.75rem',
         }}
       >
         <div style={{ background: 'var(--bg-surface)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Beban Akut Terkini (7 Hari)
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>
             {currentACWR.acuteLoad} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>pts/hari</span>
           </div>
-          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
             Kelelahan sistemik jangka pendek (fatigue)
           </div>
         </div>
 
         <div style={{ background: 'var(--bg-surface)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Beban Kronis Terkini (28 Hari)
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>
             {currentACWR.chronicLoad} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>pts/hari</span>
           </div>
-          <div style={{ fontSize: '0.68rem', color: 'var(--accent-neon)', marginTop: '0.2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--accent-neon)', marginTop: '0.2rem' }}>
             Tingkat kebugaran dasar struktural (fitness)
           </div>
         </div>
 
         <div style={{ background: 'var(--bg-surface)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Rasio ACWR Saat Ini
           </div>
           <div style={{ fontSize: '1.25rem', fontWeight: 900, color: currentACWR.status === 'sweet_spot' ? 'var(--accent-neon)' : currentACWR.status === 'warning' ? '#EAB308' : currentACWR.status === 'danger' ? '#EF4444' : '#60A5FA' }}>
             {currentACWR.ratio}
           </div>
-          <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', marginTop: '0.2rem', textTransform: 'capitalize' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', textTransform: 'capitalize' }}>
             Zona: {currentACWR.status.replace('_', ' ')}
           </div>
         </div>
@@ -320,3 +320,5 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
     </div>
   );
 };
+
+

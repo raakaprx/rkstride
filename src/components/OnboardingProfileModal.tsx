@@ -4,6 +4,7 @@ import { UserProfile } from '@/types/workout';
 import { RaceCategory } from '@/types/productFeatures';
 import { db } from '@/lib/db/database';
 import { estimateMaxHeartRate } from '@/lib/engine/workload';
+import { Modal } from './ui/Modal';
 
 interface OnboardingProfileModalProps {
   isOpen: boolean;
@@ -93,26 +94,12 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 55,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(9, 9, 11, 0.85)',
-        backdropFilter: 'blur(8px)',
-        padding: '1rem',
-      }}
-      onClick={onClose}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="560px" ariaLabel="Profil fisiologi atlet">
       <div
         style={{
           background: 'var(--bg-secondary)',
           border: '1px solid var(--border-default)',
           borderRadius: 'var(--radius-lg)',
-          maxWidth: '560px',
           width: '100%',
           maxHeight: '90vh',
           display: 'flex',
@@ -120,7 +107,6 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
           boxShadow: 'var(--shadow-elevation-3)',
           overflow: 'hidden',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div
@@ -132,7 +118,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div
               style={{
                 width: '32px',
@@ -151,7 +137,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
                 Profil Fisiologi Atlet
               </h2>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Parameter biometrik untuk kalibrasi zona Karvonen, TRIMP &amp; Nutrisi
               </span>
             </div>
@@ -179,9 +165,9 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-neon)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               1. Biometrik Fisik
             </span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(130px, 100%), 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Usia (Tahun)
                 </label>
                 <input
@@ -193,7 +179,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, age: Number(e.target.value) })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -205,7 +191,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Berat Badan (kg)
                 </label>
                 <input
@@ -218,7 +204,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, weightKg: Number(e.target.value) })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -230,7 +216,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Tinggi Badan (cm)
                 </label>
                 <input
@@ -242,7 +228,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, heightCm: Number(e.target.value) })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -254,7 +240,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Fisiologi / Gender
                 </label>
                 <select
@@ -262,7 +248,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, gender: e.target.value as 'male' | 'female' })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -283,9 +269,9 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-neon)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               2. Kalibrasi Denyut Jantung (HRR Karvonen)
             </span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Resting Heart Rate (RHR Baseline)
                 </label>
                 <input
@@ -297,7 +283,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, restingHrBaseline: Number(e.target.value) })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -306,13 +292,13 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     boxSizing: 'border-box',
                   }}
                 />
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   Detak saat bangun pagi saat istirahat tenang
                 </span>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Formula Max HR
                 </label>
                 <select
@@ -327,7 +313,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   }}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -340,7 +326,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   <option value="gellish">Gellish (207 - 0.7 x usia)</option>
                   <option value="custom">Input Hasil Tes Lab Manual</option>
                 </select>
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   Estimasi Max HR: <strong style={{ color: 'var(--accent-neon)' }}>{calculatedMaxHr} bpm</strong>
                 </span>
               </div>
@@ -352,9 +338,9 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
             <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--accent-neon)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               3. Target Kompetisi &amp; Periodisasi Tapering
             </span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))', gap: '0.75rem', marginTop: '0.5rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Nama Event Lomba
                 </label>
                 <input
@@ -364,7 +350,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, targetRaceName: e.target.value })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -376,7 +362,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Kategori Jarak
                 </label>
                 <select
@@ -384,7 +370,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, targetRaceCategory: e.target.value as RaceCategory })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -403,7 +389,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               </div>
 
               <div style={{ gridColumn: '1 / -1' }}>
-                <label style={{ display: 'block', fontSize: '0.72rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                   Tanggal Hari Lomba
                 </label>
                 <input
@@ -412,7 +398,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   onChange={(e) => setProfile({ ...profile, targetRaceDate: e.target.value })}
                   style={{
                     width: '100%',
-                    padding: '0.5rem 0.65rem',
+                    padding: '0.5rem 0.75rem',
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
@@ -421,7 +407,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     boxSizing: 'border-box',
                   }}
                 />
-                <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   Aplikasi akan otomatis mengaktifkan modul tapering 2-3 pekan sebelum hari-H.
                 </span>
               </div>
@@ -465,6 +451,8 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
+    </Modal>
   );
 };
+
+

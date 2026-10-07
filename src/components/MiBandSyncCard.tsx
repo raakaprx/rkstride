@@ -139,13 +139,13 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
           }}
         >
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Perangkat Terhubung
             </div>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#FFFFFF' }}>
               {miBandState.deviceName}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--color-success)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-success)' }}>
               {miBandState.lastSyncTime}
             </div>
           </div>
@@ -234,7 +234,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
               gap: '1.25rem',
               marginBottom: '1.5rem',
             }}
@@ -256,7 +256,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 onChange={(e) => setLocalSleep(parseFloat(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--accent-neon)', cursor: 'pointer' }}
               />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Target optimal: 7.5 – 8.5 jam pemulihan sistem saraf.
               </div>
             </div>
@@ -278,7 +278,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 onChange={(e) => setLocalRhr(parseInt(e.target.value, 10))}
                 style={{ width: '100%', accentColor: '#ef4444', cursor: 'pointer' }}
               />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Baseline atlet: ~50-54 bpm. Lonjakan &gt; 5 bpm menandakan stres/kelelahan.
               </div>
             </div>
@@ -306,7 +306,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 }}
                 style={{ width: '100%', accentColor: 'var(--color-warning)', cursor: 'pointer' }}
               />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Jika &ge; 3/5, sistem otomatis mengunci lari cepat untuk melindungi lutut.
               </div>
             </div>
@@ -404,7 +404,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '0.65rem 1.25rem',
+                padding: '0.75rem 1.25rem',
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--accent-neon)',
                 color: '#0A0A0A',
@@ -517,3 +517,5 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
     </div>
   );
 };
+
+

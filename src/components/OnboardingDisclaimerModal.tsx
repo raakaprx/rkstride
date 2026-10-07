@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ShieldAlert, CheckCircle, ExternalLink } from 'lucide-react';
+import { ShieldAlert, CheckCircle, Info } from 'lucide-react';
+import { Modal } from './ui/Modal';
 
 interface OnboardingDisclaimerModalProps {
   isOpen: boolean;
@@ -17,26 +18,13 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 60,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(9, 9, 11, 0.92)',
-        backdropFilter: 'blur(12px)',
-        padding: '1.25rem',
-      }}
-    >
+    <Modal isOpen={isOpen} onClose={onOpenAboutDetails} maxWidth="540px" ariaLabel="Persetujuan awal RKStride">
       <div
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-default)',
           borderTop: '3px solid var(--accent-neon)',
-          maxWidth: '540px',
           width: '100%',
           boxShadow: 'var(--shadow-elevation-3)',
           padding: '2rem',
@@ -143,7 +131,7 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
           }}
         >
           <span>Baca penjelasan ilmiah lengkap &amp; kritik model ACWR</span>
-          <ExternalLink size={14} />
+          <Info size={14} />
         </button>
 
         {/* Checkbox agreement */}
@@ -151,7 +139,7 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
           style={{
             display: 'flex',
             alignItems: 'flex-start',
-            gap: '0.65rem',
+            gap: '0.75rem',
             cursor: 'pointer',
             marginBottom: '1.5rem',
             fontSize: '0.82rem',
@@ -194,7 +182,11 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
           <CheckCircle size={18} />
           <span>Mulai Menggunakan RKStride</span>
         </button>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.75rem', marginBottom: 0, textAlign: 'center' }}>
+          Menutup jendela ini akan membuka penjelasan ilmiah lengkap.
+        </p>
       </div>
-    </div>
+    </Modal>
   );
 };
+

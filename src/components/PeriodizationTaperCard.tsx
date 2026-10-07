@@ -61,7 +61,7 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
               </h3>
               <span
                 style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.75rem',
                   padding: '0.15rem 0.45rem',
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--accent-neon-subtle)',
@@ -157,7 +157,7 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
         </p>
 
         {/* Phase Breakdown Guidelines */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginTop: '0.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))', gap: '0.75rem', marginTop: '0.25rem' }}>
           <div style={{ background: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
             <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-neon)', display: 'block', marginBottom: '0.2rem' }}>
               Panduan Kardio &amp; Lari
@@ -180,3 +180,5 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
     </div>
   );
 };
+
+

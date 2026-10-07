@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { Modal } from './ui/Modal';
 
 interface GuardrailOverrideModalProps {
   isOpen: boolean;
@@ -23,30 +24,16 @@ export const GuardrailOverrideModal: React.FC<GuardrailOverrideModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 60,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(9, 9, 11, 0.85)',
-        padding: '1rem',
-      }}
-      onClick={onCancel}
-    >
+    <Modal isOpen={isOpen} onClose={onCancel} maxWidth="480px" ariaLabel="Konfirmasi mandiri override guardrail">
       <div
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid rgba(245, 158, 11, 0.4)',
           borderTop: '3px solid var(--color-warning)',
-          maxWidth: '480px',
           width: '100%',
           padding: '1.5rem',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
           <AlertTriangle size={20} style={{ color: 'var(--color-warning)' }} />
@@ -117,6 +104,6 @@ export const GuardrailOverrideModal: React.FC<GuardrailOverrideModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };

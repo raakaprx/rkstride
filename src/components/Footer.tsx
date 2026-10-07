@@ -43,7 +43,7 @@ export const Footer: React.FC = () => {
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <ShieldCheck size={16} style={{ color: 'var(--color-success)' }} />
             <span>ACWR Workload Risk Indicator</span>

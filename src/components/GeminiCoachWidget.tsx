@@ -220,7 +220,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>
               rkbot
             </div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               Pelatih Atletik Hibrida
             </div>
           </div>
@@ -290,7 +290,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                   </span>
                   <span
                     style={{
-                      fontSize: '0.62rem',
+                      fontSize: '0.75rem',
                       padding: '0.1rem 0.45rem',
                       borderRadius: 'var(--radius-full)',
                       background: 'rgba(204, 255, 0, 0.12)',
@@ -305,7 +305,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                     Online
                   </span>
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   ACWR: <strong style={{ color: '#FFF' }}>{athleteContext.acwrRatio}</strong> &bull; Readiness: <strong style={{ color: '#FFF' }}>{athleteContext.readinessScore}</strong>
                 </div>
               </div>
@@ -384,7 +384,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                   >
                     {renderFormattedMessage(msg.text)}
                   </div>
-                  <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginTop: '0.2rem', padding: '0 0.2rem' }}>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', padding: '0 0.2rem' }}>
                     {msg.timestamp}
                   </span>
                 </div>
@@ -419,8 +419,8 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 onClick={() => handleSendMessage(p)}
                 disabled={isLoading}
                 style={{
-                  fontSize: '0.72rem',
-                  padding: '0.3rem 0.65rem',
+                  fontSize: '0.75rem',
+                  padding: '0.3rem 0.75rem',
                   borderRadius: 'var(--radius-full)',
                   background: 'var(--bg-secondary)',
                   border: '1px solid var(--border-default)',
@@ -470,8 +470,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 color: '#FFFFFF',
                 padding: '0.6rem 0.85rem',
                 fontSize: '0.85rem',
-                outline: 'none',
-              }}
+                              }}
             />
             <button
               onClick={() => handleSendMessage()}
@@ -499,3 +498,5 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
     </>
   );
 };
+
+

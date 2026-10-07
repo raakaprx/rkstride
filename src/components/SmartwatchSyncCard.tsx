@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Watch,
   Bluetooth,
@@ -32,6 +32,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
   const [activeSyncTab, setActiveSyncTab] = useState<'quick' | 'bluetooth' | 'file'>('quick');
   const [connecting, setConnecting] = useState(false);
   const [btStatus, setBtStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form check-in state (slider defaults are input starting points, not measurements)
   const [localSleep, setLocalSleep] = useState(readiness.sleepHours);
@@ -135,17 +136,18 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             padding: '0.6rem 1rem',
             display: 'flex',
             alignItems: 'center',
+            flexWrap: 'wrap',
             gap: '1.25rem',
           }}
         >
           <div>
-            <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Connected Device
             </div>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#FFFFFF' }}>
               {smartwatchState.connected ? smartwatchState.deviceName : 'Belum terhubung'}
             </div>
-            <div style={{ fontSize: '0.72rem', color: smartwatchState.connected ? 'var(--color-success)' : 'var(--text-muted)' }}>
+            <div style={{ fontSize: '0.75rem', color: smartwatchState.connected ? 'var(--color-success)' : 'var(--text-muted)' }}>
               {smartwatchState.connected ? smartwatchState.lastSyncTime : 'Hubungkan perangkat atau isi check-in pagi'}
             </div>
           </div>
@@ -251,7 +253,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
               gap: '1.25rem',
               marginBottom: '1.5rem',
             }}
@@ -273,7 +275,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 onChange={(e) => setLocalSleep(parseFloat(e.target.value))}
                 style={{ width: '100%', accentColor: 'var(--accent-neon)', cursor: 'pointer' }}
               />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Optimal target: 7.5 – 8.5 hours for autonomic nervous system restoration.
               </div>
             </div>
@@ -295,7 +297,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 onChange={(e) => setLocalRhr(parseInt(e.target.value, 10))}
                 style={{ width: '100%', accentColor: '#ef4444', cursor: 'pointer' }}
               />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Athletic baseline: ~50-54 bpm. A spike &gt; 5 bpm signals incomplete recovery.
               </div>
             </div>
@@ -323,7 +325,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 }}
                 style={{ width: '100%', accentColor: 'var(--color-warning)', cursor: 'pointer' }}
               />
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 If &ge; 3/5, high-intensity running is locked to safeguard knee ligaments.
               </div>
             </div>
@@ -421,7 +423,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                padding: '0.65rem 1.25rem',
+                padding: '0.75rem 1.25rem',
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--accent-neon)',
                 color: '#09090b',
@@ -508,7 +510,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             Ekspor file aktivitas dari aplikasi pendamping jam Anda lalu unggah di sini.
           </p>
 
-          <label
+          <div
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -518,23 +520,44 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               borderRadius: 'var(--radius-md)',
               padding: '2rem',
               background: 'var(--bg-surface)',
-              cursor: 'pointer',
-              transition: 'var(--transition-fast)',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--accent-neon)')}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
           >
             <UploadCloud size={36} style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }} />
             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFFFFF' }}>
-              Drop FIT / GPX / TCX / JSON / CSV File Here or Browse
+              Unggah File FIT / GPX / TCX / JSON / CSV
             </span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem', marginBottom: '1rem' }}>
               Format ekspor standar aplikasi pendamping jam
             </span>
-            <input type="file" accept=".json,.csv,.fit,.gpx,.tcx" onChange={handleFileUpload} style={{ display: 'none' }} />
-          </label>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                padding: '0.6rem 1.25rem',
+                borderRadius: 'var(--radius-sm)',
+                background: 'var(--accent-neon-subtle)',
+                border: '1px solid rgba(204, 255, 0, 0.25)',
+                color: 'var(--accent-neon)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              Pilih file latihan
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,.csv,.fit,.gpx,.tcx"
+              onChange={handleFileUpload}
+              aria-label="Pilih file latihan smartwatch"
+              style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}
+            />
+          </div>
         </div>
       )}
     </div>
   );
 };
+
+

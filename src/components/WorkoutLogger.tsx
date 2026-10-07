@@ -355,7 +355,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <span
               style={{
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
                 color: 'var(--accent-neon)',
                 textTransform: 'uppercase',
@@ -371,7 +371,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                 border: '1px solid var(--border-default)',
                 borderRadius: 'var(--radius-sm)',
                 color: 'var(--text-secondary)',
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 padding: '0.2rem 0.5rem',
                 cursor: 'pointer',
                 display: 'flex',
@@ -454,7 +454,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))',
               gap: '1rem',
             }}
           >
@@ -592,8 +592,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                   border: 'none',
                   color: '#FFFFFF',
                   fontSize: '0.85rem',
-                  outline: 'none',
-                }}
+                                  }}
               />
               {searchQuery && (
                 <button
@@ -615,7 +614,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(240px, 100%), 1fr))',
                 gap: '1rem',
                 alignItems: 'flex-end',
               }}
@@ -678,8 +677,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       padding: '0.55rem 0.75rem',
                       fontSize: '0.85rem',
                       fontWeight: 600,
-                      outline: 'none',
-                      cursor: 'pointer',
+                                            cursor: 'pointer',
                     }}
                   >
                     <option value="">-- Choose Exercise from Catalog --</option>
@@ -716,7 +714,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 
             {/* Exercise Details Card */}
             {selectedExerciseId && (
-              <div style={{ marginTop: '0.85rem', padding: '0.65rem 0.85rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', fontSize: '0.78rem', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ marginTop: '0.85rem', padding: '0.75rem 0.85rem', borderRadius: 'var(--radius-sm)', background: 'var(--bg-surface)', fontSize: '0.78rem', color: 'var(--text-secondary)', border: '1px solid var(--border-subtle)' }}>
                 {(() => {
                   const ex = EXERCISE_CATALOG.find((e) => e.id === selectedExerciseId);
                   if (!ex) return null;
@@ -773,7 +771,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                         {exercise.namaGerakan}
                       </h4>
                       {isLegExercise && lastLegsHoursAgo < 48 && (
-                        <span style={{ fontSize: '0.68rem', padding: '0.15rem 0.45rem', borderRadius: '4px', background: 'var(--color-warning-bg)', color: 'var(--color-warning)', fontWeight: 600 }}>
+                        <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.45rem', borderRadius: '4px', background: 'var(--color-warning-bg)', color: 'var(--color-warning)', fontWeight: 600 }}>
                           Leg Day &lt; 48h Caution
                         </span>
                       )}
@@ -837,8 +835,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                     color: '#FFFFFF',
                                     padding: '0.35rem 0.5rem',
                                     fontSize: '0.85rem',
-                                    outline: 'none',
-                                  }}
+                                                                      }}
                                 />
                               </td>
                               <td style={{ padding: '0.5rem' }}>
@@ -855,8 +852,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                     color: '#FFFFFF',
                                     padding: '0.35rem 0.5rem',
                                     fontSize: '0.85rem',
-                                    outline: 'none',
-                                  }}
+                                                                      }}
                                 />
                               </td>
                               <td style={{ padding: '0.5rem' }}>
@@ -870,8 +866,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                     color: '#FFFFFF',
                                     padding: '0.35rem 0.5rem',
                                     fontSize: '0.85rem',
-                                    outline: 'none',
-                                    cursor: 'pointer',
+                                                                        cursor: 'pointer',
                                   }}
                                 >
                                   <option value={6}>6 (Warm-up / 4 RIR)</option>
@@ -946,7 +941,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           color: 'var(--text-secondary)',
                           fontSize: '0.78rem',
                           fontWeight: 600,
-                          padding: '0.35rem 0.65rem',
+                          padding: '0.35rem 0.75rem',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
@@ -961,7 +956,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       </button>
                     </div>
 
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       Double Progression (8-10 reps @ RPE &le; 8)
                     </span>
                   </div>
@@ -973,7 +968,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       <div
                         style={{
                           marginTop: '0.75rem',
-                          padding: '0.65rem 0.85rem',
+                          padding: '0.75rem 0.85rem',
                           borderRadius: 'var(--radius-sm)',
                           background: prog.shouldIncreaseWeight ? 'rgba(204, 255, 0, 0.08)' : 'var(--bg-surface)',
                           border: prog.shouldIncreaseWeight ? '1px solid rgba(204, 255, 0, 0.3)' : '1px solid var(--border-subtle)',
@@ -990,7 +985,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                             {prog.message}
                           </span>
                         </div>
-                        <span style={{ fontSize: '0.72rem', color: prog.shouldIncreaseWeight ? 'var(--accent-neon)' : 'var(--text-muted)', fontWeight: 700 }}>
+                        <span style={{ fontSize: '0.75rem', color: prog.shouldIncreaseWeight ? 'var(--accent-neon)' : 'var(--text-muted)', fontWeight: 700 }}>
                           {prog.nextSessionGoal}
                         </span>
                       </div>
@@ -1068,7 +1063,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                   marginBottom: '1.25rem',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <Zap size={14} style={{ color: '#38bdf8' }} /> Interval Structure ({runningSession.blocks.length} segments &bull; {runningSession.durasiMenit} min total):
                   </div>
@@ -1141,7 +1136,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           display: 'flex',
                           alignItems: 'center',
                           gap: '0.35rem',
-                          fontSize: '0.72rem',
+                          fontSize: '0.75rem',
                           padding: '0.25rem 0.55rem',
                           borderRadius: 'var(--radius-sm)',
                           background: 'var(--bg-secondary)',
@@ -1171,7 +1166,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(200px, 100%), 1fr))',
                 gap: '1rem',
                 marginBottom: '1rem',
               }}
@@ -1196,8 +1191,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 600,
-                    outline: 'none',
-                  }}
+                                      }}
                 />
               </div>
 
@@ -1220,8 +1214,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 600,
-                    outline: 'none',
-                  }}
+                                      }}
                 />
               </div>
 
@@ -1285,8 +1278,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 600,
-                    outline: 'none',
-                  }}
+                                      }}
                 />
               </div>
             </div>
@@ -1406,7 +1398,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
         {/* Load Score & Projected ACWR */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
           <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Planned Session Load</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Planned Session Load</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF' }}>
               {projectedImpact.draftLoad} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>pts</span>
             </div>
@@ -1415,7 +1407,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           <div style={{ width: '1px', height: '35px', background: 'var(--border-subtle)' }} />
 
           <div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Projected ACWR Post-Workout</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Projected ACWR Post-Workout</div>
             <div
               style={{
                 fontSize: '1.4rem',
@@ -1430,7 +1422,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           <div style={{ width: '1px', height: '35px', background: 'var(--border-subtle)' }} />
 
           <div style={{ flex: 1, minWidth: '220px' }}>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Engine Diagnostic</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Engine Diagnostic</div>
             <div style={{ fontSize: '0.82rem', color: '#FFFFFF', lineHeight: 1.4 }}>
               {projectedImpact.advice}
             </div>
@@ -1445,7 +1437,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               alignItems: 'center',
               gap: '0.5rem',
               background: 'var(--bg-surface)',
-              padding: '0.65rem 0.85rem',
+              padding: '0.75rem 0.85rem',
               borderRadius: 'var(--radius-sm)',
               borderLeft: '3px solid var(--color-warning)',
               fontSize: '0.78rem',
@@ -1478,7 +1470,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
       </div>
 
       {/* Save & Confirm Action */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         {successSaved && (
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-success)', fontSize: '0.85rem', fontWeight: 600 }}>
             <CheckCircle size={16} /> Workout Successfully Logged &amp; ACWR Updated!
@@ -1534,7 +1526,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             background: 'var(--bg-secondary)',
             border: '2px solid var(--accent-neon)',
             borderRadius: 'var(--radius-full)',
-            padding: '0.65rem 1.25rem',
+            padding: '0.75rem 1.25rem',
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
@@ -1557,7 +1549,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
                 color: '#FFFFFF',
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
                 cursor: 'pointer',
               }}
@@ -1567,12 +1559,12 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             <button
               onClick={() => setRestSecondsRemaining(null)}
               style={{
-                padding: '0.25rem 0.65rem',
+                padding: '0.25rem 0.75rem',
                 borderRadius: 'var(--radius-full)',
                 background: 'rgba(239, 68, 68, 0.2)',
                 border: '1px solid #EF4444',
                 color: '#EF4444',
-                fontSize: '0.72rem',
+                fontSize: '0.75rem',
                 fontWeight: 700,
                 cursor: 'pointer',
               }}
@@ -1585,3 +1577,6 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
     </div>
   );
 };
+
+
+

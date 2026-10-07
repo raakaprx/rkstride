@@ -9,6 +9,7 @@ import {
   Bot,
 } from 'lucide-react';
 import { ACWRResult } from '@/types/workout';
+import { Modal } from './ui/Modal';
 
 export interface PostWorkoutDebriefData {
   sessionLoad: number;
@@ -42,27 +43,13 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
   const waterMl = debriefData.totalDurationMin > 45 ? '650–850 ml' : '500–650 ml';
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(9, 9, 11, 0.85)',
-        backdropFilter: 'blur(8px)',
-        padding: '1rem',
-      }}
-      onClick={onClose}
-    >
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="560px" ariaLabel="Ringkasan sesi latihan">
       <div
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border-default)',
           borderTop: '3px solid var(--accent-neon)',
-          maxWidth: '560px',
           width: '100%',
           maxHeight: '90vh',
           overflowY: 'auto',
@@ -70,7 +57,6 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
           padding: '1.75rem',
           position: 'relative',
         }}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
@@ -128,7 +114,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(140px, 100%), 1fr))',
             gap: '0.75rem',
             marginBottom: '1.5rem',
           }}
@@ -152,7 +138,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             >
               {debriefData.projectedACWR}
             </div>
-            <div style={{ fontSize: '0.68rem', color: isSpike ? 'var(--color-danger)' : 'var(--color-success)' }}>
+            <div style={{ fontSize: '0.75rem', color: isSpike ? 'var(--color-danger)' : 'var(--color-success)' }}>
               {isSpike ? 'High Load Spike' : isSweetSpot ? 'Sweet Spot (Optimal)' : 'Light Stimulus'}
             </div>
           </div>
@@ -162,7 +148,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', marginTop: '0.2rem' }}>
               {debriefData.hasLegWorkout ? '48h Leg Window' : 'Upper Recovery'}
             </div>
-            <div style={{ fontSize: '0.68rem', color: debriefData.hasLegWorkout ? 'var(--color-warning)' : 'var(--color-success)' }}>
+            <div style={{ fontSize: '0.75rem', color: debriefData.hasLegWorkout ? 'var(--color-warning)' : 'var(--color-success)' }}>
               {debriefData.hasLegWorkout ? 'Speed run locked' : 'Lower body fresh'}
             </div>
           </div>
@@ -174,7 +160,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             <Sparkles size={14} /> Immediate Post-Workout Protocol
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* Protein & Hydration */}
             <div
               style={{
@@ -300,6 +286,8 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   );
 };
+
+

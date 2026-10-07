@@ -151,7 +151,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 100%), 1fr))',
           gap: '1rem',
           marginBottom: '1.5rem',
         }}
@@ -162,9 +162,12 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
           const hasClash = scheduleConflicts.some((c) => c.dayIndex === day.dayIndex);
 
           return (
-            <div
+            <button
               key={day.id}
+              type="button"
               onClick={() => setEditingDayIndex(day.dayIndex)}
+              aria-pressed={isSelected}
+              aria-label={`${day.dayName}: ${day.title}`}
               style={{
                 background: isSelected ? 'var(--bg-surface-elevated)' : 'var(--bg-secondary)',
                 borderRadius: 'var(--radius-md)',
@@ -178,6 +181,9 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                 cursor: 'pointer',
                 transition: 'var(--transition-fast)',
                 position: 'relative',
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                width: '100%',
               }}
               onMouseEnter={(e) => {
                 if (!isSelected) e.currentTarget.style.borderColor = 'var(--border-default)';
@@ -187,7 +193,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
               }}
             >
               {/* Day Name & Icon */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.65rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                 <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#FFFFFF' }}>{day.dayName}</span>
                 <span style={{ color: catInfo.color }}>
                   {catInfo.icon === 'strength' ? (
@@ -203,13 +209,13 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
               {/* Category Badge */}
               <div
                 style={{
-                  fontSize: '0.68rem',
+                  fontSize: '0.75rem',
                   fontWeight: 700,
                   padding: '0.2rem 0.45rem',
                   borderRadius: 'var(--radius-sm)',
                   background: catInfo.bg,
                   color: catInfo.color,
-                  marginBottom: '0.65rem',
+                  marginBottom: '0.75rem',
                   display: 'inline-block',
                 }}
               >
@@ -231,11 +237,11 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
               </div>
 
               {/* Duration */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 <Clock size={12} />
                 <span>{day.isRestDay ? 'Rest Day' : `${day.targetDurationMinutes} Minutes`}</span>
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -274,7 +280,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
           <div
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(220px, 100%), 1fr))',
               gap: '1rem',
             }}
           >
@@ -303,8 +309,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                   padding: '0.55rem 0.75rem',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  outline: 'none',
-                  cursor: 'pointer',
+                                    cursor: 'pointer',
                 }}
               >
                 <option value="push">Upper Push (Chest, Shoulders, Triceps)</option>
@@ -336,8 +341,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                   padding: '0.55rem 0.75rem',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  outline: 'none',
-                }}
+                                  }}
               />
             </div>
 
@@ -365,8 +369,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                   padding: '0.55rem 0.75rem',
                   fontSize: '0.85rem',
                   fontWeight: 600,
-                  outline: 'none',
-                }}
+                                  }}
               />
             </div>
           </div>
@@ -375,3 +378,6 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
     </div>
   );
 };
+
+
+
