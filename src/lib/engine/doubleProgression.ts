@@ -75,7 +75,7 @@ export function evaluateDoubleProgression(
       suggestedWeightKg,
       suggestedRepRange: `${targetMinReps}-${targetMaxReps}`,
       isTargetAchieved: true,
-      message: `🎯 TARGET TERCAPAI! Seluruh set memenuhi batas atas ${targetMaxReps} reps dengan cadangan tenaga aman (RPE ${Math.round(avgRpe * 10) / 10}).`,
+      message: `TARGET TERCAPAI: Seluruh set memenuhi batas atas ${targetMaxReps} reps dengan cadangan tenaga aman (RPE ${Math.round(avgRpe * 10) / 10}).`,
       nextSessionGoal: `Tingkatkan beban menjadi ${suggestedWeightKg} kg (+${incrementKg} kg) dan mulai kembali dari ${targetMinReps} repetisi.`,
     };
   }

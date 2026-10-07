@@ -22,18 +22,18 @@ const CATEGORY_DETAILS: Record<
   WorkoutCategory,
   { label: string; color: string; bg: string; icon: 'strength' | 'run' | 'rest' }
 > = {
-  push: { label: 'Push (Chest & Shoulders)', color: '#ccff00', bg: 'rgba(204, 255, 0, 0.1)', icon: 'strength' },
-  pull: { label: 'Pull (Back & Biceps)', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', icon: 'strength' },
-  legs: { label: 'Legs (Squats & Posterior)', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', icon: 'strength' },
-  arms: { label: 'Arms (Biceps & Triceps)', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.1)', icon: 'strength' },
-  core: { label: 'Core & Stabilizers', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', icon: 'strength' },
-  run_recovery: { label: 'Recovery Run (Zone 1)', color: '#9ca3af', bg: 'rgba(156, 163, 175, 0.1)', icon: 'run' },
-  run_easy: { label: 'Easy Run (Zone 2 Base)', color: '#38bdf8', bg: 'rgba(56, 189, 248, 0.1)', icon: 'run' },
-  run_tempo: { label: 'Tempo Run (Threshold)', color: '#a855f7', bg: 'rgba(168, 85, 247, 0.1)', icon: 'run' },
-  run_long: { label: 'Long Run (Endurance)', color: '#ec4899', bg: 'rgba(236, 72, 153, 0.1)', icon: 'run' },
-  run_intervals: { label: 'VO2 Max Intervals', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', icon: 'run' },
-  norwegian_4x4: { label: 'Norwegian 4x4 (VO2 Max)', color: '#c084fc', bg: 'rgba(192, 132, 252, 0.1)', icon: 'run' },
-  mobility_recovery: { label: 'Rest / Active Mobility', color: '#9ca3af', bg: 'rgba(156, 163, 175, 0.1)', icon: 'rest' },
+  push: { label: 'Push (Chest & Shoulders)', color: 'var(--accent-neon)', bg: 'rgba(204, 255, 0, 0.1)', icon: 'strength' },
+  pull: { label: 'Pull (Back & Biceps)', color: 'var(--color-success)', bg: 'rgba(16, 185, 129, 0.1)', icon: 'strength' },
+  legs: { label: 'Legs (Squats & Posterior)', color: 'var(--color-warning)', bg: 'rgba(245, 158, 11, 0.1)', icon: 'strength' },
+  arms: { label: 'Arms (Biceps & Triceps)', color: 'var(--color-info)', bg: 'rgba(56, 189, 248, 0.1)', icon: 'strength' },
+  core: { label: 'Core & Stabilizers', color: 'var(--color-success)', bg: 'rgba(16, 185, 129, 0.1)', icon: 'strength' },
+  run_recovery: { label: 'Recovery Run (Zone 1)', color: 'var(--text-muted)', bg: 'rgba(156, 163, 175, 0.1)', icon: 'run' },
+  run_easy: { label: 'Easy Run (Zone 2 Base)', color: 'var(--color-info)', bg: 'rgba(56, 189, 248, 0.1)', icon: 'run' },
+  run_tempo: { label: 'Tempo Run (Threshold)', color: 'var(--chart-violet)', bg: 'rgba(168, 85, 247, 0.1)', icon: 'run' },
+  run_long: { label: 'Long Run (Endurance)', color: 'var(--chart-pink)', bg: 'rgba(236, 72, 153, 0.1)', icon: 'run' },
+  run_intervals: { label: 'VO2 Max Intervals', color: 'var(--color-danger)', bg: 'rgba(239, 68, 68, 0.1)', icon: 'run' },
+  norwegian_4x4: { label: 'Norwegian 4x4 (VO2 Max)', color: 'var(--chart-violet-light)', bg: 'rgba(192, 132, 252, 0.1)', icon: 'run' },
+  mobility_recovery: { label: 'Rest / Active Mobility', color: 'var(--text-muted)', bg: 'rgba(156, 163, 175, 0.1)', icon: 'rest' },
 };
 
 export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
@@ -81,7 +81,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
           >
             Custom Schedule Builder
           </span>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#FFFFFF', marginTop: '0.2rem' }}>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
             Weekly Training Schedule &amp; Hybrid Split
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
@@ -108,7 +108,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.borderColor = 'var(--accent-neon)';
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.color = 'var(--text-primary)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = 'var(--border-subtle)';
@@ -139,8 +139,8 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
           </div>
           <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
             {scheduleConflicts.map((c, i) => (
-              <div key={i} style={{ fontSize: '0.8rem', color: '#FFFFFF', lineHeight: 1.4 }}>
-                <strong>• {c.message}</strong> — <span style={{ color: 'var(--text-secondary)' }}>{c.suggestion}</span>
+              <div key={i} style={{ fontSize: '0.8rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
+                <strong>• {c.message}:</strong> <span style={{ color: 'var(--text-secondary)' }}>{c.suggestion}</span>
               </div>
             ))}
           </div>
@@ -194,7 +194,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
             >
               {/* Day Name & Icon */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#FFFFFF' }}>{day.dayName}</span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 800, color: 'var(--text-primary)' }}>{day.dayName}</span>
                 <span style={{ color: catInfo.color }}>
                   {catInfo.icon === 'strength' ? (
                     <Dumbbell size={15} />
@@ -227,7 +227,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                 style={{
                   fontSize: '0.85rem',
                   fontWeight: 700,
-                  color: day.isRestDay ? 'var(--text-muted)' : '#FFFFFF',
+                  color: day.isRestDay ? 'var(--text-muted)' : 'var(--text-primary)',
                   marginBottom: '0.5rem',
                   minHeight: '2.4rem',
                   lineHeight: 1.3,
@@ -259,7 +259,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Edit2 size={16} style={{ color: 'var(--accent-neon)' }} />
-              <h4 style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF' }}>
+              <h4 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 Edit Schedule for {editingDay.dayName}
               </h4>
             </div>
@@ -305,7 +305,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border-default)',
                   borderRadius: 'var(--radius-sm)',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                   padding: '0.55rem 0.75rem',
                   fontSize: '0.85rem',
                   fontWeight: 600,
@@ -337,7 +337,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border-default)',
                   borderRadius: 'var(--radius-sm)',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                   padding: '0.55rem 0.75rem',
                   fontSize: '0.85rem',
                   fontWeight: 600,
@@ -365,7 +365,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                   background: 'var(--bg-surface)',
                   border: '1px solid var(--border-default)',
                   borderRadius: 'var(--radius-sm)',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                   padding: '0.55rem 0.75rem',
                   fontSize: '0.85rem',
                   fontWeight: 600,
@@ -378,6 +378,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
     </div>
   );
 };
+
 
 
 

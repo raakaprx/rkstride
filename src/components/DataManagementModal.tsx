@@ -144,7 +144,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             <Database size={24} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               Manajemen &amp; Portabilitas Data
             </h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -215,7 +215,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
                 <FileText size={18} style={{ color: 'var(--accent-neon)' }} />
-                <strong style={{ fontSize: '0.95rem', color: '#FFFFFF' }}>Cadangan Lengkap (JSON)</strong>
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>Cadangan Lengkap (JSON)</strong>
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0 }}>
                 Menyimpan seluruh data riwayat log, profil, kesiapan harian, dan jadwal mingguan.
@@ -259,7 +259,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
                 <FileSpreadsheet size={18} style={{ color: 'var(--color-info)' }} />
-                <strong style={{ fontSize: '0.95rem', color: '#FFFFFF' }}>Tabel Riwayat Latihan (CSV)</strong>
+                <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>Tabel Riwayat Latihan (CSV)</strong>
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: 0 }}>
                 Format tabular ramah Excel/Google Sheets untuk analisis beban dan perkembangan.
@@ -297,7 +297,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
               <Upload size={18} style={{ color: 'var(--color-warning)' }} />
-              <strong style={{ fontSize: '0.95rem', color: '#FFFFFF' }}>Pulihkan Cadangan (Impor JSON)</strong>
+              <strong style={{ fontSize: '0.95rem', color: 'var(--text-primary)' }}>Pulihkan Cadangan (Impor JSON)</strong>
             </div>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginBottom: '1rem', lineHeight: 1.4 }}>
               Unggah file backup `.json` sebelumnya. Data divalidasi dengan Zod secara atomik untuk mencegah korupsi database.
@@ -354,4 +354,5 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
     </Modal>
   );
 };
+
 

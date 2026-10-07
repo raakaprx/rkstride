@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { Modal } from './ui/Modal';
+import { Button } from './ui/Button';
 
 interface GuardrailOverrideModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export const GuardrailOverrideModal: React.FC<GuardrailOverrideModalProps> = ({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
           <AlertTriangle size={20} style={{ color: 'var(--color-warning)' }} />
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF' }}>
+          <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             Konfirmasi Mandiri (Override)
           </h2>
         </div>
@@ -52,7 +53,7 @@ export const GuardrailOverrideModal: React.FC<GuardrailOverrideModalProps> = ({
             alignItems: 'flex-start',
             gap: '0.5rem',
             fontSize: '0.82rem',
-            color: '#FFFFFF',
+            color: 'var(--text-primary)',
             cursor: 'pointer',
             marginBottom: '1.25rem',
             lineHeight: 1.5,
@@ -70,40 +71,25 @@ export const GuardrailOverrideModal: React.FC<GuardrailOverrideModalProps> = ({
           </span>
         </label>
 
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-          <button
-            onClick={onCancel}
-            style={{
-              padding: '0.6rem 1.1rem',
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--bg-surface)',
-              color: 'var(--text-secondary)',
-              fontWeight: 600,
-              fontSize: '0.85rem',
-              border: '1px solid var(--border-default)',
-              cursor: 'pointer',
-            }}
-          >
+        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+          <Button variant="secondary" onClick={onCancel}>
             Batal
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="primary"
             onClick={onConfirm}
             disabled={!acknowledged}
             style={{
-              padding: '0.6rem 1.1rem',
-              borderRadius: 'var(--radius-md)',
               background: acknowledged ? 'var(--accent-neon)' : 'var(--bg-surface-elevated)',
-              color: acknowledged ? '#09090b' : 'var(--text-muted)',
-              fontWeight: 800,
-              fontSize: '0.85rem',
-              border: 'none',
+              color: acknowledged ? 'var(--text-inverse)' : 'var(--text-muted)',
               cursor: acknowledged ? 'pointer' : 'not-allowed',
             }}
           >
             Lanjutkan tetap
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
   );
 };
+

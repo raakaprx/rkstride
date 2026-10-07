@@ -11,6 +11,7 @@ import {
   Unlock,
 } from 'lucide-react';
 import { ACWRResult, RecommendationResult, ReadinessCheckIn } from '@/types/workout';
+import { Badge } from './ui/Badge';
 
 interface WorkloadAdvisorCardProps {
   acwr: ACWRResult;
@@ -131,7 +132,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
             style={{
               fontSize: '1.5rem',
               fontWeight: 800,
-              color: '#FFFFFF',
+              color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
               gap: '0.6rem',
@@ -182,7 +183,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Smartwatch Bio-Readiness
             </div>
-            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.2 }}>
+            <div style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.2 }}>
               {readinessScore}
               <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>/100</span>
             </div>
@@ -242,8 +243,8 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               {acwr.ratio}
             </span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <div>Acute (7d): <strong style={{ color: '#FFF' }}>{acwr.acuteLoad}</strong> pts/day</div>
-              <div>Chronic (28d): <strong style={{ color: '#FFF' }}>{acwr.chronicLoad}</strong> pts/day</div>
+              <div>Acute (7d): <strong style={{ color: 'var(--text-primary)' }}>{acwr.acuteLoad}</strong> pts/day</div>
+              <div>Chronic (28d): <strong style={{ color: 'var(--text-primary)' }}>{acwr.chronicLoad}</strong> pts/day</div>
             </div>
           </div>
 
@@ -261,16 +262,16 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                   }}
                 />
                 <div
-                  title="Sweet Spot (0.8 - 1.3)"
+                  title="Sweet Spot (0.8 - 1.4)"
                   style={{
-                    flex: '53',
+                    flex: '40',
                     background: 'rgba(16, 185, 129, 0.55)',
                   }}
                 />
                 <div
                   title="High Risk (> 1.4)"
                   style={{
-                    flex: '27',
+                    flex: '40',
                     background: 'rgba(239, 68, 68, 0.5)',
                     borderRadius: '0 2px 2px 0',
                   }}
@@ -285,10 +286,10 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                   top: '-3px',
                   width: '4px',
                   height: '18px',
-                  background: '#FFFFFF',
+                  background: 'var(--text-primary)',
                   borderRadius: '2px',
                   transform: 'translateX(-50%)',
-                  boxShadow: '0 0 6px rgba(0, 0, 0, 0.7), 0 0 3px #FFFFFF',
+                  boxShadow: '0 0 6px rgba(0, 0, 0, 0.7), 0 0 3px var(--text-primary)',
                   zIndex: 2,
                 }}
               />
@@ -305,7 +306,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               }}
             >
               <span>&lt; 0.8 Underload</span>
-              <span style={{ color: 'var(--color-success)', fontWeight: 700 }}>0.8 – 1.3 Sweet Spot</span>
+              <span style={{ color: 'var(--color-success)', fontWeight: 700 }}>0.8 – 1.4 Sweet Spot</span>
               <span style={{ color: 'var(--color-danger)' }}>&gt; 1.4 Spike Risk</span>
             </div>
           </div>
@@ -327,19 +328,19 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
             <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Moon size={14} style={{ color: '#38bdf8' }} /> Sleep
+                <Moon size={14} style={{ color: 'var(--color-info)' }} /> Sleep
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#FFFFFF', marginTop: '0.25rem' }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
                 {readiness.sleepHours} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>hrs</span>
               </div>
             </div>
 
             <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Heart size={14} style={{ color: '#ef4444' }} /> Resting HR
+                <Heart size={14} style={{ color: 'var(--color-danger)' }} /> Resting HR
               </div>
               {readiness.restingHeartRate != null ? (
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#FFFFFF', marginTop: '0.25rem' }}>
+                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
                   {readiness.restingHeartRate} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>bpm</span>
                 </div>
               ) : (
@@ -361,9 +362,9 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
 
             <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Flame size={14} style={{ color: '#f97316' }} /> Energy Level
+                <Flame size={14} style={{ color: 'var(--chart-orange)' }} /> Energy Level
               </div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: '#FFFFFF', marginTop: '0.25rem', textTransform: 'capitalize' }}>
+              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem', textTransform: 'capitalize' }}>
                 {readiness.energyLevel}
               </div>
             </div>
@@ -397,7 +398,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.4rem' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               {lastLegsHoursAgo < 900 ? `${lastLegsHoursAgo}h` : '> 72h'}
             </span>
             <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>since previous leg session</span>
@@ -475,7 +476,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           )}
         </div>
 
-        <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.35rem' }}>
+        <div style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.35rem' }}>
           {recommendation.workoutDetail?.title || 'Evaluasi Beban Harian'}
         </div>
         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '0.75rem' }}>
@@ -490,7 +491,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               borderRadius: 'var(--radius-sm)',
               borderLeft: '3px solid var(--accent-neon)',
               fontSize: '0.82rem',
-              color: '#FFFFFF',
+              color: 'var(--text-primary)',
               lineHeight: 1.5,
             }}
           >
@@ -514,25 +515,13 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.3rem' }}>
               <strong style={{ color: 'var(--color-warning)' }}>{recommendation.guardrail.warningTitle}</strong>
               {recommendation.workoutDetail.speedRunLocked && (
-                <span
-                  style={{
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    padding: '0.15rem 0.5rem',
-                    borderRadius: 'var(--radius-full)',
-                    background: 'rgba(239, 68, 68, 0.12)',
-                    color: 'var(--color-danger)',
-                    border: '1px solid rgba(239, 68, 68, 0.35)',
-                  }}
-                >
-                  Lari tempo/interval terkunci
-                </span>
+                <Badge tone="danger">Lari tempo/interval terkunci</Badge>
               )}
             </div>
             <div style={{ color: 'var(--text-secondary)' }}>{recommendation.guardrail.warningMessage}</div>
             {recommendation.guardrail.allowedRunningTypes.length > 0 && (
               <div style={{ marginTop: '0.4rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                Lari yang diizinkan: <strong style={{ color: '#FFFFFF' }}>{recommendation.guardrail.allowedRunningTypes.join(', ')}</strong>
+                Lari yang diizinkan: <strong style={{ color: 'var(--text-primary)' }}>{recommendation.guardrail.allowedRunningTypes.join(', ')}</strong>
               </div>
             )}
           </div>
@@ -593,5 +582,6 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
     </div>
   );
 };
+
 
 

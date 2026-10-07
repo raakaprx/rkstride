@@ -176,7 +176,7 @@ export default function App() {
           gap: '2rem',
         }}
       >
-        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
           {tabTitles[activeTab]}
         </h1>
         {/* Tab 1: Menu Utama - Latihan & Evaluasi Beban */}
@@ -302,3 +302,4 @@ export default function App() {
     </div>
   );
 }
+

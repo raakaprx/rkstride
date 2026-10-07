@@ -134,7 +134,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
               <User size={18} />
             </div>
             <div>
-              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+              <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 Profil Fisiologi Atlet
               </h2>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -183,7 +183,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -208,7 +208,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -232,7 +232,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -252,7 +252,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -287,7 +287,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -317,7 +317,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -354,7 +354,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -374,7 +374,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -402,7 +402,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     fontSize: '0.85rem',
                     boxSizing: 'border-box',
                   }}
@@ -440,7 +440,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--accent-neon)',
                 border: 'none',
-                color: '#000000',
+                color: 'var(--text-inverse)',
                 fontSize: '0.85rem',
                 fontWeight: 800,
                 cursor: 'pointer',
@@ -454,5 +454,6 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
     </Modal>
   );
 };
+
 
 

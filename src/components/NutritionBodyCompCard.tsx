@@ -66,7 +66,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
             <Apple size={20} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               Nutrisi &amp; Keseimbangan Energi Atlet Hibrida
             </h2>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -92,7 +92,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
               borderRadius: 'calc(var(--radius-sm) - 2px)',
               background: goal === 'fat_loss' ? 'var(--bg-surface-elevated)' : 'transparent',
               border: 'none',
-              color: goal === 'fat_loss' ? '#FFFFFF' : 'var(--text-muted)',
+              color: goal === 'fat_loss' ? 'var(--text-primary)' : 'var(--text-muted)',
               fontSize: '0.75rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -107,7 +107,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
               borderRadius: 'calc(var(--radius-sm) - 2px)',
               background: goal === 'maintenance' ? 'var(--bg-surface-elevated)' : 'transparent',
               border: 'none',
-              color: goal === 'maintenance' ? '#FFFFFF' : 'var(--text-muted)',
+              color: goal === 'maintenance' ? 'var(--text-primary)' : 'var(--text-muted)',
               fontSize: '0.75rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -122,7 +122,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
               borderRadius: 'calc(var(--radius-sm) - 2px)',
               background: goal === 'muscle_gain' ? 'var(--bg-surface-elevated)' : 'transparent',
               border: 'none',
-              color: goal === 'muscle_gain' ? '#FFFFFF' : 'var(--text-muted)',
+              color: goal === 'muscle_gain' ? 'var(--text-primary)' : 'var(--text-muted)',
               fontSize: '0.75rem',
               fontWeight: 700,
               cursor: 'pointer',
@@ -147,7 +147,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Target Energi</span>
             <Flame size={14} style={{ color: 'var(--accent-neon)' }} />
           </div>
-          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)' }}>
             {plan.targetCalories.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>kcal</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -162,7 +162,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Protein Harian</span>
             <Dumbbell size={14} style={{ color: 'var(--accent-neon)' }} />
           </div>
-          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)' }}>
             {plan.proteinGrams} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>g</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--accent-neon)', marginTop: '0.2rem' }}>
@@ -174,9 +174,9 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
         <div style={{ background: 'var(--bg-surface)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Karbohidrat (Bahan Bakar)</span>
-            <Activity size={14} style={{ color: '#60A5FA' }} />
+            <Activity size={14} style={{ color: 'var(--color-info)' }} />
           </div>
-          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)' }}>
             {plan.carbsGrams} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>g</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -190,7 +190,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Lemak Sehat</span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>25% kkal</span>
           </div>
-          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)' }}>
             {plan.fatsGrams} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>g</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -202,9 +202,9 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
         <div style={{ background: 'var(--bg-surface)', padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>Target Hidrasi</span>
-            <Droplets size={14} style={{ color: '#38BDF8' }} />
+            <Droplets size={14} style={{ color: 'var(--color-info)' }} />
           </div>
-          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)' }}>
             {plan.hydrationLiters} <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Liter</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -228,7 +228,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
         }}
       >
         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
-          <strong style={{ color: '#FFFFFF' }}>Kaidah Fisiologi Nutrisi Hibrida:</strong> Asupan karbohidrat tinggi ({plan.carbsPerKg} g/kg) esensial untuk memulihkan cadangan glikogen otot pasca lari, sedangkan protein ({plan.proteinPerKg} g/kg) menstimulasi sintesis protein miofibril pasca sesi angkat beban.
+          <strong style={{ color: 'var(--text-primary)' }}>Kaidah Fisiologi Nutrisi Hibrida:</strong> Asupan karbohidrat tinggi ({plan.carbsPerKg} g/kg) esensial untuk memulihkan cadangan glikogen otot pasca lari, sedangkan protein ({plan.proteinPerKg} g/kg) menstimulasi sintesis protein miofibril pasca sesi angkat beban.
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Tingkat Aktivitas Harian:</span>
@@ -241,7 +241,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
               background: 'var(--bg-surface)',
               border: '1px solid var(--border-default)',
               borderRadius: 'var(--radius-sm)',
-              color: '#FFFFFF',
+              color: 'var(--text-primary)',
               fontSize: '0.75rem',
             }}
           >
@@ -255,5 +255,6 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
     </div>
   );
 };
+
 
 

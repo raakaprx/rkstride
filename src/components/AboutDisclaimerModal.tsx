@@ -76,7 +76,7 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
             <ShieldCheck size={24} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               Tentang RKStride &amp; Batasan Sains
             </h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -108,7 +108,7 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
         <div style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Activity size={18} style={{ color: 'var(--accent-neon)' }} />
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Keterbatasan Model ACWR (Kritik Ilmiah)
             </h3>
           </div>
@@ -132,7 +132,7 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
         <div style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Database size={18} style={{ color: 'var(--color-info)' }} />
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Privasi &amp; Kedaulatan Data Atlet
             </h3>
           </div>
@@ -145,7 +145,7 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
         <div style={{ marginBottom: '1.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
             <Lock size={18} style={{ color: 'var(--accent-neon)' }} />
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF', margin: 0 }}>
+            <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0 }}>
               Keamanan Google Gemini AI Coach
             </h3>
           </div>
@@ -176,3 +176,4 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
     </Modal>
   );
 };
+

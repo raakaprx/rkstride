@@ -56,7 +56,7 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
           </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+              <h3 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
                 {raceConfig.eventName || 'Target Kompetisi'}
               </h3>
               <span
@@ -98,7 +98,7 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
             transition: 'var(--transition-fast)',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#FFFFFF';
+            e.currentTarget.style.color = 'var(--text-primary)';
             e.currentTarget.style.borderColor = 'var(--border-strong)';
           }}
           onMouseLeave={(e) => {
@@ -126,7 +126,7 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Compass size={16} style={{ color: 'var(--accent-neon)' }} />
-            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               {plan.phaseName}
             </span>
           </div>
@@ -162,16 +162,16 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
             <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent-neon)', display: 'block', marginBottom: '0.2rem' }}>
               Panduan Kardio &amp; Lari
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#FFFFFF', lineHeight: 1.35, display: 'block' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)', lineHeight: 1.35, display: 'block' }}>
               {plan.intensityGuideline}
             </span>
           </div>
 
           <div style={{ background: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#60A5FA', display: 'block', marginBottom: '0.2rem' }}>
+            <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--color-info)', display: 'block', marginBottom: '0.2rem' }}>
               Penyesuaian Angkat Beban (PPL)
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#FFFFFF', lineHeight: 1.35, display: 'block' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)', lineHeight: 1.35, display: 'block' }}>
               {plan.strengthGuideline}
             </span>
           </div>
@@ -180,5 +180,6 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
     </div>
   );
 };
+
 
 

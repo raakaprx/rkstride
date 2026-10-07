@@ -386,7 +386,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             </button>
           </div>
 
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#FFFFFF', marginTop: '0.25rem' }}>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
             Workout Logging &amp; Real-Time Workload Test
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -423,9 +423,9 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               gap: '0.4rem',
               padding: '0.5rem 0.85rem',
               borderRadius: 'var(--radius-md)',
-              border: includeRunning ? '1px solid #38bdf8' : '1px solid var(--border-subtle)',
+              border: includeRunning ? '1px solid var(--color-info)' : '1px solid var(--border-subtle)',
               background: includeRunning ? 'rgba(56, 189, 248, 0.15)' : 'var(--bg-secondary)',
-              color: includeRunning ? '#38bdf8' : 'var(--text-muted)',
+              color: includeRunning ? 'var(--color-info)' : 'var(--text-muted)',
               fontSize: '0.82rem',
               fontWeight: 600,
               cursor: 'pointer',
@@ -447,9 +447,9 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             marginBottom: '1.75rem',
           }}
         >
-          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#FFFFFF', marginBottom: '0.75rem' }}>
-            🔬 Sports Science Foundation &amp; Mathematical Engines in RKStride
-          </div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.75rem' }}>
+              Sports Science Foundation &amp; Mathematical Engines in RKStride
+            </div>
 
           <div
             style={{
@@ -464,7 +464,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               </strong>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.35rem', lineHeight: 1.5 }}>
                 Derived from <em>Session-RPE &amp; Tonnage by Dr. Carl Foster</em>:
-                <div style={{ fontFamily: 'monospace', color: '#FFF', background: 'var(--bg-secondary)', padding: '0.3rem 0.5rem', borderRadius: '4px', margin: '0.35rem 0' }}>
+                <div style={{ fontFamily: 'monospace', color: 'var(--text-primary)', background: 'var(--bg-secondary)', padding: '0.3rem 0.5rem', borderRadius: '4px', margin: '0.35rem 0' }}>
                   Load = (Weight_kg × Reps) × (RPE / 10) × 0.1
                 </div>
                 RPE measures proximity to failure (RIR). RPE 10 provides 100% stimulus, whereas RPE 7 provides 70%.
@@ -472,12 +472,12 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             </div>
 
             <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
-              <strong style={{ color: '#38bdf8', fontSize: '0.85rem' }}>
+              <strong style={{ color: 'var(--color-info)', fontSize: '0.85rem' }}>
                 2. Running Spectrum &amp; Heart Rate TRIMP
               </strong>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.35rem', lineHeight: 1.5 }}>
                 Block-based accumulation across Heart Rate Zones:
-                <div style={{ fontFamily: 'monospace', color: '#FFF', background: 'var(--bg-secondary)', padding: '0.3rem 0.5rem', borderRadius: '4px', margin: '0.35rem 0' }}>
+                <div style={{ fontFamily: 'monospace', color: 'var(--text-primary)', background: 'var(--bg-secondary)', padding: '0.3rem 0.5rem', borderRadius: '4px', margin: '0.35rem 0' }}>
                   Total Load = sum(Duration_min × Zone_Weight)
                 </div>
                 Z1=1.0, Z2=1.2, Z3=1.5, Z4=2.2, Z5=3.5. Fallback without HR monitor: Duration × (RPE / 2).
@@ -490,10 +490,10 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               </strong>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.35rem', lineHeight: 1.5 }}>
                 Ratio of Acute Load (7-day average) to Chronic Load (28-day average):
-                <div style={{ fontFamily: 'monospace', color: '#FFF', background: 'var(--bg-secondary)', padding: '0.3rem 0.5rem', borderRadius: '4px', margin: '0.35rem 0' }}>
+                <div style={{ fontFamily: 'monospace', color: 'var(--text-primary)', background: 'var(--bg-secondary)', padding: '0.3rem 0.5rem', borderRadius: '4px', margin: '0.35rem 0' }}>
                   ACWR = Acute_Load (7d) / Chronic_Load (28d)
                 </div>
-                0.8–1.3 is the adaptation sweet spot. ACWR &gt; 1.4 signifies acute overload and triggers emergency deload.
+                0.8–1.4 is the adaptation sweet spot. ACWR &gt; 1.4 signifies acute overload and triggers emergency deload.
               </div>
             </div>
           </div>
@@ -507,7 +507,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <Dumbbell size={20} style={{ color: 'var(--accent-neon)' }} />
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF' }}>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 1. Movement Catalog &amp; Sets (Push, Pull, Legs, Arms, Core)
               </h3>
             </div>
@@ -590,7 +590,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                   flex: 1,
                   background: 'transparent',
                   border: 'none',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                   fontSize: '0.85rem',
                                   }}
               />
@@ -645,7 +645,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           padding: '0.45rem 0.5rem',
                           borderRadius: 'var(--radius-sm)',
                           background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'var(--bg-surface)',
-                          color: isActive ? '#FFFFFF' : 'var(--text-muted)',
+                          color: isActive ? 'var(--text-primary)' : 'var(--text-muted)',
                           fontWeight: isActive ? 700 : 500,
                           fontSize: '0.75rem',
                           border: isActive ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid var(--border-default)',
@@ -673,7 +673,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       background: 'var(--bg-surface)',
                       border: '1px solid var(--border-default)',
                       borderRadius: 'var(--radius-sm)',
-                      color: '#FFFFFF',
+                      color: 'var(--text-primary)',
                       padding: '0.55rem 0.75rem',
                       fontSize: '0.85rem',
                       fontWeight: 600,
@@ -698,7 +698,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       padding: '0.55rem 1.1rem',
                       borderRadius: 'var(--radius-sm)',
                       background: selectedExerciseId ? 'var(--accent-neon)' : 'var(--bg-surface-elevated)',
-                      color: selectedExerciseId ? '#09090b' : 'var(--text-muted)',
+                      color: selectedExerciseId ? 'var(--text-inverse)' : 'var(--text-muted)',
                       fontWeight: 700,
                       fontSize: '0.82rem',
                       border: 'none',
@@ -720,7 +720,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                   if (!ex) return null;
                   return (
                     <div>
-                      <strong style={{ color: '#FFFFFF' }}>Target Muscles:</strong> {ex.targetMuscles} &bull;{' '}
+                      <strong style={{ color: 'var(--text-primary)' }}>Target Muscles:</strong> {ex.targetMuscles} &bull;{' '}
                       <span style={{ color: 'var(--text-muted)' }}>{ex.description}</span>
                     </div>
                   );
@@ -757,7 +757,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           borderRadius: '50%',
                           background: 'var(--bg-surface-elevated)',
                           border: '1px solid var(--border-default)',
-                          color: '#FFFFFF',
+                          color: 'var(--text-primary)',
                           fontSize: '0.75rem',
                           fontWeight: 700,
                           display: 'flex',
@@ -767,7 +767,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       >
                         {exIdx + 1}
                       </span>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#FFFFFF' }}>
+                      <h4 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                         {exercise.namaGerakan}
                       </h4>
                       {isLegExercise && lastLegsHoursAgo < 48 && (
@@ -779,7 +779,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                        Volume Load: <strong style={{ color: '#FFFFFF' }}>{Math.round(exLoad * 0.1)} pts</strong>
+                        Volume Load: <strong style={{ color: 'var(--text-primary)' }}>{Math.round(exLoad * 0.1)} pts</strong>
                       </span>
                       <button
                         onClick={() => handleRemoveExercise(exIdx)}
@@ -832,7 +832,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                     background: 'var(--bg-surface)',
                                     border: '1px solid var(--border-default)',
                                     borderRadius: 'var(--radius-sm)',
-                                    color: '#FFFFFF',
+                                    color: 'var(--text-primary)',
                                     padding: '0.35rem 0.5rem',
                                     fontSize: '0.85rem',
                                                                       }}
@@ -849,7 +849,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                     background: 'var(--bg-surface)',
                                     border: '1px solid var(--border-default)',
                                     borderRadius: 'var(--radius-sm)',
-                                    color: '#FFFFFF',
+                                    color: 'var(--text-primary)',
                                     padding: '0.35rem 0.5rem',
                                     fontSize: '0.85rem',
                                                                       }}
@@ -863,7 +863,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                     background: 'var(--bg-surface)',
                                     border: '1px solid var(--border-default)',
                                     borderRadius: 'var(--radius-sm)',
-                                    color: '#FFFFFF',
+                                    color: 'var(--text-primary)',
                                     padding: '0.35rem 0.5rem',
                                     fontSize: '0.85rem',
                                                                         cursor: 'pointer',
@@ -879,7 +879,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                   <option value={10}>10 (Absolute Max / 0 RIR)</option>
                                 </select>
                               </td>
-                              <td style={{ padding: '0.5rem', fontWeight: 600, color: '#FFFFFF' }}>
+                              <td style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                                 {setScore} pts
                               </td>
                               <td style={{ padding: '0.5rem', textAlign: 'center' }}>
@@ -981,7 +981,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
                           <TrendingUp size={14} style={{ color: prog.shouldIncreaseWeight ? 'var(--accent-neon)' : 'var(--text-muted)' }} />
-                          <span style={{ fontSize: '0.75rem', color: '#FFFFFF', fontWeight: 600 }}>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)', fontWeight: 600 }}>
                             {prog.message}
                           </span>
                         </div>
@@ -1003,13 +1003,13 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
         <div style={{ marginBottom: '2.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Timer size={20} style={{ color: '#38bdf8' }} />
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#FFFFFF' }}>
+              <Timer size={20} style={{ color: 'var(--color-info)' }} />
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                 2. Running Spectrum &amp; TRIMP Workload
               </h3>
             </div>
             <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
-              Running Workload Score: <strong style={{ color: '#38bdf8' }}>{calculateRunningLoad(activeRunToEvaluate)} pts</strong>
+              Running Workload Score: <strong style={{ color: 'var(--color-info)' }}>{calculateRunningLoad(activeRunToEvaluate)} pts</strong>
             </div>
           </div>
 
@@ -1037,7 +1037,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                         padding: '0.45rem 0.75rem',
                         borderRadius: 'var(--radius-sm)',
                         background: isSelected ? 'rgba(56, 189, 248, 0.12)' : 'var(--bg-surface)',
-                        color: isSelected ? '#38bdf8' : 'var(--text-secondary)',
+                        color: isSelected ? 'var(--color-info)' : 'var(--text-secondary)',
                         fontWeight: isSelected ? 700 : 500,
                         fontSize: '0.78rem',
                         border: isSelected ? '1px solid rgba(56, 189, 248, 0.45)' : '1px solid var(--border-default)',
@@ -1064,11 +1064,11 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#FFFFFF', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Zap size={14} style={{ color: '#38bdf8' }} /> Interval Structure ({runningSession.blocks.length} segments &bull; {runningSession.durasiMenit} min total):
+                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <Zap size={14} style={{ color: 'var(--color-info)' }} /> Interval Structure ({runningSession.blocks.length} segments &bull; {runningSession.durasiMenit} min total):
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: '#FFFFFF', fontWeight: 700 }}>
-                    Accumulated: <span style={{ color: '#38bdf8' }}>{calculateRunningLoad(runningSession)} pts</span>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-primary)', fontWeight: 700 }}>
+                    Accumulated: <span style={{ color: 'var(--color-info)' }}>{calculateRunningLoad(runningSession)} pts</span>
                   </div>
                 </div>
 
@@ -1090,14 +1090,14 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       const pct = (b.durationMinutes / totalMins) * 100;
                       const barColor =
                         b.zone === 5
-                          ? '#ef4444'
+                          ? 'var(--color-danger)'
                           : b.zone === 4
-                          ? '#a855f7'
+                          ? 'var(--chart-violet)'
                           : b.zone === 3
-                          ? '#f59e0b'
+                          ? 'var(--color-warning)'
                           : b.zone === 2
-                          ? '#38bdf8'
-                          : '#64748b';
+                          ? 'var(--color-info)'
+                          : 'var(--text-muted)';
                       return (
                         <div
                           key={idx}
@@ -1120,14 +1120,14 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     const roundedLoad = Math.round(b.durationMinutes * ZONE_WEIGHTS[b.zone] * 10) / 10;
                     const zoneDotColor =
                       b.zone === 5
-                        ? '#ef4444'
+                        ? 'var(--color-danger)'
                         : b.zone === 4
-                        ? '#a855f7'
+                        ? 'var(--chart-violet)'
                         : b.zone === 3
-                        ? '#f59e0b'
+                        ? 'var(--color-warning)'
                         : b.zone === 2
-                        ? '#38bdf8'
-                        : '#64748b';
+                        ? 'var(--color-info)'
+                        : 'var(--text-muted)';
 
                     return (
                       <div
@@ -1141,7 +1141,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           borderRadius: 'var(--radius-sm)',
                           background: 'var(--bg-secondary)',
                           border: '1px solid var(--border-subtle)',
-                          color: '#E2E8F0',
+                          color: 'var(--text-primary)',
                         }}
                       >
                         <span
@@ -1187,7 +1187,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 600,
@@ -1210,7 +1210,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     background: 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 600,
@@ -1228,7 +1228,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     background: 'var(--bg-surface-elevated)',
                     border: '1px solid var(--border-subtle)',
                     borderRadius: 'var(--radius-sm)',
-                    color: '#FFFFFF',
+                    color: 'var(--text-primary)',
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 700,
@@ -1274,7 +1274,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                     background: useSensorlessRpe ? 'var(--bg-surface-elevated)' : 'var(--bg-surface)',
                     border: '1px solid var(--border-default)',
                     borderRadius: 'var(--radius-sm)',
-                    color: useSensorlessRpe ? 'var(--text-muted)' : '#FFFFFF',
+                    color: useSensorlessRpe ? 'var(--text-muted)' : 'var(--text-primary)',
                     padding: '0.55rem 0.75rem',
                     fontSize: '0.95rem',
                     fontWeight: 600,
@@ -1306,7 +1306,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                   onChange={(e) => setUseSensorlessRpe(e.target.checked)}
                   style={{ cursor: 'pointer' }}
                 />
-                <label htmlFor="rpeFallbackCheck" style={{ fontSize: '0.8rem', color: '#FFFFFF', cursor: 'pointer' }}>
+                <label htmlFor="rpeFallbackCheck" style={{ fontSize: '0.8rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
                   Running without Heart Rate Sensor (Use RPE Fallback: Duration × (RPE / 2))
                 </label>
               </div>
@@ -1358,7 +1358,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Sparkles size={17} style={{ color: projectedImpact.isOverloaded ? 'var(--color-danger)' : 'var(--accent-neon)' }} />
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Planned Workout Evaluation (Live Safety &amp; ACWR Check)
             </h4>
           </div>
@@ -1399,7 +1399,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Planned Session Load</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               {projectedImpact.draftLoad} <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>pts</span>
             </div>
           </div>
@@ -1423,7 +1423,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 
           <div style={{ flex: 1, minWidth: '220px' }}>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Engine Diagnostic</div>
-            <div style={{ fontSize: '0.82rem', color: '#FFFFFF', lineHeight: 1.4 }}>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-primary)', lineHeight: 1.4 }}>
               {projectedImpact.advice}
             </div>
           </div>
@@ -1486,7 +1486,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             padding: '0.7rem 1.4rem',
             borderRadius: 'var(--radius-md)',
             background: 'var(--accent-neon)',
-            color: '#09090b',
+            color: 'var(--text-inverse)',
             fontSize: '0.88rem',
             fontWeight: 800,
             border: 'none',
@@ -1522,7 +1522,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             bottom: '1.5rem',
             left: '50%',
             transform: 'translateX(-50%)',
-            zIndex: 45,
+            zIndex: 'var(--z-floating)',
             background: 'var(--bg-secondary)',
             border: '2px solid var(--accent-neon)',
             borderRadius: 'var(--radius-full)',
@@ -1535,7 +1535,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Timer size={18} style={{ color: 'var(--accent-neon)' }} />
-            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Istirahat Antar Set: {Math.floor(restSecondsRemaining / 60)}:{(restSecondsRemaining % 60).toString().padStart(2, '0')}
             </span>
           </div>
@@ -1548,7 +1548,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                 borderRadius: 'var(--radius-full)',
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
-                color: '#FFFFFF',
+                color: 'var(--text-primary)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -1562,8 +1562,8 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                 padding: '0.25rem 0.75rem',
                 borderRadius: 'var(--radius-full)',
                 background: 'rgba(239, 68, 68, 0.2)',
-                border: '1px solid #EF4444',
-                color: '#EF4444',
+                border: '1px solid var(--color-danger)',
+                color: 'var(--color-danger)',
                 fontSize: '0.75rem',
                 fontWeight: 700,
                 cursor: 'pointer',
@@ -1577,6 +1577,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
     </div>
   );
 };
+
 
 
 

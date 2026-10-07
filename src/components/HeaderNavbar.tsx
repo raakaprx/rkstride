@@ -28,7 +28,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
         borderBottom: '1px solid var(--border-subtle)',
         position: 'sticky',
         top: 0,
-        zIndex: 40,
+        zIndex: 'var(--z-header)',
         backdropFilter: 'blur(12px)',
       }}
     >
@@ -51,7 +51,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               width: '38px',
               height: '38px',
               borderRadius: 'var(--radius-md)',
-              background: '#141417',
+              background: 'var(--bg-surface)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               alignItems: 'center',
@@ -63,11 +63,11 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M4 19L11 4H15L8 19H4Z"
-                fill="var(--accent-neon)"
+                style={{ fill: 'var(--accent-neon)' }}
               />
               <path
                 d="M13 11L18 4H21L15 13L20 20H16L12.5 15"
-                stroke="var(--accent-neon)"
+                style={{ stroke: 'var(--accent-neon)' }}
                 strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -83,7 +83,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                   fontWeight: 900,
                   fontSize: '1.35rem',
                   letterSpacing: '0.04em',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                 }}
               >
                 RK<span style={{ color: 'var(--accent-neon)' }}>STRIDE</span>
@@ -135,7 +135,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               borderRadius: 'calc(var(--radius-md) - 2px)',
               border: 'none',
               background: activeTab === 'training' ? 'var(--bg-surface-elevated)' : 'transparent',
-              color: activeTab === 'training' ? '#FFFFFF' : 'var(--text-secondary)',
+              color: activeTab === 'training' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'training' ? 700 : 500,
               fontSize: '0.82rem',
               cursor: 'pointer',
@@ -156,7 +156,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               borderRadius: 'calc(var(--radius-md) - 2px)',
               border: 'none',
               background: activeTab === 'trends' ? 'var(--bg-surface-elevated)' : 'transparent',
-              color: activeTab === 'trends' ? '#FFFFFF' : 'var(--text-secondary)',
+              color: activeTab === 'trends' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'trends' ? 700 : 500,
               fontSize: '0.82rem',
               cursor: 'pointer',
@@ -177,7 +177,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               borderRadius: 'calc(var(--radius-md) - 2px)',
               border: 'none',
               background: activeTab === 'nutrition' ? 'var(--bg-surface-elevated)' : 'transparent',
-              color: activeTab === 'nutrition' ? '#FFFFFF' : 'var(--text-secondary)',
+              color: activeTab === 'nutrition' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'nutrition' ? 700 : 500,
               fontSize: '0.82rem',
               cursor: 'pointer',
@@ -198,7 +198,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               borderRadius: 'calc(var(--radius-md) - 2px)',
               border: 'none',
               background: activeTab === 'schedule' ? 'var(--bg-surface-elevated)' : 'transparent',
-              color: activeTab === 'schedule' ? '#FFFFFF' : 'var(--text-secondary)',
+              color: activeTab === 'schedule' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'schedule' ? 700 : 500,
               fontSize: '0.82rem',
               cursor: 'pointer',
@@ -219,7 +219,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               borderRadius: 'calc(var(--radius-md) - 2px)',
               border: 'none',
               background: activeTab === 'smartwatch' ? 'var(--bg-surface-elevated)' : 'transparent',
-              color: activeTab === 'smartwatch' ? '#FFFFFF' : 'var(--text-secondary)',
+              color: activeTab === 'smartwatch' ? 'var(--text-primary)' : 'var(--text-secondary)',
               fontWeight: activeTab === 'smartwatch' ? 700 : 500,
               fontSize: '0.82rem',
               cursor: 'pointer',
@@ -253,7 +253,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 transition: 'var(--transition-fast)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.color = 'var(--text-primary)';
                 e.currentTarget.style.borderColor = 'var(--border-strong)';
               }}
               onMouseLeave={(e) => {
@@ -278,7 +278,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
               borderRadius: 'var(--radius-md)',
               background: 'var(--bg-surface)',
               border: smartwatchState.connected ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid var(--border-default)',
-              color: '#FFFFFF',
+              color: 'var(--text-primary)',
               fontSize: '0.78rem',
               cursor: 'pointer',
               transition: 'var(--transition-fast)',
@@ -333,7 +333,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 transition: 'var(--transition-fast)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.color = 'var(--text-primary)';
                 e.currentTarget.style.borderColor = 'var(--border-strong)';
               }}
               onMouseLeave={(e) => {
@@ -366,7 +366,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 transition: 'var(--transition-fast)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#FFFFFF';
+                e.currentTarget.style.color = 'var(--text-primary)';
                 e.currentTarget.style.borderColor = 'var(--border-strong)';
               }}
               onMouseLeave={(e) => {
@@ -383,4 +383,6 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
     </header>
   );
 };
+
+
 

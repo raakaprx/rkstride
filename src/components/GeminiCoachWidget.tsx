@@ -51,7 +51,7 @@ function renderFormattedMessage(text: string) {
           if (part.startsWith('**') && part.endsWith('**')) {
             const inner = part.slice(2, -2);
             return (
-              <strong key={pIdx} style={{ fontWeight: 700, color: '#FFFFFF' }}>
+              <strong key={pIdx} style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
                 {inner}
               </strong>
             );
@@ -170,10 +170,10 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
   };
 
   const quickPrompts = [
-    '📊 Analisis beban latihan saya hari ini',
-    '🦵 Bolehkah saya lari besok setelah leg day?',
-    '🥗 Rekomendasi nutrisi pemulihan pasca workout',
-    '⚡ Cara eksekusi Norwegian 4x4 yang benar',
+    'Analisis beban latihan saya hari ini',
+    'Bolehkah saya lari besok setelah leg day?',
+    'Rekomendasi nutrisi pemulihan pasca workout',
+    'Cara eksekusi Norwegian 4x4 yang benar',
   ];
 
   return (
@@ -186,7 +186,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             position: 'fixed',
             bottom: '1.5rem',
             right: '1.5rem',
-            zIndex: 45,
+            zIndex: 'var(--z-floating)',
             display: 'flex',
             alignItems: 'center',
             gap: '0.6rem',
@@ -194,7 +194,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             borderRadius: 'var(--radius-full)',
             background: 'var(--bg-secondary)',
             border: '1.5px solid var(--accent-neon)',
-            color: '#FFFFFF',
+            color: 'var(--text-primary)',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(204, 255, 0, 0.15)',
             cursor: 'pointer',
             transition: 'var(--transition-fast)',
@@ -217,7 +217,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             <Sparkles size={16} />
           </div>
           <div style={{ textAlign: 'left' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFFFFF', lineHeight: 1.1 }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1 }}>
               rkbot
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -242,7 +242,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             position: 'fixed',
             bottom: '1rem',
             right: '1rem',
-            zIndex: 50,
+            zIndex: 'var(--z-chat)',
             width: '92vw',
             maxWidth: '430px',
             height: '620px',
@@ -285,7 +285,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#FFFFFF' }}>
+                  <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                     rkbot
                   </span>
                   <span
@@ -306,7 +306,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                   </span>
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  ACWR: <strong style={{ color: '#FFF' }}>{athleteContext.acwrRatio}</strong> &bull; Readiness: <strong style={{ color: '#FFF' }}>{athleteContext.readinessScore}</strong>
+                  ACWR: <strong style={{ color: 'var(--text-primary)' }}>{athleteContext.acwrRatio}</strong> &bull; Readiness: <strong style={{ color: 'var(--text-primary)' }}>{athleteContext.readinessScore}</strong>
                 </div>
               </div>
             </div>
@@ -376,7 +376,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                       borderLeft: !isUser ? '3px solid var(--accent-neon)' : undefined,
                       padding: '0.75rem 0.95rem',
                       borderRadius: isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
-                      color: '#FFFFFF',
+                      color: 'var(--text-primary)',
                       fontSize: '0.82rem',
                       lineHeight: 1.5,
                       wordBreak: 'break-word',
@@ -431,7 +431,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.borderColor = 'var(--accent-neon)';
-                  e.currentTarget.style.color = '#FFFFFF';
+                  e.currentTarget.style.color = 'var(--text-primary)';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = 'var(--border-default)';
@@ -467,7 +467,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
                 borderRadius: 'var(--radius-md)',
-                color: '#FFFFFF',
+                color: 'var(--text-primary)',
                 padding: '0.6rem 0.85rem',
                 fontSize: '0.85rem',
                               }}
@@ -480,7 +480,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 height: '38px',
                 borderRadius: 'var(--radius-md)',
                 background: inputValue.trim() ? 'var(--accent-neon)' : 'var(--bg-surface-elevated)',
-                color: inputValue.trim() ? '#09090b' : 'var(--text-muted)',
+                color: inputValue.trim() ? 'var(--text-inverse)' : 'var(--text-muted)',
                 border: 'none',
                 display: 'flex',
                 alignItems: 'center',
@@ -498,5 +498,6 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
     </>
   );
 };
+
 
 

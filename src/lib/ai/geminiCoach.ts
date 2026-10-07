@@ -153,7 +153,7 @@ export function checkMedicalRedFlags(prompt: string): string | null {
   const p = prompt.toLowerCase();
   for (const flag of MEDICAL_RED_FLAGS) {
     if (p.includes(flag)) {
-      return `⚠️ **PERINGATAN KESELAMATAN MEDIS**:\n\nGejala yang Anda sebutkan (*"${flag}"*) berpotensi menandakan kondisi klinis darurat atau cedera akut. RKStride Coach adalah sistem pendukung keputusan latihan atletik, **bukan pengganti diagnosis medis**.\n\n**Tindakan Wajib:**\n1. Hentikan seluruh aktivitas fisik atau latihan segera.\n2. Jangan memaksakan diri melakukan latihan kardiovaskular atau angkat beban.\n3. Segera konsultasikan kondisi Anda dengan dokter, IGD, atau fasilitas medis terdekat.`;
+      return `**PERINGATAN KESELAMATAN MEDIS**:\n\nGejala yang Anda sebutkan (*"${flag}"*) berpotensi menandakan kondisi klinis darurat atau cedera akut. RKStride Coach adalah sistem pendukung keputusan latihan atletik, **bukan pengganti diagnosis medis**.\n\n**Tindakan Wajib:**\n1. Hentikan seluruh aktivitas fisik atau latihan segera.\n2. Jangan memaksakan diri melakukan latihan kardiovaskular atau angkat beban.\n3. Segera konsultasikan kondisi Anda dengan dokter, IGD, atau fasilitas medis terdekat.`;
     }
   }
   return null;

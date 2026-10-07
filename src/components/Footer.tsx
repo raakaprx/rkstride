@@ -29,7 +29,7 @@ export const Footer: React.FC = () => {
                 fontFamily: 'var(--font-family-display)',
                 fontWeight: 900,
                 fontSize: '1.1rem',
-                color: '#FFFFFF',
+                color: 'var(--text-primary)',
               }}
             >
               RK<span style={{ color: 'var(--accent-neon)' }}>STRIDE</span>
@@ -57,3 +57,4 @@ export const Footer: React.FC = () => {
     </footer>
   );
 };
+

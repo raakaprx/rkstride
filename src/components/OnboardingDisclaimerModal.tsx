@@ -47,7 +47,7 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
             <ShieldAlert size={24} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               Selamat Datang di RKStride
             </h2>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
@@ -189,4 +189,5 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
     </Modal>
   );
 };
+
 

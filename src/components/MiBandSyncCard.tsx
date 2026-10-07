@@ -117,7 +117,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
             <Watch size={24} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Integrasi Jam Mi Band & Biometrik
             </h2>
             <div style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
@@ -142,7 +142,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Perangkat Terhubung
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#FFFFFF' }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               {miBandState.deviceName}
             </div>
             <div style={{ fontSize: '0.75rem', color: 'var(--color-success)' }}>
@@ -223,7 +223,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
       {activeSyncTab === 'quick' && (
         <div>
           <div style={{ marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Input Cepat Biometrik Pagi Hari (Dari Layar Mi Band)
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -243,9 +243,9 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
             <div style={{ background: 'var(--bg-secondary)', padding: '1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Moon size={15} style={{ color: '#38bdf8' }} /> Durasi Tidur
+                  <Moon size={15} style={{ color: 'var(--color-info)' }} /> Durasi Tidur
                 </span>
-                <strong style={{ color: '#FFFFFF', fontSize: '1.1rem' }}>{localSleep} Jam</strong>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '1.1rem' }}>{localSleep} Jam</strong>
               </div>
               <input
                 type="range"
@@ -265,9 +265,9 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
             <div style={{ background: 'var(--bg-secondary)', padding: '1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Heart size={15} style={{ color: '#ef4444' }} /> Resting Heart Rate (RHR)
+                  <Heart size={15} style={{ color: 'var(--color-danger)' }} /> Resting Heart Rate (RHR)
                 </span>
-                <strong style={{ color: '#FFFFFF', fontSize: '1.1rem' }}>{localRhr} bpm</strong>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '1.1rem' }}>{localRhr} bpm</strong>
               </div>
               <input
                 type="range"
@@ -276,7 +276,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 step={1}
                 value={localRhr}
                 onChange={(e) => setLocalRhr(parseInt(e.target.value, 10))}
-                style={{ width: '100%', accentColor: '#ef4444', cursor: 'pointer' }}
+                style={{ width: '100%', accentColor: 'var(--color-danger)', cursor: 'pointer' }}
               />
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Baseline atlet: ~50-54 bpm. Lonjakan &gt; 5 bpm menandakan stres/kelelahan.
@@ -317,7 +317,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   Level Energi Hari Ini
                 </span>
-                <strong style={{ color: '#FFFFFF', fontSize: '1rem', textTransform: 'capitalize' }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '1rem', textTransform: 'capitalize' }}>
                   {localEnergy}
                 </strong>
               </div>
@@ -331,7 +331,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                       padding: '0.4rem 0.2rem',
                       borderRadius: 'var(--radius-sm)',
                       background: localEnergy === lvl ? 'var(--accent-neon)' : 'var(--bg-surface)',
-                      color: localEnergy === lvl ? '#0A0A0A' : 'var(--text-secondary)',
+                      color: localEnergy === lvl ? 'var(--text-inverse)' : 'var(--text-secondary)',
                       fontWeight: 700,
                       fontSize: '0.75rem',
                       border: '1px solid var(--border-default)',
@@ -358,7 +358,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--bg-secondary)',
                   border: '1px solid var(--border-default)',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                   cursor: 'pointer',
                 }}
               >
@@ -407,7 +407,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
                 padding: '0.75rem 1.25rem',
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--accent-neon)',
-                color: '#0A0A0A',
+                color: 'var(--text-inverse)',
                 fontWeight: 800,
                 fontSize: '0.85rem',
                 border: 'none',
@@ -425,8 +425,8 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
       {activeSyncTab === 'bluetooth' && (
         <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-            <Bluetooth size={22} style={{ color: '#38bdf8' }} />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <Bluetooth size={22} style={{ color: 'var(--color-info)' }} />
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Koneksi Langsung Web Bluetooth API
             </h3>
           </div>
@@ -435,7 +435,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
           </p>
 
           <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.25rem' }}>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '0.4rem' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
               Langkah Menghubungkan:
             </h4>
             <ol style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', paddingLeft: '1.25rem', lineHeight: 1.6 }}>
@@ -460,8 +460,8 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
               gap: '0.5rem',
               padding: '0.75rem 1.5rem',
               borderRadius: 'var(--radius-md)',
-              background: '#38bdf8',
-              color: '#0A0A0A',
+              background: 'var(--color-info)',
+              color: 'var(--text-inverse)',
               fontWeight: 800,
               fontSize: '0.9rem',
               border: 'none',
@@ -479,7 +479,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
         <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
             <UploadCloud size={22} style={{ color: 'var(--accent-neon)' }} />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Upload File Ekspor Mi Fitness / Zepp Life
             </h3>
           </div>
@@ -504,7 +504,7 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
           >
             <UploadCloud size={36} style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFFFFF' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Pilih atau Tarik File JSON / CSV ke Sini
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
@@ -517,5 +517,6 @@ export const MiBandSyncCard: React.FC<MiBandSyncCardProps> = ({
     </div>
   );
 };
+
 
 

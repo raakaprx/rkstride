@@ -118,7 +118,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             <Watch size={22} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Smartwatch Integration Hub
             </h2>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
@@ -144,7 +144,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
               Connected Device
             </div>
-            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#FFFFFF' }}>
+            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               {smartwatchState.connected ? smartwatchState.deviceName : 'Belum terhubung'}
             </div>
             <div style={{ fontSize: '0.75rem', color: smartwatchState.connected ? 'var(--color-success)' : 'var(--text-muted)' }}>
@@ -184,7 +184,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             borderRadius: 'calc(var(--radius-md) - 2px)',
             background: activeSyncTab === 'quick' ? 'var(--bg-surface-elevated)' : 'transparent',
             border: 'none',
-            color: activeSyncTab === 'quick' ? '#FFFFFF' : 'var(--text-secondary)',
+            color: activeSyncTab === 'quick' ? 'var(--text-primary)' : 'var(--text-secondary)',
             fontWeight: activeSyncTab === 'quick' ? 700 : 500,
             fontSize: '0.82rem',
             cursor: 'pointer',
@@ -205,7 +205,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             borderRadius: 'calc(var(--radius-md) - 2px)',
             background: activeSyncTab === 'bluetooth' ? 'var(--bg-surface-elevated)' : 'transparent',
             border: 'none',
-            color: activeSyncTab === 'bluetooth' ? '#FFFFFF' : 'var(--text-secondary)',
+            color: activeSyncTab === 'bluetooth' ? 'var(--text-primary)' : 'var(--text-secondary)',
             fontWeight: activeSyncTab === 'bluetooth' ? 700 : 500,
             fontSize: '0.82rem',
             cursor: 'pointer',
@@ -226,7 +226,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             borderRadius: 'calc(var(--radius-md) - 2px)',
             background: activeSyncTab === 'file' ? 'var(--bg-surface-elevated)' : 'transparent',
             border: 'none',
-            color: activeSyncTab === 'file' ? '#FFFFFF' : 'var(--text-secondary)',
+            color: activeSyncTab === 'file' ? 'var(--text-primary)' : 'var(--text-secondary)',
             fontWeight: activeSyncTab === 'file' ? 700 : 500,
             fontSize: '0.82rem',
             cursor: 'pointer',
@@ -242,7 +242,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
       {activeSyncTab === 'quick' && (
         <div>
           <div style={{ marginBottom: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Quick Morning Biometric Sync (Direct from Watch Display)
             </h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -262,9 +262,9 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             <div style={{ background: 'var(--bg-secondary)', padding: '1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Moon size={15} style={{ color: '#38bdf8' }} /> Sleep Duration
+                  <Moon size={15} style={{ color: 'var(--color-info)' }} /> Sleep Duration
                 </span>
-                <strong style={{ color: '#FFFFFF', fontSize: '1.1rem' }}>{localSleep} hrs</strong>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '1.1rem' }}>{localSleep} hrs</strong>
               </div>
               <input
                 type="range"
@@ -284,9 +284,9 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             <div style={{ background: 'var(--bg-secondary)', padding: '1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <Heart size={15} style={{ color: '#ef4444' }} /> Resting Heart Rate (RHR)
+                  <Heart size={15} style={{ color: 'var(--color-danger)' }} /> Resting Heart Rate (RHR)
                 </span>
-                <strong style={{ color: '#FFFFFF', fontSize: '1.1rem' }}>{localRhr} bpm</strong>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '1.1rem' }}>{localRhr} bpm</strong>
               </div>
               <input
                 type="range"
@@ -295,7 +295,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 step={1}
                 value={localRhr}
                 onChange={(e) => setLocalRhr(parseInt(e.target.value, 10))}
-                style={{ width: '100%', accentColor: '#ef4444', cursor: 'pointer' }}
+                style={{ width: '100%', accentColor: 'var(--color-danger)', cursor: 'pointer' }}
               />
               <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
                 Athletic baseline: ~50-54 bpm. A spike &gt; 5 bpm signals incomplete recovery.
@@ -336,7 +336,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                   Subjective Energy Level
                 </span>
-                <strong style={{ color: '#FFFFFF', fontSize: '1rem', textTransform: 'capitalize' }}>
+                <strong style={{ color: 'var(--text-primary)', fontSize: '1rem', textTransform: 'capitalize' }}>
                   {localEnergy}
                 </strong>
               </div>
@@ -350,7 +350,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                       padding: '0.4rem 0.2rem',
                       borderRadius: 'var(--radius-sm)',
                       background: localEnergy === lvl ? 'var(--accent-neon)' : 'var(--bg-surface)',
-                      color: localEnergy === lvl ? '#0A0A0A' : 'var(--text-secondary)',
+                      color: localEnergy === lvl ? 'var(--text-inverse)' : 'var(--text-secondary)',
                       fontWeight: 700,
                       fontSize: '0.75rem',
                       border: '1px solid var(--border-default)',
@@ -377,7 +377,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                   borderRadius: 'var(--radius-sm)',
                   background: 'var(--bg-secondary)',
                   border: '1px solid var(--border-default)',
-                  color: '#FFFFFF',
+                  color: 'var(--text-primary)',
                   cursor: 'pointer',
                 }}
               >
@@ -426,7 +426,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 padding: '0.75rem 1.25rem',
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--accent-neon)',
-                color: '#09090b',
+                color: 'var(--text-inverse)',
                 fontWeight: 800,
                 fontSize: '0.85rem',
                 border: 'none',
@@ -448,8 +448,8 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
       {activeSyncTab === 'bluetooth' && (
         <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
-            <Bluetooth size={22} style={{ color: '#38bdf8' }} />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <Bluetooth size={22} style={{ color: 'var(--color-info)' }} />
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Direct Web Bluetooth GATT Stream
             </h3>
           </div>
@@ -458,7 +458,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           </p>
 
           <div style={{ background: 'var(--bg-surface)', padding: '1rem', borderRadius: 'var(--radius-sm)', marginBottom: '1.25rem' }}>
-            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: '#FFFFFF', marginBottom: '0.4rem' }}>
+            <h4 style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '0.4rem' }}>
               Pairing Instructions:
             </h4>
             <ol style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', paddingLeft: '1.25rem', lineHeight: 1.6 }}>
@@ -483,8 +483,8 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               gap: '0.5rem',
               padding: '0.75rem 1.5rem',
               borderRadius: 'var(--radius-md)',
-              background: '#38bdf8',
-              color: '#0A0A0A',
+              background: 'var(--color-info)',
+              color: 'var(--text-inverse)',
               fontWeight: 800,
               fontSize: '0.9rem',
               border: 'none',
@@ -502,7 +502,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
         <div style={{ background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '1.5rem', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.5rem' }}>
             <UploadCloud size={22} style={{ color: 'var(--accent-neon)' }} />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#FFFFFF' }}>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)' }}>
               Impor File Latihan (.fit / .gpx / .tcx / .json / .csv)
             </h3>
           </div>
@@ -523,7 +523,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             }}
           >
             <UploadCloud size={36} style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }} />
-            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#FFFFFF' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               Unggah File FIT / GPX / TCX / JSON / CSV
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem', marginBottom: '1rem' }}>
@@ -559,5 +559,6 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
     </div>
   );
 };
+
 
 

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { TrendingUp } from 'lucide-react';
 import { DailyLog } from '@/types/workout';
 import { calculateACWR } from '@/lib/engine/workload';
+import { Button } from './ui/Button';
 
 interface TrendsDashboardCardProps {
   history: DailyLog[];
@@ -98,7 +99,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             <TrendingUp size={20} />
           </div>
           <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#FFFFFF', margin: 0 }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
               Tren Beban Kerja &amp; Rasio ACWR (28 Hari)
             </h2>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -114,7 +115,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             <span style={{ color: 'var(--text-secondary)' }}>Sweet Spot (0.8 - 1.4)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(239, 68, 68, 0.3)', border: '1px solid #EF4444' }} />
+            <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(239, 68, 68, 0.3)', border: '1px solid var(--color-danger)' }} />
             <span style={{ color: 'var(--text-secondary)' }}>Bahaya (&gt; 1.4)</span>
           </div>
         </div>
@@ -135,29 +136,16 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             gap: '0.75rem',
           }}
         >
-          <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             Belum ada data latihan
           </div>
           <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: '420px', lineHeight: 1.5 }}>
             Catat sesi pertama Anda di tab Workout &amp; Workload. Grafik tren ACWR akan terbentuk setelah Anda mencatat latihan (minimal 21 hari untuk rasio yang bermakna).
           </div>
           {onNavigateToLogger && (
-            <button
-              onClick={onNavigateToLogger}
-              style={{
-                marginTop: '0.25rem',
-                padding: '0.6rem 1.25rem',
-                borderRadius: 'var(--radius-md)',
-                background: 'var(--accent-neon)',
-                color: '#09090b',
-                fontWeight: 800,
-                fontSize: '0.85rem',
-                border: 'none',
-                cursor: 'pointer',
-              }}
-            >
+            <Button variant="primary" onClick={onNavigateToLogger} style={{ marginTop: '0.25rem' }}>
               Catat sesi pertama
-            </button>
+            </Button>
           )}
         </div>
       ) : (
@@ -196,7 +184,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             strokeDasharray="4 4"
             strokeWidth="1"
           />
-          <text x={svgWidth - padding.right + 4} y={ySweetMin + 3} fill="var(--text-muted)" fontSize="12">
+          <text x={svgWidth - padding.right + 4} y={ySweetMin + 3} style={{ fill: 'var(--text-muted)' }} fontSize="12">
             0.8
           </text>
 
@@ -209,7 +197,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             strokeDasharray="4 4"
             strokeWidth="1"
           />
-          <text x={svgWidth - padding.right + 4} y={yDanger + 3} fill="#EF4444" fontSize="12">
+          <text x={svgWidth - padding.right + 4} y={yDanger + 3} style={{ fill: 'var(--color-danger)' }} fontSize="12">
             1.4
           </text>
 
@@ -235,7 +223,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             <path
               d={pathD}
               fill="none"
-              stroke="var(--accent-neon)"
+              style={{ stroke: 'var(--accent-neon)' }}
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -249,8 +237,8 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
               cx={p.x}
               cy={p.y}
               r={idx === points.length - 1 ? 4 : 2}
-              fill={idx === points.length - 1 ? '#FFFFFF' : 'var(--accent-neon)'}
-              stroke="var(--bg-primary)"
+              fill={idx === points.length - 1 ? 'var(--text-primary)' : 'var(--accent-neon)'}
+              style={{ stroke: 'var(--bg-primary)' }}
               strokeWidth="1.5"
             />
           ))}
@@ -261,7 +249,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
               key={idx}
               x={p.x}
               y={svgHeight - 10}
-              fill="var(--text-muted)"
+              style={{ fill: 'var(--text-muted)' }}
               fontSize="12"
               textAnchor="middle"
             >
@@ -283,7 +271,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Beban Akut Terkini (7 Hari)
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {currentACWR.acuteLoad} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>pts/hari</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
@@ -295,7 +283,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Beban Kronis Terkini (28 Hari)
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#FFFFFF' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
             {currentACWR.chronicLoad} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>pts/hari</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--accent-neon)', marginTop: '0.2rem' }}>
@@ -307,7 +295,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Rasio ACWR Saat Ini
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: currentACWR.status === 'sweet_spot' ? 'var(--accent-neon)' : currentACWR.status === 'warning' ? '#EAB308' : currentACWR.status === 'danger' ? '#EF4444' : '#60A5FA' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: currentACWR.status === 'sweet_spot' ? 'var(--accent-neon)' : currentACWR.status === 'warning' ? 'var(--color-warning)' : currentACWR.status === 'danger' ? 'var(--color-danger)' : 'var(--color-info)' }}>
             {currentACWR.ratio}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', textTransform: 'capitalize' }}>
@@ -320,5 +308,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
     </div>
   );
 };
+
+
 
 

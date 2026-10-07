@@ -4,10 +4,10 @@
  */
 
 :root {
-  /* Color Palette - Core Backgrounds (Refined Obsidian & Graphite) */
-  --bg-primary: #09090b;
+  /* Color Palette - Core Backgrounds (Obsidian spec: DESIGN.md) */
+  --bg-primary: #0B0B0B;
   --bg-secondary: #121215;
-  --bg-surface: #18181c;
+  --bg-surface: #171717;
   --bg-surface-elevated: #202026;
   --bg-surface-hover: #26262e;
 
@@ -28,15 +28,21 @@
   --color-info: #38bdf8;
   --color-info-bg: rgba(56, 189, 248, 0.08);
 
+  /* Categorical chart colors (interval zones, run-type badges) */
+  --chart-violet: #a855f7;
+  --chart-violet-light: #c084fc;
+  --chart-pink: #ec4899;
+  --chart-orange: #f97316;
+
   /* Typography Colors (muted meets WCAG AA 4.5:1 on dark surfaces) */
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #94a3b8;
-  --text-inverse: #09090b;
+  --text-inverse: #0B0B0B;
 
   /* Borders & Dividers - Crisp & Subtle */
   --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-default: #27272a;
+  --border-default: #262626;
   --border-hover: #3f3f46;
   --border-strong: #3f3f46;
   --border-focus: #ccff00;
@@ -97,6 +103,8 @@
   --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Z-Index Scale (centralized stacking order) */
+  --z-header: 40;
+  --z-floating: 45;
   --z-chat: 50;
   --z-modal: 100;
   --z-toast: 200;

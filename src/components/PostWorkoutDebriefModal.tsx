@@ -76,7 +76,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             justifyContent: 'center',
             transition: 'var(--transition-fast)',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+          onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
           onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
         >
           <X size={16} />
@@ -102,8 +102,8 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             <Trophy size={26} />
           </div>
 
-          <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-0.02em' }}>
-            Workout Logged Successfully! 🎉
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+            Workout Logged Successfully
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem', lineHeight: 1.4 }}>
             Great effort today! Your cardiovascular and musculoskeletal workload have been registered into the ACWR engine.
@@ -121,7 +121,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
         >
           <div style={{ background: 'var(--bg-surface)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Session Load</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#FFFFFF', marginTop: '0.2rem' }}>
+            <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
               {debriefData.sessionLoad} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>pts</span>
             </div>
           </div>
@@ -145,7 +145,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
 
           <div style={{ background: 'var(--bg-surface)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
             <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Recovery Window</div>
-            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#FFFFFF', marginTop: '0.2rem' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
               {debriefData.hasLegWorkout ? '48h Leg Window' : 'Upper Recovery'}
             </div>
             <div style={{ fontSize: '0.75rem', color: debriefData.hasLegWorkout ? 'var(--color-warning)' : 'var(--color-success)' }}>
@@ -167,15 +167,15 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
                 background: 'var(--bg-surface)',
                 padding: '0.85rem',
                 borderRadius: 'var(--radius-sm)',
-                borderLeft: '3px solid #38bdf8',
+                borderLeft: '3px solid var(--color-info)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '0.75rem',
               }}
             >
-              <Droplets size={18} style={{ color: '#38bdf8', flexShrink: 0, marginTop: '2px' }} />
+              <Droplets size={18} style={{ color: 'var(--color-info)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong style={{ fontSize: '0.85rem', color: '#FFFFFF' }}>Nutrition &amp; Rehydration Target:</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Nutrition &amp; Rehydration Target:</strong>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                   Drink <strong>{waterMl}</strong> with electrolytes and consume <strong>{proteinGrams} protein</strong> within 45–60 minutes to stimulate Muscle Protein Synthesis (MPS).
                 </p>
@@ -188,15 +188,15 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
                 background: 'var(--bg-surface)',
                 padding: '0.85rem',
                 borderRadius: 'var(--radius-sm)',
-                borderLeft: '3px solid #10b981',
+                borderLeft: '3px solid var(--color-success)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '0.75rem',
               }}
             >
-              <Activity size={18} style={{ color: '#10b981', flexShrink: 0, marginTop: '2px' }} />
+              <Activity size={18} style={{ color: 'var(--color-success)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong style={{ fontSize: '0.85rem', color: '#FFFFFF' }}>Targeted Tissue Flush:</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Targeted Tissue Flush:</strong>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                   {debriefData.hasLegWorkout
                     ? 'Quad and glute foam rolling + 90/90 hip stretches. High-speed running is locked for 48h to protect patellar tendons.'
@@ -221,7 +221,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             >
               <Calendar size={18} style={{ color: 'var(--accent-neon)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong style={{ fontSize: '0.85rem', color: '#FFFFFF' }}>Tomorrow&apos;s Training Preview:</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Tomorrow&apos;s Training Preview:</strong>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                   {debriefData.hasLegWorkout
                     ? 'Upper Body Push / Pull or complete Rest Day. Allow quadriceps motor units to rebuild.'
@@ -253,7 +253,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
               padding: '0.7rem 1.1rem',
               borderRadius: 'var(--radius-md)',
               background: 'var(--accent-neon)',
-              color: '#09090b',
+              color: 'var(--text-inverse)',
               fontWeight: 800,
               fontSize: '0.85rem',
               border: 'none',
@@ -279,7 +279,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
               cursor: 'pointer',
               transition: 'var(--transition-fast)',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
           >
             Done
@@ -289,5 +289,6 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
     </Modal>
   );
 };
+
 
 

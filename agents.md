@@ -12,10 +12,12 @@ Before writing application features, initialize Context.dev integration:
 
 ---
 
-## 2. Tech Stack & Standards
-- Framework: Next.js (App Router, TypeScript strict mode)
-- Styling: Tailwind CSS, Lucide React (icons), Framer Motion (micro-interactions)
-- State & Calculations: Typed utility functions for Acute:Chronic Workload Ratio (ACWR) and daily workout suggestions
+## 2. Tech Stack & Standards (aktual, selaras dengan repo)
+- Framework: Vite + React 19 SPA (TypeScript strict mode). Bukan Next.js App Router.
+- Styling: CSS custom properties di `src/styles/tokens.css` + inline styles per komponen. Bukan Tailwind.
+- Ikon: Lucide React. Tanpa Framer Motion (MOTION 1: hover state saja, lihat DESIGN.md).
+- State & Calculations: Typed pure functions di `src/lib/engine/` (ACWR, sRPE, TRIMP, guardrail, nutrisi, periodisasi) + orkestrasi `src/hooks/useWorkoutEngine.ts` + persistensi Dexie IndexedDB.
+- Arah visual tertulis: `DESIGN.md` (wajib dibaca sebelum kerja UI, R-37).
 - Code Quality:
   - Clean architecture with clear separation between UI components and mathematical calculation engines.
   - Zero placeholder buttons; all buttons must have handlers or trigger realistic state changes.
@@ -27,7 +29,8 @@ Before writing application features, initialize Context.dev integration:
 - **Color Theme:** Strict Dark Mode with Neon Lime Accents:
   - Background: `#0B0B0B` (Canvas), `#171717` (Cards & Modals)
   - Primary Accent: Neon Volt/Lime `#CCFF00` (Buttons, key badges, highlight section)
-  - Secondary Accents: Neutral Gray `#262626` (Borders), Slate `#9CA3AF` (Muted text)
+  - Secondary Accents: Neutral Gray `#262626` (Borders), Slate `#94A3B8` (Muted text, lolos WCAG AA)
+  - Token terpusat di `src/styles/tokens.css`; nol literal hex di `src/components` (DESIGN.md).
 - **Visual Reference:** Replicate the aesthetic of the provided PULSE landing page mockup:
   - Hero with high-contrast bold typography (`BECOME THE BEST VERSION OF YOURSELF`).
   - Stat counters with prominent numbers (`12K+`, `50+`, `98%`).
