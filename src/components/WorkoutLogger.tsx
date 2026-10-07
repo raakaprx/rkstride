@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { StrengthExercise, RunSession, RunningType, ACWRStatus } from '@/types/workout';
+import { GuardrailOverrideModal } from './GuardrailOverrideModal';
 import {
   calculateStrengthLoad,
   calculateRunningLoad,
@@ -34,6 +35,7 @@ interface WorkoutLoggerProps {
   onSaveWorkout: (params: {
     strengthExercises?: StrengthExercise[];
     runningSessions?: RunSession[];
+    isOverridden?: boolean;
   }) => void;
   calculateProjectedImpact: (
     draftStrength: StrengthExercise[],
@@ -68,6 +70,10 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 }) => {
   const [successSaved, setSuccessSaved] = useState(false);
   const [showFormulaGuide, setShowFormulaGuide] = useState(false);
+
+  // Advisory guardrail override: armed only after explicit athlete confirmation.
+  const [overrideArmed, setOverrideArmed] = useState(false);
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
 
   // Category and Type Filters for Movement Selection
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory | 'all'>('all');
@@ -266,14 +272,17 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
     });
   };
 
-  // Save workout
-  const handleSave = () => {
+  // Save workout. Advisory gate: a leg-recovery conflict opens the explicit
+  // override modal instead of saving; saving is never hard-blocked.
+  const persistDraft = (withOverride: boolean) => {
     const s = includeStrength ? strengthList : [];
     const r = includeRunning && activeRunToEvaluate.durasiMenit > 0 ? [activeRunToEvaluate] : [];
     onSaveWorkout({
       strengthExercises: s,
       runningSessions: r,
+      isOverridden: withOverride || undefined,
     });
+    setOverrideArmed(false);
     setSuccessSaved(true);
     setTimeout(() => setSuccessSaved(false), 3500);
 
@@ -293,6 +302,15 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
         totalDurationMin: runningDuration + strengthDuration,
       });
     }
+  };
+
+  // Advisory gate entry point for the Save button.
+  const handleSave = () => {
+    if (projectedImpact.legConflict && !overrideArmed) {
+      setShowOverrideModal(true);
+      return;
+    }
+    persistDraft(overrideArmed);
   };
 
   // Update running inputs
@@ -1419,7 +1437,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           </div>
         </div>
 
-        {/* Leg Day 48h Conflict Notice */}
+        {/* Leg Day 48h Conflict Notice (advisory: confirm override or adjust plan) */}
         {projectedImpact.legConflict && (
           <div
             style={{
@@ -1432,12 +1450,29 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               borderLeft: '3px solid var(--color-warning)',
               fontSize: '0.78rem',
               color: 'var(--color-warning)',
+              flexWrap: 'wrap',
             }}
           >
             <AlertTriangle size={16} />
-            <span>
+            <span style={{ flex: 1, minWidth: '220px' }}>
               Caution: Previous leg day completed only {lastLegsHoursAgo}h ago. Avoid heavy quadriceps loading or high-speed intervals today to safeguard knee tendons and hamstrings.
             </span>
+            <button
+              onClick={() => setShowOverrideModal(true)}
+              style={{
+                padding: '0.35rem 0.75rem',
+                borderRadius: 'var(--radius-sm)',
+                background: 'transparent',
+                border: '1px solid var(--color-warning)',
+                color: 'var(--color-warning)',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Lanjutkan tetap
+            </button>
           </div>
         )}
       </div>
@@ -1474,6 +1509,18 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           Save &amp; Log Today&apos;s Workout
         </button>
       </div>
+
+      {/* Advisory guardrail override modal (never hard-blocks saving) */}
+      <GuardrailOverrideModal
+        isOpen={showOverrideModal}
+        conflictSummary={`Sesi kaki terakhir ${lastLegsHoursAgo} jam lalu. Mencatat sesi kaki berat atau lari cepat sekarang melewati jendela pemulihan 48 jam.`}
+        onCancel={() => setShowOverrideModal(false)}
+        onConfirm={() => {
+          setShowOverrideModal(false);
+          setOverrideArmed(true);
+          persistDraft(true);
+        }}
+      />
 
       {/* Floating Interactive Rest Timer Bar */}
       {restSecondsRemaining !== null && (

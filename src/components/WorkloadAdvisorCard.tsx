@@ -29,9 +29,10 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
   lastLegsHoursAgo,
 }) => {
   const isColdStart = acwr.status === 'insufficient_data';
-  const isDanger = acwr.status === 'danger' || acwr.ratio > 1.5;
-  const isWarning = acwr.status === 'warning' || (acwr.ratio > 1.3 && acwr.ratio <= 1.5);
-  const isSweetSpot = acwr.status === 'sweet_spot' || (acwr.ratio >= 0.8 && acwr.ratio <= 1.3 && !isDanger && !isWarning);
+  // Single 1.4 guardrail (AGENTS.md). 'warning' status is legacy-only.
+  const isDanger = acwr.status === 'danger' || acwr.ratio > 1.4;
+  const isWarning = acwr.status === 'warning';
+  const isSweetSpot = acwr.status === 'sweet_spot' || (acwr.ratio >= 0.8 && acwr.ratio <= 1.4 && !isDanger && !isWarning);
 
   // Status warna
   const statusColor = isColdStart
@@ -494,6 +495,46 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
             }}
           >
             <strong style={{ color: 'var(--accent-neon)' }}>Actionable Plan:</strong> {recommendation.workoutDetail.suggestedAction}
+          </div>
+        )}
+
+        {/* Interference guardrail state: warning, speed-run lock, allowed types */}
+        {recommendation.guardrail.level !== 'none' && (
+          <div
+            style={{
+              marginTop: '0.75rem',
+              padding: '0.65rem 0.85rem',
+              borderRadius: 'var(--radius-sm)',
+              background: 'rgba(245, 158, 11, 0.08)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              fontSize: '0.8rem',
+              lineHeight: 1.4,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.3rem' }}>
+              <strong style={{ color: 'var(--color-warning)' }}>{recommendation.guardrail.warningTitle}</strong>
+              {recommendation.workoutDetail.speedRunLocked && (
+                <span
+                  style={{
+                    fontSize: '0.68rem',
+                    fontWeight: 700,
+                    padding: '0.15rem 0.5rem',
+                    borderRadius: 'var(--radius-full)',
+                    background: 'rgba(239, 68, 68, 0.12)',
+                    color: 'var(--color-danger)',
+                    border: '1px solid rgba(239, 68, 68, 0.35)',
+                  }}
+                >
+                  Lari tempo/interval terkunci
+                </span>
+              )}
+            </div>
+            <div style={{ color: 'var(--text-secondary)' }}>{recommendation.guardrail.warningMessage}</div>
+            {recommendation.guardrail.allowedRunningTypes.length > 0 && (
+              <div style={{ marginTop: '0.4rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                Lari yang diizinkan: <strong style={{ color: '#FFFFFF' }}>{recommendation.guardrail.allowedRunningTypes.join(', ')}</strong>
+              </div>
+            )}
           </div>
         )}
 

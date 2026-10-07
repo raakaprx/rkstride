@@ -15,6 +15,7 @@ import {
   calculateACWR,
   getWorkoutRecommendation,
   calculateReadinessScore,
+  auditWeeklySchedule,
 } from '@/lib/engine/workload';
 import {
   SmartwatchDeviceState,
@@ -108,10 +109,25 @@ export function useWorkoutEngine() {
     return calculateACWR(history);
   }, [history]);
 
-  // Dynamic recommendation for today
+  // Dynamic recommendation for today. Tomorrow's planned run (from the
+  // weekly schedule) is passed through so the Recovery Exemption branch
+  // (Zone 1-2 <= 45 min) is reachable from the app, not just from tests.
   const recommendation: RecommendationResult = useMemo(() => {
-    return getWorkoutRecommendation(acwrResult.ratio, todayReadiness, lastLegsTrainedHoursAgo);
-  }, [acwrResult.ratio, lastLegsTrainedHoursAgo, todayReadiness]);
+    const todayIdx = (new Date().getDay() + 6) % 7; // Mon=0..Sun=6
+    const tomorrow = weeklySchedule.find((d) => d.dayIndex === (todayIdx + 1) % 7);
+    const runTypeMap: Record<string, 'recovery' | 'easy' | 'tempo' | 'intervals' | 'norwegian_4x4' | 'long_run'> = {
+      run_recovery: 'recovery',
+      run_easy: 'easy',
+      run_tempo: 'tempo',
+      run_intervals: 'intervals',
+      norwegian_4x4: 'norwegian_4x4',
+      run_long: 'long_run',
+    };
+    const plannedRun = tomorrow && runTypeMap[tomorrow.category]
+      ? { type: runTypeMap[tomorrow.category], durationMinutes: tomorrow.targetDurationMinutes }
+      : undefined;
+    return getWorkoutRecommendation(acwrResult.ratio, todayReadiness, lastLegsTrainedHoursAgo, 999, plannedRun);
+  }, [acwrResult.ratio, lastLegsTrainedHoursAgo, todayReadiness, weeklySchedule]);
 
   // Composite readiness score (0 - 100)
   const readinessResult = useMemo(() => {
@@ -119,28 +135,20 @@ export function useWorkoutEngine() {
   }, [todayReadiness]);
   const readinessScore = readinessResult.score;
 
-  // Weekly schedule conflict detector
+  // Weekly schedule conflict detector. Engine-based audit (both directions
+  // + Recovery Exemption via auditWeeklySchedule) plus a complementary
+  // cardio-density heuristic (3 consecutive runs).
   const scheduleConflicts = useMemo<ScheduleConflict[]>(() => {
-    const conflicts: ScheduleConflict[] = [];
+    const conflicts: ScheduleConflict[] = auditWeeklySchedule(
+      weeklySchedule,
+      todayReadiness,
+      readinessScore
+    );
 
     for (let i = 0; i < weeklySchedule.length; i++) {
       const current = weeklySchedule[i];
       const nextIndex = (i + 1) % weeklySchedule.length;
       const next = weeklySchedule[nextIndex];
-
-      // If today is Legs and tomorrow is high intensity running (Tempo / Long Run / Norwegian 4x4)
-      if (
-        current.category === 'legs' &&
-        (next.category === 'run_tempo' || next.category === 'run_long' || next.category === 'norwegian_4x4' || next.category === 'run_intervals')
-      ) {
-        conflicts.push({
-          dayIndex: next.dayIndex,
-          dayName: next.dayName,
-          severity: 'danger',
-          message: `Schedule Conflict: ${next.dayName} has ${next.title} scheduled immediately following ${current.dayName} (Leg Day).`,
-          suggestion: `Reschedule ${next.dayName} to Easy Run / Upper Body / Rest Day to honor the 48-hour patellar and hamstring recovery window.`,
-        });
-      }
 
       // If 3 consecutive days of running without recovery
       const prevIndex = (i - 1 + weeklySchedule.length) % weeklySchedule.length;
@@ -158,7 +166,7 @@ export function useWorkoutEngine() {
     }
 
     return conflicts;
-  }, [weeklySchedule]);
+  }, [weeklySchedule, todayReadiness, readinessScore]);
 
   // Mengubah jadwal satu hari tertentu
   const updateDaySchedule = useCallback((dayIndex: number, updates: Partial<ScheduledDay>) => {
@@ -282,16 +290,12 @@ export function useWorkoutEngine() {
 
       let projectedStatus: ACWRResult['status'] = 'sweet_spot';
       let isOverloaded = false;
-      let advice = 'Planned workload is in the optimal athletic adaptation zone (Sweet Spot 0.8 - 1.3).';
+      let advice = 'Planned workload is in the optimal athletic adaptation zone (Sweet Spot 0.8 - 1.4).';
 
-      if (projectedRatio > 1.5) {
+      if (projectedRatio > 1.4) {
         projectedStatus = 'danger';
         isOverloaded = true;
-        advice = `⚠️ INDIKATOR RISIKO LONJAKAN BEBAN: Rasio proyeksi (${projectedRatio}) berada di Zona Bahaya (> 1.5). Kurangi volume atau intensitas kardio.`;
-      } else if (projectedRatio > 1.3) {
-        projectedStatus = 'warning';
-        isOverloaded = false;
-        advice = `Zona Waspada (${projectedRatio} ACWR). Beban mendekati batas atas adaptasi. Monitor tingkat kelelahan secara berkala.`;
+        advice = `Indikator Risiko Lonjakan Beban: Rasio proyeksi (${projectedRatio}) berada di Zona Bahaya (> 1.4). Kurangi volume atau intensitas kardio.`;
       } else if (projectedRatio < 0.8) {
         projectedStatus = 'undertraining';
         advice = `Stimulus ringan (${projectedRatio} ACWR). Aman untuk progressive overload bertahap.`;
@@ -321,25 +325,31 @@ export function useWorkoutEngine() {
     [history, lastLegsTrainedHoursAgo, todayReadiness]
   );
 
-  // Simpan log latihan hari ini
+  // Simpan log latihan hari ini. isOverridden records an explicit
+  // athlete override of an interference warning (advisory guardrail,
+  // never hard-blocking) on the logged running sessions.
   const logTodayWorkout = useCallback(
     (params: {
       strengthExercises?: StrengthExercise[];
       runningSessions?: RunSession[];
+      isOverridden?: boolean;
     }) => {
       let load = 0;
       if (params.strengthExercises && params.strengthExercises.length > 0) {
         load += calculateStrengthLoad(params.strengthExercises);
       }
-      if (params.runningSessions && params.runningSessions.length > 0) {
-        load += params.runningSessions.reduce((acc, curr) => acc + calculateRunningLoad(curr), 0);
+      const runningSessions = (params.runningSessions || []).map((r) =>
+        params.isOverridden ? { ...r, isOverridden: true } : r
+      );
+      if (runningSessions.length > 0) {
+        load += runningSessions.reduce((acc, curr) => acc + calculateRunningLoad(curr), 0);
       }
 
       const todayStr = new Date().toISOString().split('T')[0];
       const newEntry: DailyLog = {
         tanggal: todayStr,
         strengthWorkouts: params.strengthExercises || [],
-        runningWorkouts: params.runningSessions || [],
+        runningWorkouts: runningSessions,
         totalLoadScore: load,
       };
 

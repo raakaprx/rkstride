@@ -63,10 +63,9 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
     ? `${pathD} L ${points[points.length - 1].x},${padding.top + graphHeight} L ${points[0].x},${padding.top + graphHeight} Z`
     : '';
 
-  // Horizontal threshold levels
+  // Horizontal threshold levels (single 1.4 guardrail)
   const ySweetMin = padding.top + graphHeight - (0.8 / maxRatio) * graphHeight;
-  const ySweetMax = padding.top + graphHeight - (1.3 / maxRatio) * graphHeight;
-  const yWarningMax = padding.top + graphHeight - (1.5 / maxRatio) * graphHeight;
+  const yDanger = padding.top + graphHeight - (1.4 / maxRatio) * graphHeight;
 
   return (
     <div
@@ -112,15 +111,11 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.72rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(204, 255, 0, 0.25)', border: '1px solid var(--accent-neon)' }} />
-            <span style={{ color: 'var(--text-secondary)' }}>Sweet Spot (0.8 - 1.3)</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-            <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(234, 179, 8, 0.3)', border: '1px solid #EAB308' }} />
-            <span style={{ color: 'var(--text-secondary)' }}>Waspada (1.3 - 1.5)</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Sweet Spot (0.8 - 1.4)</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(239, 68, 68, 0.3)', border: '1px solid #EF4444' }} />
-            <span style={{ color: 'var(--text-secondary)' }}>Bahaya (&gt; 1.5)</span>
+            <span style={{ color: 'var(--text-secondary)' }}>Bahaya (&gt; 1.4)</span>
           </div>
         </div>
       </div>
@@ -182,22 +177,13 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
           viewBox={`0 0 ${svgWidth} ${svgHeight}`}
           style={{ width: '100%', minWidth: '550px', height: 'auto', display: 'block' }}
         >
-          {/* Sweet Spot Band (0.8 - 1.3) */}
+          {/* Sweet Spot Band (0.8 - 1.4) */}
           <rect
             x={padding.left}
-            y={ySweetMax}
+            y={yDanger}
             width={graphWidth}
-            height={Math.max(0, ySweetMin - ySweetMax)}
+            height={Math.max(0, ySweetMin - yDanger)}
             fill="rgba(204, 255, 0, 0.06)"
-          />
-
-          {/* Warning Band (1.3 - 1.5) */}
-          <rect
-            x={padding.left}
-            y={yWarningMax}
-            width={graphWidth}
-            height={Math.max(0, ySweetMax - yWarningMax)}
-            fill="rgba(234, 179, 8, 0.06)"
           />
 
           {/* Horizontal Reference Lines */}
@@ -216,28 +202,15 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
 
           <line
             x1={padding.left}
-            y1={ySweetMax}
+            y1={yDanger}
             x2={svgWidth - padding.right}
-            y2={ySweetMax}
-            stroke="rgba(204, 255, 0, 0.4)"
-            strokeDasharray="4 4"
-            strokeWidth="1"
-          />
-          <text x={svgWidth - padding.right + 4} y={ySweetMax + 3} fill="var(--text-muted)" fontSize="9">
-            1.3
-          </text>
-
-          <line
-            x1={padding.left}
-            y1={yWarningMax}
-            x2={svgWidth - padding.right}
-            y2={yWarningMax}
+            y2={yDanger}
             stroke="rgba(239, 68, 68, 0.4)"
             strokeDasharray="4 4"
             strokeWidth="1"
           />
-          <text x={svgWidth - padding.right + 4} y={yWarningMax + 3} fill="#EF4444" fontSize="9">
-            1.5
+          <text x={svgWidth - padding.right + 4} y={yDanger + 3} fill="#EF4444" fontSize="9">
+            1.4
           </text>
 
           {/* Area fill */}

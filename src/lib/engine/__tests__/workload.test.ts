@@ -15,6 +15,7 @@ import {
   estimate1RM,
   calculateWeeklyMuscleVolume,
   getWorkoutRecommendation,
+  auditWeeklySchedule,
   RUNNING_PRESETS,
 } from '../workload';
 import {
@@ -27,6 +28,7 @@ import {
   DailyLog,
   ReadinessCheckIn,
   UserProfile,
+  WorkoutCategory,
 } from '@/types/workout';
 
 describe('Workload & Sports Science Engine - Unit Tests', () => {
@@ -211,11 +213,34 @@ describe('Workload & Sports Science Engine - Unit Tests', () => {
       expect(spike.spikePercent).toBe(100);
     });
 
-    it('covers all ACWR status zones gaplessly', () => {
+    it('covers all ACWR status zones with the single 1.4 guardrail (AGENTS.md)', () => {
       expect(ACWR_THRESHOLDS.UNDERTRAINING_MAX).toBe(0.8);
-      expect(ACWR_THRESHOLDS.SWEET_SPOT_MAX).toBe(1.3);
-      expect(ACWR_THRESHOLDS.WARNING_MAX).toBe(1.5);
-      expect(ACWR_THRESHOLDS.DANGER_THRESHOLD).toBe(1.5);
+      expect(ACWR_THRESHOLDS.SWEET_SPOT_MAX).toBe(1.4);
+      expect(ACWR_THRESHOLDS.DANGER_THRESHOLD).toBe(1.4);
+      expect('WARNING_MAX' in ACWR_THRESHOLDS).toBe(false);
+    });
+
+    it('classifies ratio exactly 1.4 as sweet_spot and above 1.4 as danger', () => {
+      const atBoundary: DailyLog[] = Array.from({ length: 28 }, (_, index) => ({
+        tanggal: `2026-09-${28 - index}`,
+        strengthWorkouts: [],
+        runningWorkouts: [],
+        // Acute avg 560, chronic avg (7*560 + 21*346.67)/28 = 400 -> ratio 1.4
+        totalLoadScore: index < 7 ? 560 : 346.67,
+      }));
+      const boundaryRes = calculateACWR(atBoundary, 'rolling_coupled');
+      expect(boundaryRes.ratio).toBeCloseTo(1.4, 1);
+      expect(boundaryRes.status).toBe('sweet_spot');
+
+      const aboveBoundary: DailyLog[] = Array.from({ length: 28 }, (_, index) => ({
+        tanggal: `2026-09-${28 - index}`,
+        strengthWorkouts: [],
+        runningWorkouts: [],
+        totalLoadScore: index < 7 ? 700 : 350, // ratio 1.6
+      }));
+      const aboveRes = calculateACWR(aboveBoundary, 'rolling_coupled');
+      expect(aboveRes.ratio).toBeGreaterThan(1.4);
+      expect(aboveRes.status).toBe('danger');
     });
   });
 
@@ -368,7 +393,7 @@ describe('Workload & Sports Science Engine - Unit Tests', () => {
   });
 
   describe('Workout Recommendation Engine', () => {
-    it('recommends deload attenuation (-20% to -40%) when in ACWR danger zone (> 1.5)', () => {
+    it('recommends deload attenuation (-20% to -40%) when in ACWR danger zone (> 1.4)', () => {
       const readiness: ReadinessCheckIn = {
         sleepHours: 6.0,
         muscleSoreness: 3,
@@ -380,6 +405,120 @@ describe('Workload & Sports Science Engine - Unit Tests', () => {
       const rec = getWorkoutRecommendation(1.65, readiness, 24);
       expect(rec.volumeAdjustmentPercent).toBeLessThanOrEqual(-20);
       expect(rec.volumeAdjustmentPercent).toBeGreaterThanOrEqual(-40);
+    });
+
+    it('recommends a safe progressive overload step when ACWR < 0.8', () => {
+      const readiness: ReadinessCheckIn = {
+        sleepHours: 8.0,
+        muscleSoreness: 1,
+        legFatigue: false,
+        energyLevel: 'high',
+        restingHeartRate: 50,
+      };
+
+      const rec = getWorkoutRecommendation(0.75, readiness, 999);
+      expect(rec.workoutDetail.title).toContain('Progressive Overload Aman');
+      expect(rec.volumeAdjustmentPercent).toBe(5);
+      expect(rec.workoutDetail.suggestedAction).toContain('+2.5');
+    });
+
+    it('reaches the Recovery Exemption branch when the planned run is easy Zone 2 <= 45 min', () => {
+      const readiness: ReadinessCheckIn = {
+        sleepHours: 7.5,
+        muscleSoreness: 2,
+        legFatigue: true,
+        energyLevel: 'moderate',
+        restingHeartRate: 52,
+      };
+
+      const rec = getWorkoutRecommendation(1.0, readiness, 24, 999, {
+        type: 'easy',
+        durationMinutes: 40,
+      });
+      expect(rec.guardrail.level).toBe('none');
+      expect(rec.guardrail.warningTitle).toContain('Aman');
+    });
+
+    it('locks fast running when the planned run is Norwegian 4x4 within 48h of legs', () => {
+      const readiness: ReadinessCheckIn = {
+        sleepHours: 7.0,
+        muscleSoreness: 3,
+        legFatigue: true,
+        energyLevel: 'moderate',
+        restingHeartRate: 54,
+      };
+
+      const rec = getWorkoutRecommendation(1.0, readiness, 24, 999, {
+        type: 'norwegian_4x4',
+        durationMinutes: 44,
+      });
+      expect(rec.guardrail.level).not.toBe('none');
+      expect(rec.guardrail.conflictDirection).toBe('legs_to_run');
+      expect(rec.workoutDetail.speedRunLocked).toBe(true);
+    });
+  });
+
+  describe('Weekly Schedule Audit (engine delegation)', () => {
+    const baseReadiness: ReadinessCheckIn = {
+      sleepHours: 7.5,
+      muscleSoreness: 2,
+      legFatigue: false,
+      energyLevel: 'moderate',
+      restingHeartRate: 52,
+    };
+
+    const makeDay = (dayIndex: number, category: WorkoutCategory, title: string, minutes = 60) => ({
+      id: `sch-${dayIndex}`,
+      dayName: (['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'] as const)[dayIndex],
+      dayIndex,
+      category,
+      title,
+      targetDurationMinutes: minutes,
+      isRestDay: false,
+    });
+
+    it('flags legs followed by a fast run the next day (legs_to_run)', () => {
+      const schedule = [
+        makeDay(0, 'legs', 'Heavy Squats', 70),
+        makeDay(1, 'norwegian_4x4', 'Norwegian 4x4', 44),
+        makeDay(2, 'push', 'Upper Push', 60),
+        makeDay(3, 'mobility_recovery', 'Rest', 30),
+        makeDay(4, 'pull', 'Pull Day', 60),
+        makeDay(5, 'push', 'Upper Pump', 50),
+        makeDay(6, 'run_easy', 'Easy Run', 40),
+      ];
+      const conflicts = auditWeeklySchedule(schedule, baseReadiness, 85);
+      const legsToRun = conflicts.filter((c) => c.dayIndex === 1);
+      expect(legsToRun.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('flags legs the day after a fast run (run_to_legs)', () => {
+      const schedule = [
+        makeDay(0, 'run_tempo', 'Threshold Run', 50),
+        makeDay(1, 'legs', 'Heavy Squats', 70),
+        makeDay(2, 'push', 'Upper Push', 60),
+        makeDay(3, 'mobility_recovery', 'Rest', 30),
+        makeDay(4, 'pull', 'Pull Day', 60),
+        makeDay(5, 'push', 'Upper Pump', 50),
+        makeDay(6, 'run_easy', 'Easy Run', 40),
+      ];
+      const conflicts = auditWeeklySchedule(schedule, baseReadiness, 85);
+      const runToLegs = conflicts.filter((c) => c.dayIndex === 1);
+      expect(runToLegs.length).toBeGreaterThanOrEqual(1);
+    });
+
+    it('exempts an easy Zone 2 run <= 45 min after legs (Recovery Exemption)', () => {
+      const schedule = [
+        makeDay(0, 'legs', 'Heavy Squats', 70),
+        makeDay(1, 'run_easy', 'Zone 2 Flush', 40),
+        makeDay(2, 'push', 'Upper Push', 60),
+        makeDay(3, 'mobility_recovery', 'Rest', 30),
+        makeDay(4, 'pull', 'Pull Day', 60),
+        makeDay(5, 'push', 'Upper Pump', 50),
+        makeDay(6, 'run_easy', 'Easy Run', 40),
+      ];
+      const conflicts = auditWeeklySchedule(schedule, baseReadiness, 85);
+      expect(conflicts.filter((c) => c.dayIndex === 1)).toHaveLength(0);
     });
   });
 });

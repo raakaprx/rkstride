@@ -264,14 +264,13 @@ runTest(
   `Days: ${acwrColdStart.daysCollected}/${ACWR_COLD_START_MIN_DAYS}, Progress: ${acwrColdStart.coldStartProgressPercent}%`
 );
 
-// 3.5 Gapless ACWR Zone Thresholds
+// 3.5 Gapless ACWR Zone Thresholds (single 1.4 guardrail, AGENTS.md)
 runTest(
-  'ACWR Gapless Thresholds (<0.8, 0.8-1.3, 1.3-1.5, >1.5)',
+  'ACWR Gapless Thresholds (<0.8, 0.8-1.4, >1.4)',
   () =>
     ACWR_THRESHOLDS.UNDERTRAINING_MAX === 0.8 &&
-    ACWR_THRESHOLDS.SWEET_SPOT_MAX === 1.3 &&
-    ACWR_THRESHOLDS.WARNING_MAX === 1.5 &&
-    ACWR_THRESHOLDS.DANGER_THRESHOLD === 1.5,
+    ACWR_THRESHOLDS.SWEET_SPOT_MAX === 1.4 &&
+    ACWR_THRESHOLDS.DANGER_THRESHOLD === 1.4,
   'Zone boundaries strictly cover all numeric ranges without gaps'
 );
 

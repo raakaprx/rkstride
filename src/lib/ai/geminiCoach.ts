@@ -196,7 +196,7 @@ CORE PRINCIPLES & SAFEGUARDS:
    You are an athletic decision-support tool. You NEVER provide medical diagnoses or prescribe medical treatment.
    If the athlete mentions chest pain, severe palpitations, sudden dizziness/fainting, or acute joint/ligament injuries, immediately instruct them to stop exercising and consult a medical doctor.
 2. EVIDENCE-BASED SPORTS SCIENCE:
-   - ACWR (Dr. Tim Gabbett): Sweet Spot (0.8 - 1.3), Warning (1.3 - 1.5), Danger (> 1.5 triggers deload -20% to -40%).
+   - ACWR (Dr. Tim Gabbett): Sweet Spot (0.8 - 1.4), Danger (> 1.4 triggers deload -20% to -40%).
    - Concurrent Training Interference (Hickson / Baar): 48-hour recovery window between leg day and high-speed running (Norwegian 4x4, track intervals, tempo). Zone 1-2 easy recovery running (<= 45 min) is always permitted.
    - Foster Session RPE (sRPE): Universal workload metric (duration * RPE).
 3. COACHING VOICE & STYLE:
@@ -208,8 +208,7 @@ CORE PRINCIPLES & SAFEGUARDS:
     return `${baseInstruction}\n\nNOTE: The user has disabled biometric telemetry sharing. Answer athletic questions based strictly on general sports science principles without personalized context.`;
   }
 
-  const isDanger = ctx.acwrRatio > 1.5;
-  const isWarning = ctx.acwrRatio > 1.3 && ctx.acwrRatio <= 1.5;
+  const isDanger = ctx.acwrRatio > 1.4;
   const legLocked = ctx.lastLegsHoursAgo < 48;
 
   return `${baseInstruction}
@@ -218,14 +217,13 @@ ATHLETE AGGREGATED TELEMETRY (ANONYMIZED HIGH-LEVEL METRICS):
 - ACWR Ratio: ${ctx.acwrRatio} (${ctx.acwrStatus.toUpperCase()})
 - Acute Load (7-day avg): ${ctx.acuteLoad} pts/day | Chronic Load (28-day avg): ${ctx.chronicLoad} pts/day
 - Smartwatch Readiness Score: ${ctx.readinessScore}/100
-- Sleep Duration: ${ctx.readiness.sleepHours} hrs | Resting Heart Rate: ${ctx.readiness.restingHeartRate || 52} bpm
+- Sleep Duration: ${ctx.readiness.sleepHours} hrs | Resting Heart Rate: ${ctx.readiness.restingHeartRate != null ? `${ctx.readiness.restingHeartRate} bpm` : 'belum diukur'}
 - Muscle DOMS: ${ctx.readiness.muscleSoreness}/5 | Leg Fatigue: ${ctx.readiness.legFatigue ? 'FATIGUED' : 'FRESH'}
 - Hours Since Previous Leg Session: ${ctx.lastLegsHoursAgo < 900 ? `${ctx.lastLegsHoursAgo}h` : '> 72h'} (48h Window: ${legLocked ? 'ACTIVE' : 'CLEARED'})
 ${ctx.recentWorkoutSummary ? `- Recent Session: ${ctx.recentWorkoutSummary.strengthExercisesCount} strength exercises, ${ctx.recentWorkoutSummary.runningKm} km running (${ctx.recentWorkoutSummary.runningMinutes}m), Session Load: ${ctx.recentWorkoutSummary.totalLoadScore} pts.` : ''}
 
 DIRECTIVES BASED ON ATHLETE STATE:
-${isDanger ? '- CRITICAL: ACWR is in Danger Zone (> 1.5). Emphasize immediate volume reduction (-30% to -40%) and active mobility.' : ''}
-${isWarning ? '- NOTICE: ACWR is in Warning Zone (1.3 - 1.5). Recommend holding steady volume without aggressive jumps.' : ''}
+${isDanger ? '- CRITICAL: ACWR is in Danger Zone (> 1.4). Emphasize immediate volume reduction (-30% to -40%) and active mobility.' : ''}
 ${legLocked ? '- NOTICE: 48-hour leg window is currently active. Do NOT recommend heavy squats or fast interval running today (only light Zone 1/2 < 45m or Upper Body).' : ''}`;
 }
 
@@ -270,7 +268,7 @@ Silakan tanyakan menu latihan, jadwal besok, atau analisis beban fisik Anda!`;
     const acwr = ctx?.acwrRatio ?? 1.0;
     const readiness = ctx?.readinessScore ?? 80;
 
-    if (acwr > 1.5) {
+    if (acwr > 1.4) {
       return `### Rekomendasi Menu Latihan Besok (rkbot)
 
 Status Beban Latihan: Lonjakan Akut (ACWR ${acwr}).
@@ -322,9 +320,8 @@ Pastikan melakukan pemanasan mobilitas 10 menit sebelum memulai sesi berintensit
 Pengiriman telemetri saat ini dinonaktifkan dalam preferensi privasi Anda.
 Secara umum, ambang batas **Acute:Chronic Workload Ratio (ACWR)** adalah:
 - **< 0.8**: *Undertraining* (aman menerapkan progressive overload bertahap).
-- **0.8 - 1.3**: *Sweet Spot* (zona adaptasi kebugaran optimal dengan risiko cedera paling rendah).
-- **1.3 - 1.5**: *Zona Waspada* (beban meningkat cepat, pantau pemulihan harian).
-- **> 1.5**: *Zona Bahaya* (lonjakan beban akut tinggi, disarankan deload volume -20% s.d. -40%).`;
+- **0.8 - 1.4**: *Sweet Spot* (zona adaptasi kebugaran optimal dengan risiko cedera paling rendah).
+- **> 1.4**: *Zona Bahaya* (lonjakan beban akut tinggi, disarankan deload volume -20% s.d. -40%).`;
     }
 
     const statusText =
@@ -344,15 +341,13 @@ Berdasarkan telemetri performa Anda saat ini:
 - **Rasio ACWR:** **${ctx.acwrRatio}** (${statusText})
 - **Beban Akut (7 Hari):** ${ctx.acuteLoad} pts/hari
 - **Beban Kronis (28 Hari):** ${ctx.chronicLoad} pts/hari
-- **Skor Kesiapan Biometrik:** ${ctx.readinessScore}/100 (${ctx.readiness.sleepHours} jam tidur, RHR ${ctx.readiness.restingHeartRate || 52} bpm)
+- **Skor Kesiapan Biometrik:** ${ctx.readinessScore}/100 (${ctx.readiness.sleepHours} jam tidur, RHR ${ctx.readiness.restingHeartRate != null ? `${ctx.readiness.restingHeartRate} bpm` : 'belum diukur'})
 
 ${
-  ctx.acwrRatio > 1.5
-    ? '**Rekomendasi Utama:** Beban akut Anda melonjak melewati batas 1.5. Risiko kelelahan sistemik meningkat. Lakukan active recovery atau mobility session, hindari menambah beban berat hari ini.'
-    : ctx.acwrRatio > 1.3
-    ? '**Rekomendasi Utama:** Beban berada di Zona Waspada (1.3-1.5). Pertahankan beban yang ada dan monitor kualitas pemulihan.'
+  ctx.acwrRatio > 1.4
+    ? '**Rekomendasi Utama:** Beban akut Anda melonjak melewati batas 1.4. Risiko kelelahan sistemik meningkat. Lakukan active recovery atau mobility session, hindari menambah beban berat hari ini.'
     : ctx.acwrRatio >= 0.8
-    ? '**Rekomendasi Utama:** Anda berada di Sweet Spot ideal (0.8–1.3). Kapasitas adaptasi kardiorespirasi dan hipertrofi otot berada pada titik optimal.'
+    ? '**Rekomendasi Utama:** Anda berada di Sweet Spot ideal (0.8–1.4). Kapasitas adaptasi kardiorespirasi dan hipertrofi otot berada pada titik optimal.'
     : '**Rekomendasi Utama:** Beban Anda saat ini tergolong ringan. Aman untuk menerapkan progressive overload bertahap.'
 }`;
   }

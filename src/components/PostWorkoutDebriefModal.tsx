@@ -35,7 +35,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
 }) => {
   if (!isOpen) return null;
 
-  const isSweetSpot = debriefData.projectedACWR >= 0.8 && debriefData.projectedACWR <= 1.3;
+  const isSweetSpot = debriefData.projectedACWR >= 0.8 && debriefData.projectedACWR <= 1.4;
   const isSpike = debriefData.projectedACWR > 1.4;
 
   const proteinGrams = debriefData.hasLegWorkout ? '30–35g' : '25–30g';

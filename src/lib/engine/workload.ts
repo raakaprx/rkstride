@@ -24,6 +24,7 @@ import {
   WorkoutCategory,
   StrengthSet,
 } from '@/types/workout';
+import { ScheduledDay, ScheduleConflict } from '@/types/schedule';
 
 import {
   ACWR_THRESHOLDS,
@@ -399,11 +400,10 @@ export function calculateEWMALoad(loadsChronological: number[], lambda: number):
  * - Requires at least ACWR_COLD_START_MIN_DAYS (21 days) of data to classify risk zones.
  * - Under 21 days is flagged as 'insufficient_data' with exact collection progress.
  *
- * Risk Zones without Gaps:
+ * Risk Zones (single 1.4 guardrail per AGENTS.md):
  * - < 0.8: 'undertraining'
- * - 0.8 - 1.3: 'sweet_spot'
- * - 1.3 - 1.5: 'warning'
- * - > 1.5: 'danger'
+ * - 0.8 - 1.4: 'sweet_spot'
+ * - > 1.4: 'danger'
  */
 export function calculateACWR(
   history28Days: DailyLog[],
@@ -449,7 +449,9 @@ export function calculateACWR(
     ratio = Math.round((acuteLoad / chronicLoad) * 100) / 100;
   }
 
-  // Zone Classification without Gaps
+  // Zone Classification: single 1.4 guardrail (AGENTS.md).
+  // NOTE: 'warning' remains in the ACWRStatus union for legacy UI fallback
+  // but the engine no longer emits it.
   let status: ACWRStatus;
   if (isColdStart) {
     status = 'insufficient_data';
@@ -457,8 +459,6 @@ export function calculateACWR(
     status = 'undertraining';
   } else if (ratio <= ACWR_THRESHOLDS.SWEET_SPOT_MAX) {
     status = 'sweet_spot';
-  } else if (ratio <= ACWR_THRESHOLDS.WARNING_MAX) {
-    status = 'warning';
   } else {
     status = 'danger';
   }
@@ -586,6 +586,94 @@ export function evaluateSoftGuardrail(params: EvaluateGuardrailParams): SoftGuar
     conflictDirection: 'none',
     allowedRunningTypes: ['recovery', 'easy', 'tempo', 'norwegian_4x4', 'intervals', 'long_run'],
   };
+}
+
+// =============================================================================
+// 5b. WEEKLY SCHEDULE AUDIT (delegates to the engine guardrail)
+// =============================================================================
+
+const FAST_RUN_CATEGORIES: WorkoutCategory[] = ['run_tempo', 'run_intervals', 'norwegian_4x4'];
+
+function mapScheduleCategoryToRunType(category: WorkoutCategory): RunningType {
+  switch (category) {
+    case 'run_tempo':
+      return 'tempo';
+    case 'run_intervals':
+      return 'intervals';
+    case 'norwegian_4x4':
+      return 'norwegian_4x4';
+    case 'run_recovery':
+      return 'recovery';
+    case 'run_long':
+      return 'long_run';
+    case 'run_easy':
+    default:
+      return 'easy';
+  }
+}
+
+/**
+ * Audit a 7-day planned schedule with the bidirectional engine guardrail.
+ * - Direction 1 (legs -> fast run): previous day is legs, current day is a
+ *   fast run. Consecutive days are ~24h apart (< 48h window).
+ * - Direction 2 (fast run -> legs): previous day is a fast run, current day
+ *   is legs. Assumes ~20h gap (evening run -> next-morning lift), inside the
+ *   24h window.
+ * - Recovery Exemption flows through automatically: easy/recovery runs
+ *   <= 45 min return level 'none' and produce no conflict.
+ */
+export function auditWeeklySchedule(
+  weeklySchedule: ScheduledDay[],
+  readiness: ReadinessCheckIn,
+  readinessScore: number
+): ScheduleConflict[] {
+  const conflicts: ScheduleConflict[] = [];
+  if (!weeklySchedule || weeklySchedule.length === 0) return conflicts;
+
+  for (let i = 0; i < weeklySchedule.length; i++) {
+    const current = weeklySchedule[i];
+    const prev = weeklySchedule[(i - 1 + weeklySchedule.length) % weeklySchedule.length];
+
+    const prevIsLegs = prev.category === 'legs';
+    const prevIsFastRun = FAST_RUN_CATEGORIES.includes(prev.category);
+    const currentIsLegs = current.category === 'legs';
+    const currentIsFastRun = FAST_RUN_CATEGORIES.includes(current.category);
+
+    let guardrail: SoftGuardrailResult | null = null;
+
+    if (prevIsLegs && currentIsFastRun) {
+      guardrail = evaluateSoftGuardrail({
+        lastLegDayHoursAgo: 24,
+        intendedActivity: 'running',
+        runningType: mapScheduleCategoryToRunType(current.category),
+        runningDurationMinutes: current.targetDurationMinutes,
+        muscleSoreness: readiness.muscleSoreness,
+        legFatigue: readiness.legFatigue,
+        readinessScore,
+      });
+    } else if (prevIsFastRun && currentIsLegs) {
+      guardrail = evaluateSoftGuardrail({
+        lastLegDayHoursAgo: 999,
+        lastFastRunHoursAgo: 20,
+        intendedActivity: 'legs',
+        muscleSoreness: readiness.muscleSoreness,
+        legFatigue: readiness.legFatigue,
+        readinessScore,
+      });
+    }
+
+    if (guardrail && guardrail.level !== 'none') {
+      conflicts.push({
+        dayIndex: current.dayIndex,
+        dayName: current.dayName,
+        severity: guardrail.level === 'high_risk' ? 'danger' : 'warning',
+        message: `${current.dayName} (${current.title}) ${guardrail.conflictDirection === 'legs_to_run' ? `dijadwalkan sehari setelah Leg Day (${prev.dayName})` : `berupa Leg Day sehari setelah lari cepat (${prev.dayName})`}: ${guardrail.warningTitle}.`,
+        suggestion: guardrail.suggestedAction,
+      });
+    }
+  }
+
+  return conflicts;
 }
 
 // =============================================================================
@@ -789,28 +877,36 @@ export function calculateWeeklyMuscleVolume(
 
 /**
  * Adaptive Sports Science Workout Advisor
- * Combines ACWR status (with dynamic deload attenuation -20% to -40%),
- * soft interference guardrail, and tendon alerts.
+ * Combines ACWR status (single 1.4 guardrail with dynamic deload
+ * attenuation -20% to -40%), soft interference guardrail, and tendon alerts.
+ *
+ * Zones: < 0.8 undertraining (safe progressive overload step),
+ * 0.8 - 1.4 sweet spot, > 1.4 danger (deload).
  */
 export function getWorkoutRecommendation(
   acwrRatio: number,
   readiness: ReadinessCheckIn,
   lastLegDayHoursAgo: number,
-  lastFastRunHoursAgo: number = 999
+  lastFastRunHoursAgo: number = 999,
+  plannedRun?: { type: RunningType; durationMinutes: number }
 ): RecommendationResult {
   const readinessResult = calculateReadinessScore(readiness);
+  // Default preserves the legacy probe (hard interval session) so the
+  // Recovery Exemption branch is reachable whenever callers pass the
+  // actually planned run (type + duration) instead.
+  const probeRun = plannedRun ?? { type: 'norwegian_4x4' as RunningType, durationMinutes: 44 };
   const guardrail = evaluateSoftGuardrail({
     lastLegDayHoursAgo,
     lastFastRunHoursAgo,
     intendedActivity: 'running',
-    runningType: 'norwegian_4x4',
-    runningDurationMinutes: 44,
+    runningType: probeRun.type,
+    runningDurationMinutes: probeRun.durationMinutes,
     muscleSoreness: readiness.muscleSoreness,
     legFatigue: readiness.legFatigue,
     readinessScore: readinessResult.score,
   });
 
-  // 1. Danger Zone: ACWR > 1.5 (High acute spike)
+  // 1. Danger Zone: ACWR > 1.4 (acute spike -> overtraining warning + deload)
   if (acwrRatio > ACWR_THRESHOLDS.DANGER_THRESHOLD) {
     const deloadPercent = readinessResult.score < 50
       ? DELOAD_ATTENUATION.AGGRESSIVE
@@ -818,7 +914,7 @@ export function getWorkoutRecommendation(
 
     return {
       targetCategory: 'mobility_recovery',
-      warningMessage: `Indikator Risiko Lonjakan Beban: Rasio ACWR (${acwrRatio}) berada di Zona Bahaya (> 1.5). Terdeteksi kenaikan beban latihan akut yang signifikan.`,
+      warningMessage: `Indikator Risiko Lonjakan Beban: Rasio ACWR (${acwrRatio}) berada di Zona Bahaya (> 1.4). Terdeteksi kenaikan beban latihan akut yang signifikan.`,
       volumeAdjustmentPercent: deloadPercent,
       guardrail,
       workoutDetail: {
@@ -832,29 +928,7 @@ export function getWorkoutRecommendation(
     };
   }
 
-  // 2. Warning Zone: 1.3 < ACWR <= 1.5
-  if (acwrRatio > ACWR_THRESHOLDS.SWEET_SPOT_MAX) {
-    const deloadPercent = readinessResult.score < 60
-      ? DELOAD_ATTENUATION.MODERATE
-      : DELOAD_ATTENUATION.MILD;
-
-    return {
-      targetCategory: 'run_easy',
-      warningMessage: `Zona Waspada ACWR (${acwrRatio}): Beban latihan sedang berakselerasi mendekati batas aman atas.`,
-      volumeAdjustmentPercent: deloadPercent,
-      guardrail,
-      workoutDetail: {
-        title: 'Stabilisasi Beban Aerobik Zone 2',
-        rationale: 'Beban akut berada pada batas atas zona adaptasi. Direkomendasikan menjaga intensitas tanpa menambah volume secara agresif.',
-        speedRunLocked: guardrail.level !== 'none',
-        suggestedAction: 'Lari stabil Zone 2 selama 35-45 menit atau latihan kekuatan tubuh bagian atas dengan RPE 6-7.',
-        allowedRunningTypes: ['recovery', 'easy'],
-      },
-      tendonWarning: readinessResult.tendonAlert,
-    };
-  }
-
-  // 3. Interference Guardrail Active (< 48 hours post-legs)
+  // 2. Interference Guardrail Active (< 48 hours post-legs)
   if (guardrail.level !== 'none') {
     return {
       targetCategory: 'push',
@@ -872,7 +946,7 @@ export function getWorkoutRecommendation(
     };
   }
 
-  // 4. Low Energy / Readiness Depleted
+  // 3. Low Energy / Readiness Depleted
   if (readiness.energyLevel === 'low' || readinessResult.score < 50) {
     return {
       targetCategory: 'run_easy',
@@ -890,7 +964,24 @@ export function getWorkoutRecommendation(
     };
   }
 
-  // 5. Sweet Spot (ACWR 0.8 - 1.3 & Legs Fresh > 48h)
+  // 4. Underload: ACWR < 0.8 (safe progressive overload step, AGENTS.md)
+  if (acwrRatio < ACWR_THRESHOLDS.UNDERTRAINING_MAX) {
+    return {
+      targetCategory: 'push',
+      volumeAdjustmentPercent: 5,
+      guardrail,
+      workoutDetail: {
+        title: 'Progressive Overload Aman',
+        rationale: `ACWR (${acwrRatio}) berada di bawah 0.8: stimulus latihan saat ini ringan dan kapasitas adaptasi masih longgar.`,
+        speedRunLocked: false,
+        suggestedAction: 'Tambah 1 set ekstra atau +2.5-5 kg pada main lift (upper +2.5 kg, lower/compound +5 kg) dengan RPE target 7-8.',
+        allowedRunningTypes: ['recovery', 'easy', 'tempo', 'norwegian_4x4', 'intervals', 'long_run'],
+      },
+      tendonWarning: readinessResult.tendonAlert,
+    };
+  }
+
+  // 5. Sweet Spot (ACWR 0.8 - 1.4 & Legs Fresh > 48h)
   return {
     targetCategory: 'norwegian_4x4',
     volumeAdjustmentPercent: 0,

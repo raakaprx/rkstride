@@ -34,23 +34,23 @@ export const ACWR_THRESHOLDS = {
   UNDERTRAINING_MAX: 0.8,
 
   /**
-   * Sweet Spot: 0.8 <= ACWR <= 1.3
-   * Optimal athletic adaptation window with lowest statistical injury risk.
+   * Sweet Spot: 0.8 <= ACWR <= 1.4
+   * Optimal athletic adaptation window (AGENTS.md guardrail).
    */
-  SWEET_SPOT_MAX: 1.3,
+  SWEET_SPOT_MAX: 1.4,
 
   /**
-   * Warning (Waspada): 1.3 < ACWR <= 1.5
-   * Workload is accelerating; requires close biometric and recovery monitoring.
+   * Danger (Bahaya): ACWR > 1.4
+   * Acute workload spike; triggers overtraining warning + deload guidance.
+   * Single source of truth per AGENTS.md section 4.2.
    */
-  WARNING_MAX: 1.5,
-
-  /**
-   * Danger (Bahaya): ACWR > 1.5
-   * Acute workload spike; triggers deload guidance.
-   */
-  DANGER_THRESHOLD: 1.5,
+  DANGER_THRESHOLD: 1.4,
 } as const;
+
+/**
+ * Alias for the single high-risk boundary (AGENTS.md: ACWR > 1.4).
+ */
+export const ACWR_HIGH_RISK_THRESHOLD = 1.4;
 
 /**
  * Days required for baseline maturity.
@@ -80,9 +80,9 @@ export const WEEKLY_LOAD_SPIKE_THRESHOLD_PERCENT = 15;
  * Depending on ACWR severity and bio-readiness state, volume adjustments range from -20% to -40%.
  */
 export const DELOAD_ATTENUATION = {
-  MILD: -20, // ACWR 1.3 - 1.5 or moderate readiness
-  MODERATE: -30, // Standard ACWR > 1.5
-  AGGRESSIVE: -40, // ACWR > 1.5 combined with poor bio-readiness / high DOMS
+  MILD: -20, // ACWR slightly above 1.4 with good readiness
+  MODERATE: -30, // Standard ACWR > 1.4
+  AGGRESSIVE: -40, // ACWR > 1.4 combined with poor bio-readiness / high DOMS
 } as const;
 
 // =============================================================================
