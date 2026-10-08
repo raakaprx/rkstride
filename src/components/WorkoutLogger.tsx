@@ -1518,6 +1518,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
       {/* Floating Interactive Rest Timer Bar */}
       {restSecondsRemaining !== null && (
         <div
+          className="rest-timer"
           style={{
             position: 'fixed',
             bottom: '1.5rem',

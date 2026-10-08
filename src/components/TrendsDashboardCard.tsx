@@ -153,6 +153,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
       <>
       {/* SVG Interactive Chart Canvas */}
       <div
+        className="trends-chart"
         style={{
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
@@ -260,8 +261,17 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
         </svg>
       </div>
 
+      {/* Mobile-only scroll hint for the wide chart */}
+      <div
+        className="scroll-hint-mobile"
+        style={{ display: 'none', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}
+      >
+        Geser grafik ke samping untuk melihat seluruh 28 hari
+      </div>
+
       {/* Summary Metrics Bar: Acute vs Chronic */}
       <div
+        className="trends-metrics"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(180px, 100%), 1fr))',

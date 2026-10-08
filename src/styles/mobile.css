@@ -70,6 +70,40 @@
     max-height: 80dvh !important;
   }
 
+  /* Phone-specific content order: numbers before chart */
+  .trends-metrics {
+    order: -1 !important;
+  }
+
+  .trends-chart {
+    order: 0 !important;
+  }
+
+  .scroll-hint-mobile {
+    display: block !important;
+    order: 1 !important;
+  }
+
+  /* Modals breathe on narrow screens */
+  .modal-panel {
+    padding: 1.25rem 1rem !important;
+  }
+
+  /* Slim sticky header: hide tagline, keep brand + rails */
+  .brand-subtitle {
+    display: none !important;
+  }
+
+  /* Rest timer never clips on tiny screens */
+  .rest-timer {
+    left: 0.75rem !important;
+    right: 0.75rem !important;
+    transform: none !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    border-radius: var(--radius-md) !important;
+  }
+
   /* Prevent iOS auto-zoom on focus (inputs must be >= 16px) */
   input[type='text'],
   input[type='number'],

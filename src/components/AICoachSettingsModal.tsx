@@ -42,6 +42,7 @@ export const AICoachSettingsModal: React.FC<AICoachSettingsModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="520px" ariaLabel="Pengaturan AI Coach">
       <div
+        className="modal-panel"
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',

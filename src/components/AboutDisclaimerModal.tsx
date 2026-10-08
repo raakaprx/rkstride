@@ -23,6 +23,7 @@ export const AboutDisclaimerModal: React.FC<AboutDisclaimerModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="680px" ariaLabel="Tentang RKStride dan batasan sains">
       <div
+        className="modal-panel"
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',

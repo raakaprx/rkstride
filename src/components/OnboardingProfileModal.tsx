@@ -101,6 +101,7 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="560px" ariaLabel="Profil fisiologi atlet">
       <div
+        className="modal-panel"
         style={{
           background: 'var(--bg-secondary)',
           border: '1px solid var(--border-default)',

@@ -27,6 +27,7 @@ export const GuardrailOverrideModal: React.FC<GuardrailOverrideModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} maxWidth="480px" ariaLabel="Konfirmasi mandiri override guardrail">
       <div
+        className="modal-panel"
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',

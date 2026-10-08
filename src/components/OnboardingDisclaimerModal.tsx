@@ -20,6 +20,7 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
   return (
     <Modal isOpen={isOpen} onClose={onOpenAboutDetails} maxWidth="540px" ariaLabel="Persetujuan awal RKStride">
       <div
+        className="modal-panel"
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',

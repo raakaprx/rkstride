@@ -108,7 +108,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 Hybrid Engine
               </span>
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <div className="brand-subtitle" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
               Push-Pull-Legs &amp; Running Workload Intelligence
             </div>
           </div>

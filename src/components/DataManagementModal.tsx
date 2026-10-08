@@ -99,6 +99,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} maxWidth="600px" ariaLabel="Manajemen dan portabilitas data">
       <div
+        className="modal-panel"
         style={{
           background: 'var(--bg-secondary)',
           borderRadius: 'var(--radius-lg)',
