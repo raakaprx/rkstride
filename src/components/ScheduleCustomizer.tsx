@@ -48,6 +48,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
 
   return (
     <div
+      className="card-mobile"
       style={{
         background: 'var(--bg-surface)',
         borderRadius: 'var(--radius-lg)',

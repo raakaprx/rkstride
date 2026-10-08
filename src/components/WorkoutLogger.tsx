@@ -330,6 +330,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 
   return (
     <div
+      className="card-mobile"
       style={{
         background: 'var(--bg-surface)',
         borderRadius: 'var(--radius-lg)',

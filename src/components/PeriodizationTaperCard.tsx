@@ -25,6 +25,7 @@ export const PeriodizationTaperCard: React.FC<PeriodizationTaperCardProps> = ({
 
   return (
     <div
+      className="card-mobile"
       style={{
         background: 'var(--bg-secondary)',
         border: isTaperOrRaceWeek ? '1px solid rgba(204, 255, 0, 0.4)' : '1px solid var(--border-default)',

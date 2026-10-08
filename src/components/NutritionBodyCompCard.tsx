@@ -37,6 +37,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
 
   return (
     <div
+      className="card-mobile"
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-default)',

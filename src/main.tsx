@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles/tokens.css';
+import './styles/mobile.css';
 
 // Offline support: register the app-shell service worker in production only.
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {

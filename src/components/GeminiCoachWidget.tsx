@@ -238,6 +238,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
       {/* Chat Window Panel */}
       {isOpen && (
         <div
+          className="coach-panel"
           style={{
             position: 'fixed',
             bottom: '1rem',

@@ -25,6 +25,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
 }) => {
   return (
     <header
+      className="site-header"
       style={{
         background: 'var(--bg-secondary)',
         borderBottom: '1px solid var(--border-subtle)',
@@ -35,6 +36,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
       }}
     >
       <div
+        className="site-header-inner"
         style={{
           maxWidth: '1280px',
           margin: '0 auto',
@@ -114,6 +116,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
 
         {/* Navigation Tabs (Segmented Control) */}
         <nav
+          className="tab-bar"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -234,7 +237,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
         </nav>
 
         {/* Right Action Badges & Modal Triggers */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
           {/* Athlete Profile & Target Race Trigger */}
           {onOpenProfileModal && (
             <button

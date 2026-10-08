@@ -70,6 +70,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
 
   return (
     <div
+      className="card-mobile"
       style={{
         background: 'var(--bg-secondary)',
         border: '1px solid var(--border-default)',

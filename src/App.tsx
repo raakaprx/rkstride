@@ -177,6 +177,7 @@ export default function App() {
 
       {/* Main Container */}
       <main
+        className="app-main"
         style={{
           flex: 1,
           maxWidth: '1280px',

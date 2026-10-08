@@ -80,6 +80,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
 
   return (
     <div
+      className="card-mobile"
       style={{
         background: 'var(--bg-surface)',
         borderRadius: 'var(--radius-lg)',
