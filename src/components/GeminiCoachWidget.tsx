@@ -181,10 +181,11 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
       {/* Floating Launcher Button */}
       {!isOpen && (
         <button
+          className="coach-launcher"
           onClick={() => setIsOpen(true)}
           style={{
             position: 'fixed',
-            bottom: '1.5rem',
+            bottom: 'calc(var(--dock-clearance) + 0.5rem)',
             right: '1.5rem',
             zIndex: 'var(--z-floating)',
             display: 'flex',

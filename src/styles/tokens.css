@@ -10,6 +10,10 @@
   --bg-surface: #171717;
   --bg-surface-elevated: #202026;
   --bg-surface-hover: #26262e;
+  /* Inset tray: recessed wells (bottom dock, number fields, strip rails).
+     One step BELOW --bg-surface on the elevation axis, so the dock reads as
+     part of the device rather than as another card. */
+  --bg-inset: #141417;
 
   /* Accent Colors - Disciplined Athletic Volt Lime */
   --accent-neon: #ccff00;
@@ -27,6 +31,12 @@
   --color-danger-bg: rgba(239, 68, 68, 0.1);
   --color-info: #38bdf8;
   --color-info-bg: rgba(56, 189, 248, 0.08);
+
+  /* Recovery cyan. Semantic, not categorical: only ever marks recovery and
+     aerobic-base work (Zone 1-2, deload, mobility). If it appears on a
+     card that is not about recovery, that is a bug. */
+  --color-recovery: #00f0ff;
+  --color-recovery-bg: rgba(0, 240, 255, 0.08);
 
   /* Categorical chart colors (interval zones, run-type badges) */
   --chart-violet: #a855f7;
@@ -51,6 +61,16 @@
   --font-family-display: 'Syne', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Numeric voice: every measured value (load, kg, pace, ACWR ratio, timer)
+     uses this stack. Tabular figures keep 1.08 -> 1.11 from reflowing
+     mid-set, which is what makes a number readable on a phone held at arm's
+     length with a shaking hand. */
+  --font-family-mono: ui-monospace, 'SF Mono', 'JetBrains Mono', 'Roboto Mono', Menlo, monospace;
+  --font-size-metric-sm: 1.25rem;  /* inline set rows */
+  --font-size-metric-md: 1.75rem;  /* KPI cards */
+  --font-size-metric-lg: 2.75rem;  /* hero ACWR ratio, rest countdown */
+  --tracking-status: 0.08em;       /* uppercase status labels */
+
 
   --font-size-xs: 0.75rem;    /* 12px */
   --font-size-sm: 0.875rem;   /* 14px */
@@ -109,6 +129,15 @@
   --z-modal: 100;
   --z-toast: 200;
   --z-tooltip: 300;
+
+  /* Device safe areas. viewport-fit=cover in index.html is what makes these
+     resolve to real insets instead of 0px. Every fixed bottom surface
+     (dock, rest timer, FAB, coach panel) must offset by the bottom inset. */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --size-dock: 4.25rem;
+  /* Content clearance so nothing hides behind the floating dock. */
+  --dock-clearance: calc(var(--size-dock) + var(--safe-bottom) + 1.5rem);
 }
 
 /* Spinner Animation */
@@ -153,6 +182,12 @@ h1, h2, h3, h4, h5, h6 {
 button {
   min-height: 44px;
   min-width: 44px;
+}
+
+/* Dock-safe scrolling: when a sheet or dock is present the last element must
+   still clear the home indicator. Opt-in via class so desktop is untouched. */
+.dock-safe-bottom {
+  padding-bottom: var(--dock-clearance);
 }
 
 input[type='checkbox'],

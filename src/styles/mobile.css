@@ -63,7 +63,7 @@
   .coach-panel {
     left: 0.75rem !important;
     right: 0.75rem !important;
-    bottom: 0.75rem !important;
+    bottom: calc(var(--dock-clearance) + 0.75rem) !important;
     width: auto !important;
     max-width: none !important;
     height: min(620px, 80dvh) !important;
@@ -94,14 +94,19 @@
     display: none !important;
   }
 
-  /* Rest timer never clips on tiny screens */
+  /* Rest timer and coach launcher clear the bottom dock */
   .rest-timer {
     left: 0.75rem !important;
     right: 0.75rem !important;
+    bottom: calc(var(--dock-clearance) + 0.5rem) !important;
     transform: none !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
     border-radius: var(--radius-md) !important;
+  }
+
+  .coach-launcher {
+    bottom: calc(var(--dock-clearance) + 0.5rem) !important;
   }
 
   /* Prevent iOS auto-zoom on focus (inputs must be >= 16px) */
@@ -114,6 +119,13 @@
   textarea {
     font-size: 16px !important;
   }
+}
+
+/* Floating dock: capped thumb-reach width on wide screens, full-bleed on phones */
+.bottom-dock {
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Global touch polish (all viewports) */

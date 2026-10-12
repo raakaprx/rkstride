@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useWorkoutEngine } from './hooks/useWorkoutEngine';
 import { HeaderNavbar } from './components/HeaderNavbar';
+import { BottomNav, AppTab } from './components/BottomNav';
+import { useOnlineStatus } from './lib/platform';
 import { WorkloadAdvisorCard } from './components/WorkloadAdvisorCard';
 import { WorkoutLogger } from './components/WorkoutLogger';
 import { ScheduleCustomizer } from './components/ScheduleCustomizer';
@@ -22,14 +24,15 @@ import { UserProfile } from './types/workout';
 import { RaceTargetConfig } from './types/productFeatures';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'training' | 'trends' | 'nutrition' | 'schedule' | 'smartwatch'>('training');
+  const [activeTab, setActiveTab] = useState<AppTab>('today');
+  const isOnline = useOnlineStatus();
 
-  const tabTitles: Record<typeof activeTab, string> = {
-    training: 'Latihan & Beban Kerja Hari Ini',
-    trends: 'Tren Beban Kerja ACWR',
-    nutrition: 'Nutrisi & Energi Atlet',
-    schedule: 'Jadwal Latihan Mingguan',
-    smartwatch: 'Smartwatch & Biometrik Harian',
+  const tabTitles: Record<AppTab, string> = {
+    today: 'Latihan Hari Ini',
+    load: 'Beban & Kesiapan',
+    program: 'Program Mingguan',
+    fuel: 'Nutrisi & Energi',
+    coach: 'Pelatih & Perangkat',
   };
 
   // Modals state
@@ -165,10 +168,9 @@ export default function App() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
       {/* Sticky Top Header */}
       <HeaderNavbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
         smartwatchState={smartwatchState}
-        onOpenSmartwatchModal={() => setActiveTab('smartwatch')}
+        isOnline={isOnline}
+        onOpenSmartwatchModal={() => setActiveTab('coach')}
         onOpenDataModal={() => setIsDataModalOpen(true)}
         onOpenAboutModal={() => setIsAboutModalOpen(true)}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
@@ -177,7 +179,7 @@ export default function App() {
 
       {/* Main Container */}
       <main
-        className="app-main"
+        className="app-main dock-safe-bottom"
         style={{
           flex: 1,
           maxWidth: '1280px',
@@ -207,8 +209,8 @@ export default function App() {
             <strong>Gagal memuat data lokal:</strong> {dbError}
           </div>
         )}
-        {/* Tab 1: Menu Utama - Latihan & Evaluasi Beban */}
-        {activeTab === 'training' && (
+        {/* Hari Ini: Menu Utama - Latihan & Evaluasi Beban */}
+        {activeTab === 'today' && (
           <>
             {/* Kartu Target Kompetisi & Tapering Dinamis */}
             {raceConfig.category !== 'none' && (
@@ -238,13 +240,13 @@ export default function App() {
           </>
         )}
 
-        {/* Tab 2: Dashboard Tren ACWR & Beban Kerja 28 Hari */}
-        {activeTab === 'trends' && (
-          <TrendsDashboardCard history={history} onNavigateToLogger={() => setActiveTab('training')} />
+        {/* Beban: Dashboard Tren ACWR & Beban Kerja 28 Hari */}
+        {activeTab === 'load' && (
+          <TrendsDashboardCard history={history} onNavigateToLogger={() => setActiveTab('today')} />
         )}
 
-        {/* Tab 3: Nutrisi & Kebutuhan Energi Atlet Hibrida */}
-        {activeTab === 'nutrition' && (
+        {/* Nutrisi: Nutrisi & Kebutuhan Energi Atlet Hibrida */}
+        {activeTab === 'fuel' && (
           <NutritionBodyCompCard
             userProfile={userProfile}
             todayWorkoutDurationMinutes={debriefData.totalDurationMin || 0}
@@ -253,8 +255,8 @@ export default function App() {
           />
         )}
 
-        {/* Tab 4: Jadwal Mingguan Kustom */}
-        {activeTab === 'schedule' && (
+        {/* Program: Jadwal Mingguan Kustom */}
+        {activeTab === 'program' && (
           <ScheduleCustomizer
             weeklySchedule={weeklySchedule}
             scheduleConflicts={scheduleConflicts}
@@ -263,8 +265,8 @@ export default function App() {
           />
         )}
 
-        {/* Tab 5: Integrasi Jam Pintar Universal (Smartwatch Hub) */}
-        {activeTab === 'smartwatch' && (
+        {/* Coach: Integrasi Jam Pintar Universal (Smartwatch Hub) */}
+        {activeTab === 'coach' && (
           <SmartwatchSyncCard
             smartwatchState={smartwatchState}
             readiness={todayReadiness}
@@ -332,6 +334,16 @@ export default function App() {
       <AICoachSettingsModal
         isOpen={isAiSettingsOpen}
         onClose={() => setIsAiSettingsOpen(false)}
+      />
+
+            {/* Bottom dock: primary destinations in thumb reach */}
+      <BottomNav
+        activeTab={activeTab}
+        onSelectTab={(tab) => {
+          setActiveTab(tab);
+          window.scrollTo({ top: 0 });
+        }}
+        coachBadgeCount={scheduleConflicts.length}
       />
 
       {/* Minimalist Dark Footer */}

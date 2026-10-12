@@ -1521,7 +1521,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           className="rest-timer"
           style={{
             position: 'fixed',
-            bottom: '1.5rem',
+            bottom: 'calc(var(--dock-clearance) + 0.5rem)',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 'var(--z-floating)',
