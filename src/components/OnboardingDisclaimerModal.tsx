@@ -14,6 +14,7 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
   onOpenAboutDetails,
 }) => {
   const [agreed, setAgreed] = useState(false);
+  const [showValidationHint, setShowValidationHint] = useState(false);
 
   if (!isOpen) return null;
 
@@ -116,6 +117,7 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
 
         {/* Read more link */}
         <button
+          type="button"
           onClick={onOpenAboutDetails}
           style={{
             background: 'transparent',
@@ -125,59 +127,101 @@ export const OnboardingDisclaimerModal: React.FC<OnboardingDisclaimerModalProps>
             fontWeight: 600,
             cursor: 'pointer',
             padding: 0,
-            marginBottom: '1.5rem',
+            marginBottom: '1.25rem',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '0.35rem',
+            touchAction: 'manipulation',
           }}
         >
           <span>Baca penjelasan ilmiah lengkap &amp; kritik model ACWR</span>
           <Info size={14} />
         </button>
 
-        {/* Checkbox agreement */}
+        {/* Checkbox agreement as an interactive touch card */}
         <label
           style={{
             display: 'flex',
-            alignItems: 'flex-start',
-            gap: '0.75rem',
+            alignItems: 'center',
+            gap: '0.85rem',
             cursor: 'pointer',
-            marginBottom: '1.5rem',
-            fontSize: '0.82rem',
+            padding: '0.9rem 1rem',
+            borderRadius: 'var(--radius-md)',
+            background: agreed ? 'var(--accent-neon-subtle)' : 'var(--bg-surface)',
+            border: agreed
+              ? '1.5px solid var(--accent-neon)'
+              : showValidationHint
+              ? '1.5px solid var(--color-warning)'
+              : '1px solid var(--border-default)',
+            marginBottom: '1rem',
+            fontSize: '0.85rem',
             color: 'var(--text-primary)',
-            lineHeight: 1.4,
+            lineHeight: 1.45,
+            transition: 'var(--transition-fast)',
+            touchAction: 'manipulation',
           }}
         >
           <input
             type="checkbox"
             checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            style={{ marginTop: '0.15rem', accentColor: 'var(--accent-neon)' }}
+            onChange={(e) => {
+              setAgreed(e.target.checked);
+              if (e.target.checked) setShowValidationHint(false);
+            }}
+            style={{ width: '22px', height: '22px', flexShrink: 0, accentColor: 'var(--accent-neon)', cursor: 'pointer' }}
           />
-          <span>
+          <span style={{ fontWeight: agreed ? 600 : 400 }}>
             Saya telah membaca dan memahami bahwa RKStride adalah sistem pendukung keputusan atletik non-medis.
           </span>
         </label>
 
+        {showValidationHint && (
+          <div
+            style={{
+              padding: '0.5rem 0.75rem',
+              borderRadius: 'var(--radius-sm)',
+              background: 'var(--color-warning-bg)',
+              border: '1px solid var(--color-warning)',
+              color: 'var(--color-warning)',
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              marginBottom: '1rem',
+            }}
+          >
+            <ShieldAlert size={15} /> Harap centang kotak persetujuan di atas untuk melanjutkan.
+          </div>
+        )}
+
         {/* Submit */}
         <button
-          onClick={onAccept}
-          disabled={!agreed}
+          type="button"
+          onClick={() => {
+            if (!agreed) {
+              setShowValidationHint(true);
+              return;
+            }
+            onAccept();
+          }}
           style={{
             width: '100%',
+            minHeight: '48px',
             padding: '0.85rem',
             borderRadius: 'var(--radius-md)',
-            background: agreed ? 'var(--accent-neon)' : 'var(--border-default)',
+            background: agreed ? 'var(--accent-neon)' : 'var(--bg-surface-elevated)',
             color: agreed ? 'var(--text-inverse)' : 'var(--text-muted)',
             fontWeight: 800,
-            fontSize: '0.9rem',
-            border: 'none',
-            cursor: agreed ? 'pointer' : 'not-allowed',
+            fontSize: '0.92rem',
+            border: agreed ? 'none' : '1px solid var(--border-default)',
+            cursor: 'pointer',
             transition: 'background var(--transition-fast)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             gap: '0.5rem',
+            touchAction: 'manipulation',
           }}
         >
           <CheckCircle size={18} />

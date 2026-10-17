@@ -91,6 +91,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             color: isActive ? 'var(--accent-neon)' : 'var(--text-muted)',
             cursor: 'pointer',
             transition: 'var(--transition-fast)',
+            touchAction: 'manipulation',
           }}
         >
           <Icon size={20} />

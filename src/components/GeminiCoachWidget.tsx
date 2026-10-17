@@ -91,14 +91,25 @@ interface GeminiCoachWidgetProps {
   athleteContext: AthleteContext;
   externalPrompt?: string;
   onClearExternalPrompt?: () => void;
+  isOpenControlled?: boolean;
+  onToggleOpen?: (open: boolean) => void;
+  hideLauncher?: boolean;
 }
 
 export const GeminiCoachWidget: React.FC<GeminiCoachWidgetProps> = ({
   athleteContext,
   externalPrompt,
   onClearExternalPrompt,
+  isOpenControlled,
+  onToggleOpen,
+  hideLauncher = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = isOpenControlled !== undefined ? isOpenControlled : internalOpen;
+  const setIsOpen = (next: boolean) => {
+    setInternalOpen(next);
+    if (onToggleOpen) onToggleOpen(next);
+  };
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: 'welcome-msg',
@@ -179,10 +190,11 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
   return (
     <>
       {/* Floating Launcher Button */}
-      {!isOpen && (
+      {!isOpen && !hideLauncher && (
         <button
           className="coach-launcher"
           onClick={() => setIsOpen(true)}
+          aria-label="Buka sesi konsultasi AI Coach rkbot"
           style={{
             position: 'fixed',
             bottom: 'calc(var(--dock-clearance) + 0.5rem)',
@@ -213,11 +225,12 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
               alignItems: 'center',
               justifyContent: 'center',
               color: 'var(--accent-neon)',
+              flexShrink: 0,
             }}
           >
             <Sparkles size={16} />
           </div>
-          <div style={{ textAlign: 'left' }}>
+          <div className="coach-launcher-text" style={{ textAlign: 'left' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1 }}>
               rkbot
             </div>
@@ -226,11 +239,13 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             </div>
           </div>
           <span
+            className="coach-launcher-text"
             style={{
               width: '8px',
               height: '8px',
               borderRadius: '50%',
               background: 'var(--color-success)',
+              flexShrink: 0,
             }}
           />
         </button>
@@ -477,9 +492,12 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
             <button
               onClick={() => handleSendMessage()}
               disabled={!inputValue.trim() || isLoading}
+              aria-label="Kirim pesan ke rkbot"
               style={{
-                width: '38px',
-                height: '38px',
+                width: '44px',
+                height: '44px',
+                minWidth: '44px',
+                minHeight: '44px',
                 borderRadius: 'var(--radius-md)',
                 background: inputValue.trim() ? 'var(--accent-neon)' : 'var(--bg-surface-elevated)',
                 color: inputValue.trim() ? 'var(--text-inverse)' : 'var(--text-muted)',
@@ -490,9 +508,10 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
                 transition: 'var(--transition-fast)',
                 flexShrink: 0,
+                touchAction: 'manipulation',
               }}
             >
-              <Send size={16} />
+              <Send size={18} />
             </button>
           </div>
         </div>

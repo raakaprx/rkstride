@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { Bot, Settings2 } from 'lucide-react';
 import { useWorkoutEngine } from './hooks/useWorkoutEngine';
 import { HeaderNavbar } from './components/HeaderNavbar';
 import { BottomNav, AppTab } from './components/BottomNav';
@@ -41,6 +42,7 @@ export default function App() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
+  const [isCoachChatOpen, setIsCoachChatOpen] = useState(false);
 
   // Athlete Profile & Race Target State
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -265,16 +267,211 @@ export default function App() {
           />
         )}
 
-        {/* Coach: Integrasi Jam Pintar Universal (Smartwatch Hub) */}
+        {/* Coach: Integrasi Pelatih AI & Jam Pintar (Coach & Devices Hub) */}
         {activeTab === 'coach' && (
-          <SmartwatchSyncCard
-            smartwatchState={smartwatchState}
-            readiness={todayReadiness}
-            onUpdateReadiness={setTodayReadiness}
-            onConnectBluetooth={connectBluetooth}
-            onImportFile={importSmartwatchFile}
-            onApplyPreset={applyPreset}
-          />
+          <>
+            {/* Kartu Konsultasi Pelatih AI Gemini (rkbot) */}
+            <div
+              className="card-mobile"
+              style={{
+                background: 'var(--bg-secondary)',
+                borderRadius: 'var(--radius-lg)',
+                border: '1px solid var(--border-default)',
+                borderLeft: '3px solid var(--accent-neon)',
+                padding: '1.5rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1.25rem',
+                boxShadow: 'var(--shadow-elevation-2)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div
+                    style={{
+                      width: '42px',
+                      height: '42px',
+                      borderRadius: 'var(--radius-md)',
+                      background: 'var(--accent-neon-subtle)',
+                      border: '1px solid rgba(204, 255, 0, 0.25)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--accent-neon)',
+                    }}
+                  >
+                    <Bot size={22} />
+                  </div>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+                      <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+                        rkbot &bull; Pelatih AI Atletik Hibrida
+                      </h2>
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          fontWeight: 700,
+                          padding: '0.15rem 0.45rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'rgba(204, 255, 0, 0.1)',
+                          color: 'var(--accent-neon)',
+                        }}
+                      >
+                        Gemini 2.5
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                      Asisten fisiologi cerdas untuk beban PPL, interval lari &amp; protokol pemulihan
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAiSettingsOpen(true)}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.4rem 0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg-surface)',
+                    border: '1px solid var(--border-default)',
+                    color: 'var(--text-secondary)',
+                    fontSize: '0.78rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    minHeight: '40px',
+                    touchAction: 'manipulation',
+                  }}
+                >
+                  <Settings2 size={14} style={{ color: 'var(--accent-neon)' }} />
+                  <span>Pengaturan API Key</span>
+                </button>
+              </div>
+
+              {/* Status Telemetri Singkat */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(min(150px, 100%), 1fr))',
+                  gap: '0.75rem',
+                  background: 'var(--bg-surface)',
+                  padding: '0.85rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Rasio ACWR</span>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+                    {acwrResult.ratio}{' '}
+                    <span style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--text-muted)' }}>
+                      ({acwrResult.status === 'sweet_spot' ? 'Sweet Spot' : acwrResult.status === 'danger' ? 'Bahaya' : 'Normal'})
+                    </span>
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Skor Kesiapan</span>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--accent-neon)' }}>
+                    {readinessScore}/100
+                  </span>
+                </div>
+                <div>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block' }}>Jendela Kaki (48j)</span>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 800, color: lastLegsTrainedHoursAgo < 48 ? 'var(--color-warning)' : 'var(--color-success)' }}>
+                    {lastLegsTrainedHoursAgo < 900 ? `${lastLegsTrainedHoursAgo}j lalu` : '> 72j'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Prompt Suggestions */}
+              <div>
+                <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                  Pilih Topik Konsultasi Cepat:
+                </span>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {[
+                    'Analisis beban latihan saya hari ini',
+                    'Bolehkah saya lari besok setelah leg day?',
+                    'Rekomendasi nutrisi pemulihan pasca workout',
+                    'Cara eksekusi Norwegian 4x4 yang benar',
+                  ].map((p, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setExternalCoachPrompt(p);
+                        setIsCoachChatOpen(true);
+                      }}
+                      style={{
+                        padding: '0.45rem 0.8rem',
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'var(--bg-surface)',
+                        border: '1px solid var(--border-default)',
+                        color: 'var(--text-secondary)',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'var(--transition-fast)',
+                        touchAction: 'manipulation',
+                        minHeight: '40px',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--accent-neon)';
+                        e.currentTarget.style.color = 'var(--text-primary)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = 'var(--border-default)';
+                        e.currentTarget.style.color = 'var(--text-secondary)';
+                      }}
+                    >
+                      &bull; {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tombol Utama Buka Sesi Chat */}
+              <button
+                type="button"
+                onClick={() => setIsCoachChatOpen(true)}
+                style={{
+                  width: '100%',
+                  minHeight: '48px',
+                  padding: '0.8rem 1.25rem',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--accent-neon)',
+                  color: 'var(--text-inverse)',
+                  fontWeight: 800,
+                  fontSize: '0.92rem',
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  boxShadow: '0 2px 10px rgba(204, 255, 0, 0.2)',
+                  transition: 'var(--transition-fast)',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <Bot size={18} />
+                <span>Buka Sesi Chat Konsultasi rkbot</span>
+              </button>
+            </div>
+
+            {/* Integrasi Jam Pintar Universal */}
+            <SmartwatchSyncCard
+              smartwatchState={smartwatchState}
+              readiness={todayReadiness}
+              onUpdateReadiness={setTodayReadiness}
+              onConnectBluetooth={connectBluetooth}
+              onImportFile={importSmartwatchFile}
+              onApplyPreset={applyPreset}
+            />
+          </>
         )}
       </main>
 
@@ -285,6 +482,7 @@ export default function App() {
         debriefData={debriefData}
         onOpenAiCoachWithPrompt={(prompt) => {
           setExternalCoachPrompt(prompt);
+          setIsCoachChatOpen(true);
         }}
       />
 
@@ -293,6 +491,9 @@ export default function App() {
         athleteContext={athleteContext}
         externalPrompt={externalCoachPrompt}
         onClearExternalPrompt={() => setExternalCoachPrompt('')}
+        isOpenControlled={isCoachChatOpen}
+        onToggleOpen={setIsCoachChatOpen}
+        hideLauncher={activeTab === 'coach'}
       />
 
       {/* Scientific Basis & Non-Medical Disclaimer Modal */}

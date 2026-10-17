@@ -783,16 +783,23 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                         Volume Load: <strong style={{ color: 'var(--text-primary)' }}>{Math.round(exLoad * 0.1)} pts</strong>
                       </span>
                       <button
+                        type="button"
                         onClick={() => handleRemoveExercise(exIdx)}
-                        title="Remove Exercise"
+                        aria-label={`Hapus latihan ${exercise.namaGerakan}`}
+                        title="Hapus Latihan"
                         style={{
                           background: 'transparent',
                           border: 'none',
                           color: 'var(--text-muted)',
                           cursor: 'pointer',
                           padding: '0.2rem',
+                          minWidth: '40px',
+                          minHeight: '40px',
                           display: 'flex',
                           alignItems: 'center',
+                          justifyContent: 'center',
+                          borderRadius: 'var(--radius-sm)',
+                          touchAction: 'manipulation',
                         }}
                       >
                         <Trash2 size={16} />
@@ -886,13 +893,25 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                               <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                                 {exercise.sets.length > 1 && (
                                   <button
+                                    type="button"
                                     onClick={() => handleRemoveSet(exIdx, sIdx)}
+                                    aria-label={`Hapus set ${sIdx + 1}`}
                                     style={{
-                                      background: 'transparent',
-                                      border: 'none',
-                                      color: 'var(--text-muted)',
+                                      background: 'rgba(239, 68, 68, 0.08)',
+                                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                                      borderRadius: 'var(--radius-sm)',
+                                      color: 'var(--color-danger)',
                                       cursor: 'pointer',
-                                      fontSize: '0.8rem',
+                                      fontSize: '0.82rem',
+                                      fontWeight: 700,
+                                      width: '36px',
+                                      height: '36px',
+                                      minWidth: '36px',
+                                      minHeight: '36px',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      touchAction: 'manipulation',
                                     }}
                                   >
                                     ✕
@@ -908,30 +927,35 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
 
                   {/* Exercise Actions & Rest Timer */}
                   <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <button
+                        type="button"
                         onClick={() => handleAddSet(exIdx)}
+                        aria-label="Add Set"
                         style={{
                           background: 'var(--bg-surface)',
                           border: '1px solid var(--border-default)',
                           borderRadius: 'var(--radius-sm)',
                           color: 'var(--text-secondary)',
-                          fontSize: '0.78rem',
+                          fontSize: '0.8rem',
                           fontWeight: 600,
-                          padding: '0.35rem 0.75rem',
+                          padding: '0.45rem 0.85rem',
+                          minHeight: '44px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.3rem',
+                          gap: '0.35rem',
                           transition: 'var(--transition-fast)',
+                          touchAction: 'manipulation',
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
                         onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
                       >
-                        <Plus size={14} /> Add Set
+                        <Plus size={15} /> Add Set
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => {
                           setRestSecondsRemaining(90);
                         }}
@@ -940,20 +964,22 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           border: '1px solid var(--border-default)',
                           borderRadius: 'var(--radius-sm)',
                           color: 'var(--text-secondary)',
-                          fontSize: '0.78rem',
+                          fontSize: '0.8rem',
                           fontWeight: 600,
-                          padding: '0.35rem 0.75rem',
+                          padding: '0.45rem 0.85rem',
+                          minHeight: '44px',
                           cursor: 'pointer',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '0.3rem',
+                          gap: '0.35rem',
                           transition: 'var(--transition-fast)',
+                          touchAction: 'manipulation',
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'var(--border-hover)')}
                         onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'var(--border-default)')}
                       >
-                        <Timer size={13} style={{ color: 'var(--accent-neon)' }} />
-                        <span>Rest 90s</span>
+                        <Timer size={14} style={{ color: 'var(--accent-neon)' }} />
+                        <span>Istirahat 90s</span>
                       </button>
                     </div>
 
@@ -1471,34 +1497,39 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
       </div>
 
       {/* Save & Confirm Action */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
+      <div className="save-workout-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', gap: '1rem' }}>
         {successSaved && (
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-success)', fontSize: '0.85rem', fontWeight: 600 }}>
-            <CheckCircle size={16} /> Workout Successfully Logged &amp; ACWR Updated!
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--color-success)', fontSize: '0.88rem', fontWeight: 600 }}>
+            <CheckCircle size={18} /> Workout Successfully Logged &amp; ACWR Updated!
           </span>
         )}
 
         <button
+          type="button"
+          className="btn-save-workout"
           onClick={handleSave}
+          aria-label="Save & Log Today's Workout"
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem',
-            padding: '0.7rem 1.4rem',
+            gap: '0.55rem',
+            padding: '0.75rem 1.5rem',
+            minHeight: '48px',
             borderRadius: 'var(--radius-md)',
             background: 'var(--accent-neon)',
             color: 'var(--text-inverse)',
-            fontSize: '0.88rem',
+            fontSize: '0.92rem',
             fontWeight: 800,
             border: 'none',
             cursor: 'pointer',
             boxShadow: '0 2px 10px rgba(204, 255, 0, 0.18)',
             transition: 'var(--transition-fast)',
+            touchAction: 'manipulation',
           }}
           onMouseEnter={(e) => (e.currentTarget.style.transform = 'translateY(-1px)')}
           onMouseLeave={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
         >
-          <Save size={17} />
+          <Save size={18} />
           Save &amp; Log Today&apos;s Workout
         </button>
       </div>
@@ -1542,33 +1573,47 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <button
+              type="button"
               onClick={() => setRestSecondsRemaining((prev) => (prev || 0) + 30)}
               style={{
-                padding: '0.25rem 0.55rem',
+                padding: '0.35rem 0.75rem',
+                minHeight: '40px',
+                minWidth: '48px',
                 borderRadius: 'var(--radius-full)',
                 background: 'var(--bg-surface)',
                 border: '1px solid var(--border-default)',
                 color: 'var(--text-primary)',
-                fontSize: '0.75rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                touchAction: 'manipulation',
               }}
             >
               +30s
             </button>
             <button
+              type="button"
               onClick={() => setRestSecondsRemaining(null)}
               style={{
-                padding: '0.25rem 0.75rem',
+                padding: '0.35rem 0.85rem',
+                minHeight: '40px',
+                minWidth: '60px',
                 borderRadius: 'var(--radius-full)',
                 background: 'rgba(239, 68, 68, 0.2)',
                 border: '1px solid var(--color-danger)',
                 color: 'var(--color-danger)',
-                fontSize: '0.75rem',
+                fontSize: '0.78rem',
                 fontWeight: 700,
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                touchAction: 'manipulation',
               }}
             >
               Selesai

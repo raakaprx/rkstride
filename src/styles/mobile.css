@@ -6,9 +6,9 @@
  */
 
 @media (max-width: 640px) {
-  /* App shell: tighter rhythm on phones */
+  /* App shell: tighter rhythm on phones with generous clearance above the fixed bottom dock */
   .app-main {
-    padding: 1rem 0.75rem !important;
+    padding: 1rem 0.75rem calc(var(--dock-clearance) + 2rem) 0.75rem !important;
     gap: 1.25rem !important;
   }
 
@@ -94,7 +94,7 @@
     display: none !important;
   }
 
-  /* Rest timer and coach launcher clear the bottom dock */
+  /* Rest timer and coach launcher clear the bottom dock without colliding */
   .rest-timer {
     left: 0.75rem !important;
     right: 0.75rem !important;
@@ -103,10 +103,47 @@
     flex-wrap: wrap !important;
     justify-content: center !important;
     border-radius: var(--radius-md) !important;
+    z-index: var(--z-floating) !important;
   }
 
+  /* Mobile Coach Launcher: reflows from desktop pill into an unobtrusive circular FAB */
   .coach-launcher {
-    bottom: calc(var(--dock-clearance) + 0.5rem) !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    border-radius: var(--radius-full) !important;
+    justify-content: center !important;
+    align-items: center !important;
+    right: 1rem !important;
+    bottom: calc(var(--dock-clearance) + 0.75rem) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7), 0 0 12px rgba(204, 255, 0, 0.25) !important;
+    touch-action: manipulation;
+  }
+
+  .coach-launcher .coach-launcher-text {
+    display: none !important;
+  }
+
+  /* If rest timer is active, push coach launcher above it to avoid overlap */
+  body:has(.rest-timer) .coach-launcher {
+    bottom: calc(var(--dock-clearance) + 4.5rem) !important;
+  }
+
+  /* Save & Log workout mobile actions: full width, easy thumb tap */
+  .save-workout-container {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .btn-save-workout {
+    width: 100% !important;
+    min-height: 48px !important;
+    font-size: 0.95rem !important;
+    justify-content: center !important;
+    touch-action: manipulation !important;
   }
 
   /* Prevent iOS auto-zoom on focus (inputs must be >= 16px) */
@@ -118,6 +155,7 @@
   select,
   textarea {
     font-size: 16px !important;
+    touch-action: manipulation;
   }
 }
 
@@ -128,7 +166,15 @@
   margin-right: auto;
 }
 
-/* Global touch polish (all viewports) */
+/* Global touch polish & 0ms tap delay (all viewports) */
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+button, input, select, textarea {
+  touch-action: manipulation;
+}
+
+button:active {
+  transform: scale(0.98);
 }
