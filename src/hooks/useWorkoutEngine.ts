@@ -3,6 +3,7 @@ import {
   DailyLog,
   ReadinessCheckIn,
   ACWRResult,
+  ACWRMethod,
   RecommendationResult,
   StrengthExercise,
   RunSession,
@@ -25,7 +26,17 @@ import {
   SMARTWATCH_SAMPLE_PRESETS,
 } from '@/lib/engine/smartwatch';
 import { defaultWeeklySchedule, scheduleTemplates } from '@/data/defaultSchedule';
+import { EXERCISE_CATALOG } from '@/data/exerciseCatalog';
 import { db } from '@/lib/db/database';
+
+export function isLegStrainMovement(namaGerakan: string, category?: string): boolean {
+  if (category === 'legs') return true;
+  const inCatalog = EXERCISE_CATALOG.find(
+    (item) => item.name.toLowerCase() === namaGerakan.toLowerCase()
+  );
+  if (inCatalog && inCatalog.isLegStrain) return true;
+  return /squat|deadlift|rdl|hip thrust|leg|calf|quad|hamstring|lunge|nordic/i.test(namaGerakan);
+}
 
 /**
  * Neutral readiness for a fresh user (no measurements yet).
@@ -42,6 +53,8 @@ export const neutralReadiness: ReadinessCheckIn = {
 export function useWorkoutEngine() {
   const [history, setHistory] = useState<DailyLog[]>([]);
   const [todayReadiness, setTodayReadinessState] = useState<ReadinessCheckIn>(neutralReadiness);
+  const [readinessHistory, setReadinessHistory] = useState<ReadinessCheckIn[]>([]);
+  const [acwrMethod, setAcwrMethod] = useState<ACWRMethod>('rolling_coupled');
   const [weeklySchedule, setWeeklySchedule] = useState<ScheduledDay[]>(defaultWeeklySchedule);
   const [dbError, setDbError] = useState<string | null>(null);
 
@@ -57,6 +70,11 @@ export function useWorkoutEngine() {
       const readiness = await db.dailyReadiness.get(todayStr);
       if (readiness) {
         setTodayReadinessState(readiness);
+      }
+      const allReadiness = await db.dailyReadiness.toArray();
+      if (allReadiness && allReadiness.length > 0) {
+        allReadiness.sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+        setReadinessHistory(allReadiness.slice(0, 28));
       }
       const schedule = await db.weeklySchedule.toArray();
       if (schedule && schedule.length > 0) {
@@ -96,21 +114,35 @@ export function useWorkoutEngine() {
     source: 'manual_sync',
   });
 
-  // Hours since last leg day session
+  // Hours since last leg day session (includes Squat, RDL, Deadlift, Hip Thrust, Lunges)
   const lastLegsTrainedHoursAgo = useMemo(() => {
     const legWorkoutIndex = history.findIndex((w) =>
-      w.strengthWorkouts.some((ex) =>
-        /squat|leg|calf|quad|hamstring|lunge/i.test(ex.namaGerakan)
-      )
+      w.strengthWorkouts.some((ex) => isLegStrainMovement(ex.namaGerakan, ex.category))
     );
     if (legWorkoutIndex === -1) return 999;
     return legWorkoutIndex * 24;
   }, [history]);
 
+  // Hours since last high-intensity running session (Direction 2 Guardrail: Fast Run -> Heavy Legs < 24h)
+  const lastFastRunHoursAgo = useMemo(() => {
+    const fastRunIndex = history.findIndex((w) =>
+      w.runningWorkouts.some(
+        (r) =>
+          r.runningType === 'norwegian_4x4' ||
+          r.runningType === 'intervals' ||
+          r.runningType === 'tempo' ||
+          r.avgPace < 5.0 ||
+          r.avgHeartRate > 165
+      )
+    );
+    if (fastRunIndex === -1) return 999;
+    return fastRunIndex === 0 ? 12 : fastRunIndex * 24;
+  }, [history]);
+
   // Current ACWR calculation
   const acwrResult: ACWRResult = useMemo(() => {
-    return calculateACWR(history);
-  }, [history]);
+    return calculateACWR(history, acwrMethod);
+  }, [history, acwrMethod]);
 
   // Dynamic recommendation for today. Tomorrow's planned run (from the
   // weekly schedule) is passed through so the Recovery Exemption branch
@@ -129,13 +161,19 @@ export function useWorkoutEngine() {
     const plannedRun = tomorrow && runTypeMap[tomorrow.category]
       ? { type: runTypeMap[tomorrow.category], durationMinutes: tomorrow.targetDurationMinutes }
       : undefined;
-    return getWorkoutRecommendation(acwrResult.ratio, todayReadiness, lastLegsTrainedHoursAgo, 999, plannedRun);
-  }, [acwrResult.ratio, lastLegsTrainedHoursAgo, todayReadiness, weeklySchedule]);
+    return getWorkoutRecommendation(
+      acwrResult.ratio,
+      todayReadiness,
+      lastLegsTrainedHoursAgo,
+      lastFastRunHoursAgo,
+      plannedRun
+    );
+  }, [acwrResult.ratio, lastLegsTrainedHoursAgo, lastFastRunHoursAgo, todayReadiness, weeklySchedule]);
 
-  // Composite readiness score (0 - 100)
+  // Composite readiness score (0 - 100) using 14-28 day personal Z-Score baseline when available
   const readinessResult = useMemo(() => {
-    return calculateReadinessScore(todayReadiness);
-  }, [todayReadiness]);
+    return calculateReadinessScore(todayReadiness, readinessHistory);
+  }, [todayReadiness, readinessHistory]);
   const readinessScore = readinessResult.score;
 
   // Weekly schedule conflict detector. Engine-based audit (both directions
@@ -305,7 +343,7 @@ export function useWorkoutEngine() {
       }
 
       const hasLegExerciseInDraft = draftStrength.some((ex) =>
-        /squat|leg|calf|quad|hamstring|lunge/i.test(ex.namaGerakan)
+        isLegStrainMovement(ex.namaGerakan, ex.category)
       );
       const hasFastRunInDraft = draftRunning.some((r) => r.avgPace < 5.0 || r.avgHeartRate > 165 || r.runningType === 'norwegian_4x4' || r.runningType === 'intervals');
 
@@ -379,10 +417,13 @@ export function useWorkoutEngine() {
     history,
     todayReadiness,
     setTodayReadiness,
+    acwrMethod,
+    setAcwrMethod,
     acwrResult,
     recommendation,
     readinessScore,
     lastLegsTrainedHoursAgo,
+    lastFastRunHoursAgo,
     weeklySchedule,
     scheduleConflicts,
     updateDaySchedule,

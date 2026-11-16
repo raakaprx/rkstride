@@ -21,10 +21,14 @@ import { GuardrailOverrideModal } from './GuardrailOverrideModal';
 import { EXPERIENCE_COPY } from '@/lib/experienceCopy';
 import {
   calculateStrengthLoad,
+  calculateStrengthVolumeLoad,
   calculateRunningLoad,
+  estimate1RM,
+  calculateKarvonenHeartRateZones,
   RUNNING_PRESETS,
   ZONE_WEIGHTS,
 } from '@/lib/engine/workload';
+import { isLegStrainMovement } from '@/hooks/useWorkoutEngine';
 import { evaluateDoubleProgression } from '@/lib/engine/doubleProgression';
 import {
   EXERCISE_CATALOG,
@@ -291,8 +295,8 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
     setTimeout(() => setSuccessSaved(false), 3500);
 
     if (onWorkoutCompletedDebrief) {
-      const hasLegWorkout = s.some((ex) => /squat|leg|calf|quad|hamstring|lunge/i.test(ex.namaGerakan));
-      const hasUpperWorkout = s.some((ex) => !/squat|leg|calf|quad|hamstring|lunge/i.test(ex.namaGerakan));
+      const hasLegWorkout = s.some((ex) => isLegStrainMovement(ex.namaGerakan, ex.category));
+      const hasUpperWorkout = s.some((ex) => !isLegStrainMovement(ex.namaGerakan, ex.category));
       const hasRunWorkout = r.length > 0;
       const runningDuration = r.reduce((acc, curr) => acc + curr.durasiMenit, 0);
       const strengthDuration = s.reduce((acc, curr) => acc + curr.sets.length * 3, 0);
@@ -754,11 +758,13 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           {/* Active Logged Exercises List */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {strengthList.map((exercise, exIdx) => {
-              const exLoad = exercise.sets.reduce((sum, s) => {
-                const rpe = Math.min(Math.max(s.rpe, 1), 10);
-                return sum + s.bebanKg * s.reps * (rpe / 10);
+              const exLoadPts = calculateStrengthLoad([exercise]);
+              const exVolumeKg = calculateStrengthVolumeLoad([exercise]);
+              const best1Rm = exercise.sets.reduce((max, s) => {
+                const est = estimate1RM(s.bebanKg, s.reps).average;
+                return est > max ? est : max;
               }, 0);
-              const isLegExercise = /squat|leg|calf|quad|hamstring|lunge/i.test(exercise.namaGerakan);
+              const isLegExercise = isLegStrainMovement(exercise.namaGerakan, exercise.category);
 
               return (
                 <div
@@ -771,7 +777,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                       <span
                         style={{
                           width: '24px',
@@ -799,9 +805,14 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       )}
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                      {best1Rm > 0 && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--accent-neon)', fontWeight: 700 }}>
+                          Est. 1RM: {best1Rm} kg
+                        </span>
+                      )}
                       <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-                        Volume Load: <strong style={{ color: 'var(--text-primary)' }}>{Math.round(exLoad * 0.1)} pts</strong>
+                        Tonnage: <strong style={{ color: 'var(--text-primary)' }}>{exVolumeKg} kg</strong> &bull; Beban sRPE: <strong style={{ color: 'var(--text-primary)' }}>{exLoadPts} pts</strong>
                       </span>
                       <button
                         type="button"
@@ -843,7 +854,8 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       </thead>
                       <tbody>
                         {exercise.sets.map((set, sIdx) => {
-                          const setScore = Math.round(set.bebanKg * set.reps * (Math.min(Math.max(set.rpe, 1), 10) / 10) * 0.1);
+                          const setScore = calculateStrengthLoad([{ namaGerakan: exercise.namaGerakan, sets: [set] }]);
+                          const setEst1Rm = estimate1RM(set.bebanKg, set.reps).average;
                           return (
                             <tr key={sIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.04)' }}>
                               <td style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--text-muted)' }}>
@@ -925,6 +937,11 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                               </td>
                               <td style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>
                                 {setScore} pts
+                                {setEst1Rm > 0 && (
+                                  <span style={{ display: 'block', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                                    1RM: {setEst1Rm} kg
+                                  </span>
+                                )}
                               </td>
                               <td style={{ padding: '0.5rem', textAlign: 'center' }}>
                                 {exercise.sets.length > 1 && (
@@ -1216,7 +1233,9 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                           }}
                         />
                         <span style={{ fontWeight: 700 }}>{b.durationMinutes}m</span>
-                        <span style={{ color: 'var(--text-muted)' }}>Z{b.zone}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>
+                          Z{b.zone} ({calculateKarvonenHeartRateZones()[b.zone].min}-{calculateKarvonenHeartRateZones()[b.zone].max} bpm)
+                        </span>
                         <span style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>({roundedLoad} pts)</span>
                       </div>
                     );

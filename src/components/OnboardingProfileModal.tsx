@@ -25,9 +25,9 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
     maxHr: 190,
     hrMaxFormula: 'tanaka',
     gender: 'male',
-    targetRaceCategory: 'half_marathon',
+    targetRaceCategory: 'none',
     targetRaceDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    targetRaceName: 'Jakarta Half Marathon',
+    targetRaceName: '',
   });
 
   const [isSaving, setIsSaving] = useState(false);

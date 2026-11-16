@@ -69,8 +69,8 @@ export default function App() {
   });
 
   const [raceConfig, setRaceConfig] = useState<RaceTargetConfig>({
-    eventName: 'Jakarta Half Marathon',
-    category: 'half_marathon',
+    eventName: '',
+    category: 'none',
     raceDate: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   });
 
@@ -91,6 +91,8 @@ export default function App() {
 
   const {
     history,
+    acwrMethod,
+    setAcwrMethod,
     acwrResult,
     recommendation,
     readinessScore,
@@ -344,7 +346,12 @@ export default function App() {
 
         {/* Beban: Dashboard Tren ACWR & Beban Kerja 28 Hari */}
         {activeTab === 'load' && (
-          <TrendsDashboardCard history={history} onNavigateToLogger={() => setActiveTab('today')} />
+          <TrendsDashboardCard
+            history={history}
+            acwrMethod={acwrMethod}
+            onChangeAcwrMethod={setAcwrMethod}
+            onNavigateToLogger={() => setActiveTab('today')}
+          />
         )}
 
         {/* Nutrisi: Nutrisi & Kebutuhan Energi Atlet Hibrida */}

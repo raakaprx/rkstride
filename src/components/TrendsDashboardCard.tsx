@@ -1,15 +1,36 @@
-import React, { useMemo } from 'react';
-import { TrendingUp } from 'lucide-react';
-import { DailyLog } from '@/types/workout';
-import { calculateACWR } from '@/lib/engine/workload';
+import React, { useMemo, useState } from 'react';
+import { TrendingUp, Dumbbell } from 'lucide-react';
+import { DailyLog, ACWRMethod } from '@/types/workout';
+import { calculateACWR, calculateWeeklyMuscleVolume } from '@/lib/engine/workload';
 import { Button } from './ui/Button';
 
 interface TrendsDashboardCardProps {
   history: DailyLog[];
+  acwrMethod?: ACWRMethod;
+  onChangeAcwrMethod?: (method: ACWRMethod) => void;
   onNavigateToLogger?: () => void;
 }
 
-export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ history, onNavigateToLogger }) => {
+const METHOD_LABELS: Record<ACWRMethod, string> = {
+  rolling_coupled: 'Coupled (7:28 Hari)',
+  rolling_uncoupled: 'Uncoupled (7:21 Hari)',
+  ewma: 'EWMA (Eksponensial)',
+};
+
+export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({
+  history,
+  acwrMethod: externalMethod,
+  onChangeAcwrMethod,
+  onNavigateToLogger,
+}) => {
+  const [internalMethod, setInternalMethod] = useState<ACWRMethod>('rolling_coupled');
+  const activeMethod = externalMethod ?? internalMethod;
+
+  const handleSelectMethod = (m: ACWRMethod) => {
+    setInternalMethod(m);
+    if (onChangeAcwrMethod) onChangeAcwrMethod(m);
+  };
+
   // Compute rolling ACWR for each day in history (chronological order)
   const chartData = useMemo(() => {
     // Clone and reverse so oldest is first
@@ -19,7 +40,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
     for (let i = 0; i < chronoHistory.length; i++) {
       // Sub-slice representing up to day i
       const subSlice = chronoHistory.slice(0, i + 1).reverse();
-      const acwr = calculateACWR(subSlice);
+      const acwr = calculateACWR(subSlice, activeMethod);
       const log = chronoHistory[i];
 
       result.push({
@@ -33,10 +54,16 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
     }
 
     return result;
-  }, [history]);
+  }, [history, activeMethod]);
 
   // Overall current ACWR
-  const currentACWR = useMemo(() => calculateACWR(history), [history]);
+  const currentACWR = useMemo(() => calculateACWR(history, activeMethod), [history, activeMethod]);
+
+  // Weekly productive muscle volume (last 7 days)
+  const weeklyMuscleVolume = useMemo(
+    () => calculateWeeklyMuscleVolume(history.slice(0, 7)),
+    [history]
+  );
 
   // SVG Chart Dimensions
   const svgWidth = 720;
@@ -109,8 +136,34 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
           </div>
         </div>
 
-        {/* Legend */}
+        {/* Legend & Method Selector */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap', fontSize: '0.75rem' }}>
+          <div role="group" aria-label="Metode perhitungan ACWR" style={{ display: 'inline-flex', background: 'var(--bg-surface)', padding: '2px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-default)', gap: '2px' }}>
+            {(['rolling_coupled', 'rolling_uncoupled', 'ewma'] as const).map((m) => {
+              const isSelected = activeMethod === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => handleSelectMethod(m)}
+                  style={{
+                    minHeight: '36px',
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: 'var(--radius-xs)',
+                    background: isSelected ? 'var(--accent-neon)' : 'transparent',
+                    color: isSelected ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                    border: 'none',
+                    fontSize: '0.72rem',
+                    fontWeight: isSelected ? 800 : 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {METHOD_LABELS[m]}
+                </button>
+              );
+            })}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
             <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: 'rgba(204, 255, 0, 0.25)', border: '1px solid var(--accent-neon)' }} />
             <span style={{ color: 'var(--text-secondary)' }}>Sweet Spot (0.8 - 1.4)</span>
@@ -310,8 +363,63 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({ histor
             {currentACWR.ratio}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', textTransform: 'capitalize' }}>
-            Zona: {currentACWR.status.replace('_', ' ')}
+            Zona: {currentACWR.status.replace('_', ' ')} ({METHOD_LABELS[activeMethod]})
           </div>
+        </div>
+      </div>
+
+      {/* Weekly Muscle Volume Breakdown (Hard Sets RPE >= 7 & Tonnage) */}
+      <div
+        style={{
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)',
+          borderRadius: 'var(--radius-md)',
+          padding: '1rem',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+            <Dumbbell size={16} style={{ color: 'var(--accent-neon)' }} />
+            <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-primary)' }}>
+              Volume Set Kerja Keras Mingguan per Kelompok Otot (7 Hari Terakhir)
+            </span>
+          </div>
+          <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+            Target Hipertrofi Optimal: 10 - 20 Hard Sets (RPE &ge; 7) / minggu
+          </span>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(130px, 100%), 1fr))',
+            gap: '0.6rem',
+          }}
+        >
+          {(['push', 'pull', 'legs', 'arms', 'core'] as const).map((cat) => {
+            const vol = weeklyMuscleVolume[cat] || { hardSets: 0, totalVolumeKg: 0, sRpeTotal: 0 };
+            return (
+              <div
+                key={cat}
+                style={{
+                  background: 'var(--bg-secondary)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 'var(--radius-sm)',
+                  padding: '0.65rem 0.75rem',
+                }}
+              >
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                  {cat}
+                </div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.15rem' }}>
+                  {vol.hardSets} <span style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>set keras</span>
+                </div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--accent-neon)', marginTop: '0.1rem' }}>
+                  Tonnage: {vol.totalVolumeKg.toLocaleString()} kg
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
       </>

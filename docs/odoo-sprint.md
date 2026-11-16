@@ -61,8 +61,8 @@ Sebelum pengguna masuk ke dasbor perhitungan, RKStride menampilkan **Gerbang Awa
 | **ODOO-102** | Sprint 1: Dokumentasi & Gerbang Masuk | EPIC-02: Onboarding & Local Auth | Implementasi Gerbang Awal: Value Proposition & Login Akun Atlet Lokal | **Done** | High | 8 | Temuan #1 |
 | **ODOO-201** | Sprint 2: Bahasa Adaptif | EPIC-03: Adaptive Tiering | Sistem Kosakata & Tampilan Adaptif: Pemula, Menengah, dan Expert | **Done** | High | 8 | Temuan #2 |
 | **ODOO-202** | Sprint 2: Bahasa Adaptif | EPIC-03: Adaptive Tiering | Penyeragaman Bahasa Indonesia & Penghapusan Em Dash / CTA Generik | **Done** | Low | 3 | Temuan #6, #10 |
-| **ODOO-301** | Sprint 3: Integritas Mesin & UI | EPIC-04: Engine Wiring | Pembersihan Data Asumsi Default & Sinkronisasi Rumus Beban UI-Engine | To Do | High | 5 | Temuan #4, #7 |
-| **ODOO-302** | Sprint 3: Integritas Mesin & UI | EPIC-04: Engine Wiring | Eksposur Metrik Mesin ke UI: Estimasi 1RM, PR Badge, Hard Sets & Karvonen | To Do | High | 8 | Temuan #7 |
+| **ODOO-301** | Sprint 3: Integritas Mesin & UI | EPIC-04: Engine Wiring | Pembersihan Data Asumsi Default & Sinkronisasi Rumus Beban UI-Engine | **Done** | High | 5 | Temuan #4, #7 |
+| **ODOO-302** | Sprint 3: Integritas Mesin & UI | EPIC-04: Engine Wiring | Eksposur Metrik Mesin ke UI: Estimasi 1RM, PR Badge, Hard Sets & Karvonen | **Done** | High | 8 | Temuan #7 |
 | **ODOO-401** | Sprint 4: Wearable & Otomasi | EPIC-05: Wearable & Hygiene | Perbaikan Parser File `.fit/.gpx/.tcx` Tanpa Angka Palsu & Kepatuhan MOTION 1 | To Do | High | 5 | Temuan #5, #8, #9 |
 
 **Total Story Points:** 42 SP (Sprint 1: 13 SP Selesai, Sprint 2: 11 SP, Sprint 3: 13 SP, Sprint 4: 5 SP).
