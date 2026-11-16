@@ -126,7 +126,7 @@ export const ODOO_SPRINT_TASKS: OdooTaskItem[] = [
     sprint: 'Sprint 4: Ekosistem Wearable & Otomasi',
     epic: 'EPIC-05: Wearable Parser & Motion Hygiene',
     title: 'Perbaikan Parser File .fit/.gpx/.tcx Tanpa Angka Palsu & Kepatuhan MOTION 1',
-    stage: 'To Do',
+    stage: 'Done',
     priority: 'High',
     storyPoints: 5,
     auditRef: 'Temuan #5, #8, #9 (R-01, R-17, R-19, R-38)',

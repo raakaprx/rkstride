@@ -9,7 +9,7 @@ import {
   Moon,
   Battery,
 } from 'lucide-react';
-import { SmartwatchDeviceState } from '@/lib/engine/smartwatch';
+import { SmartwatchDeviceState, ParsedSmartwatchData } from '@/lib/engine/smartwatch';
 import { ReadinessCheckIn } from '@/types/workout';
 
 interface SmartwatchSyncCardProps {
@@ -17,7 +17,7 @@ interface SmartwatchSyncCardProps {
   readiness: ReadinessCheckIn;
   onUpdateReadiness: (readiness: ReadinessCheckIn) => void;
   onConnectBluetooth: () => Promise<{ success: boolean; deviceName: string; error?: string }>;
-  onImportFile: (content: string, filename: string) => void;
+  onImportFile: (content: string, filename: string) => ParsedSmartwatchData | void;
   onApplyPreset: (key: 'normal' | 'fatigued' | 'peak') => void;
 }
 
@@ -32,6 +32,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
   const [activeSyncTab, setActiveSyncTab] = useState<'quick' | 'bluetooth' | 'file'>('quick');
   const [connecting, setConnecting] = useState(false);
   const [btStatus, setBtStatus] = useState<string | null>(null);
+  const [importFeedback, setImportFeedback] = useState<{ isError: boolean; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Form check-in state (slider defaults are input starting points, not measurements)
@@ -40,6 +41,8 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
   const [localSoreness, setLocalSoreness] = useState<1 | 2 | 3 | 4 | 5>(readiness.muscleSoreness);
   const [localLegFatigue, setLocalLegFatigue] = useState(readiness.legFatigue);
   const [localEnergy, setLocalEnergy] = useState<'low' | 'moderate' | 'high'>(readiness.energyLevel);
+  const [localHrv, setLocalHrv] = useState<number>(readiness.hrvRmssd ?? 55);
+  const [localTendonPain, setLocalTendonPain] = useState<0 | 1 | 2 | 3>(readiness.tendonJointPain ?? 0);
 
   // Bluetooth Connection Handler
   const handleConnectBt = async () => {
@@ -61,7 +64,15 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
     reader.onload = (event) => {
       const content = event.target?.result as string;
       if (content) {
-        onImportFile(content, file.name);
+        const res = onImportFile(content, file.name);
+        if (res && res.parseError) {
+          setImportFeedback({ isError: true, text: res.parseError });
+        } else if (res) {
+          setImportFeedback({
+            isError: false,
+            text: `Berhasil mengimpor ${file.name} (Tidur: ${res.sleepHours} jam, RHR: ${res.restingHeartRate} bpm${res.workoutDetected ? `, Sesi lari ${res.workoutDetected.durationMinutes} mnt tercatat` : ''}).`,
+          });
+        }
       }
     };
     reader.readAsText(file);
@@ -75,6 +86,8 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
       muscleSoreness: localSoreness,
       legFatigue: localLegFatigue,
       energyLevel: localEnergy,
+      hrvRmssd: localHrv,
+      tendonJointPain: localTendonPain,
     });
   };
 
@@ -364,6 +377,63 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
                 ))}
               </div>
             </div>
+
+            {/* HRV rMSSD Input */}
+            <div style={{ background: 'var(--bg-secondary)', padding: '1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  HRV (rMSSD Autonomik)
+                </span>
+                <strong style={{ color: 'var(--accent-neon)', fontSize: '1.05rem' }}>{localHrv} ms</strong>
+              </div>
+              <input
+                type="range"
+                min={20}
+                max={120}
+                step={1}
+                value={localHrv}
+                onChange={(e) => setLocalHrv(parseInt(e.target.value, 10))}
+                aria-label="HRV rMSSD dalam milidetik"
+                style={{ width: '100%', accentColor: 'var(--accent-neon)', cursor: 'pointer' }}
+              />
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+                Digunakan untuk normalisasi Z-Score kesiapan saraf otonom.
+              </div>
+            </div>
+
+            {/* Tendon / Joint Pain Input */}
+            <div style={{ background: 'var(--bg-secondary)', padding: '1.2rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  Nyeri Sendi / Tendon (0-3)
+                </span>
+                <strong style={{ color: localTendonPain >= 2 ? 'var(--color-danger)' : 'var(--color-success)', fontSize: '1rem' }}>
+                  {localTendonPain}/3
+                </strong>
+              </div>
+              <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem' }}>
+                {([0, 1, 2, 3] as const).map((painLvl) => (
+                  <button
+                    key={painLvl}
+                    type="button"
+                    onClick={() => setLocalTendonPain(painLvl)}
+                    style={{
+                      flex: 1,
+                      padding: '0.4rem 0.2rem',
+                      borderRadius: 'var(--radius-sm)',
+                      background: localTendonPain === painLvl ? 'var(--accent-neon)' : 'var(--bg-surface)',
+                      color: localTendonPain === painLvl ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                      fontWeight: 700,
+                      fontSize: '0.75rem',
+                      border: '1px solid var(--border-default)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {painLvl === 0 ? '0 Aman' : painLvl === 1 ? '1 Ringan' : painLvl === 2 ? '2 Nyeri' : '3 Tajam'}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Quick Simulation Presets & Save */}
@@ -507,9 +577,27 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               Impor File Latihan (.fit / .gpx / .tcx / .json / .csv)
             </h3>
           </div>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
-            Ekspor file aktivitas dari aplikasi pendamping jam Anda lalu unggah di sini.
-          </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '1.25rem' }}>
+              Ekspor file aktivitas dari aplikasi pendamping jam Anda lalu unggah di sini.
+            </p>
+
+            {importFeedback && (
+              <div
+                role="alert"
+                style={{
+                  padding: '0.75rem 0.9rem',
+                  borderRadius: 'var(--radius-sm)',
+                  background: importFeedback.isError ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
+                  border: importFeedback.isError ? '1px solid var(--color-danger)' : '1px solid var(--color-success)',
+                  color: importFeedback.isError ? 'var(--color-danger)' : 'var(--color-success)',
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  marginBottom: '1rem',
+                }}
+              >
+                {importFeedback.text}
+              </div>
+            )}
 
           <div
             style={{

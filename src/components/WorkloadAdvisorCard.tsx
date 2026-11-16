@@ -493,7 +493,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               background: 'var(--bg-surface)',
               padding: '0.75rem 1rem',
               borderRadius: 'var(--radius-sm)',
-              borderLeft: '3px solid var(--accent-neon)',
+              border: '1px solid var(--border-default)',
               fontSize: '0.82rem',
               color: 'var(--text-primary)',
               lineHeight: 1.5,

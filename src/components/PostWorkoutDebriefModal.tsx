@@ -168,7 +168,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
                 background: 'var(--bg-surface)',
                 padding: '0.85rem',
                 borderRadius: 'var(--radius-sm)',
-                borderLeft: '3px solid var(--color-info)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '0.75rem',
@@ -176,9 +176,9 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             >
               <Droplets size={18} style={{ color: 'var(--color-info)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Nutrition &amp; Rehydration Target:</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Target Nutrisi &amp; Rehidrasi:</strong>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
-                  Drink <strong>{waterMl}</strong> with electrolytes and consume <strong>{proteinGrams} protein</strong> within 45–60 minutes to stimulate Muscle Protein Synthesis (MPS).
+                  Minum <strong>{waterMl}</strong> dengan elektrolit dan konsumsi <strong>{proteinGrams} protein</strong> dalam 45-60 menit untuk menstimulasi sintesis protein otot (MPS).
                 </p>
               </div>
             </div>
@@ -189,7 +189,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
                 background: 'var(--bg-surface)',
                 padding: '0.85rem',
                 borderRadius: 'var(--radius-sm)',
-                borderLeft: '3px solid var(--color-success)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '0.75rem',
@@ -197,13 +197,13 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             >
               <Activity size={18} style={{ color: 'var(--color-success)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Targeted Tissue Flush:</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Pemulihan Jaringan Spesifik:</strong>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                   {debriefData.hasLegWorkout
-                    ? 'Quad and glute foam rolling + 90/90 hip stretches. High-speed running is locked for 48h to protect patellar tendons.'
+                    ? 'Foam rolling kuadrisep dan glutes serta peregangan panggul 90/90. Lari kecepatan tinggi dikunci 48 jam untuk melindungi tendon patela.'
                     : debriefData.hasRunWorkout
-                    ? 'Calf and hamstring light flush. Elevate legs for 10 minutes to assist lymphatic drainage and venous return.'
-                    : 'Doorway pectoral stretch, lat hangs, and thoracic extension to preserve shoulder mobility.'}
+                    ? 'Peregangan ringan betis dan hamstring. Angkat kaki 10 menit untuk membantu aliran balik vena.'
+                    : 'Peregangan dada, lat hang, dan ekstensi toraks untuk menjaga mobilitas bahu.'}
                 </p>
               </div>
             </div>
@@ -214,7 +214,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
                 background: 'var(--bg-surface)',
                 padding: '0.85rem',
                 borderRadius: 'var(--radius-sm)',
-                borderLeft: '3px solid var(--accent-neon)',
+                border: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: '0.75rem',
@@ -222,13 +222,13 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             >
               <Calendar size={18} style={{ color: 'var(--accent-neon)', flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Tomorrow&apos;s Training Preview:</strong>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>Pratinjau Latihan Besok:</strong>
                 <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '0.15rem', lineHeight: 1.4 }}>
                   {debriefData.hasLegWorkout
-                    ? 'Upper Body Push / Pull or complete Rest Day. Allow quadriceps motor units to rebuild.'
+                    ? 'Upper Body Push / Pull atau Hari Istirahat Penuh. Biarkan unit motorik kuadrisep pulih.'
                     : isSpike
-                    ? 'Active Recovery Protocol: 30-min mobility & foam rolling. Do not add heavy volume.'
-                    : 'Scheduled session: Steady Zone 2 Aerobic Base Run (40–45 min) or Upper Hypertrophy.'}
+                    ? 'Protokol Pemulihan Aktif: 30 menit mobilitas & foam rolling. Jangan menambah volume berat.'
+                    : 'Sesi terjadwal: Lari Santai Aerobik Zona 2 (40-45 menit) atau Hipertrofi Tubuh Atas.'}
                 </p>
               </div>
             </div>

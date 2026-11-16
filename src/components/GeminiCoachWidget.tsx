@@ -390,7 +390,6 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                     style={{
                       background: isUser ? 'var(--bg-surface-elevated)' : 'var(--bg-surface)',
                       border: isUser ? '1px solid var(--border-hover)' : '1px solid var(--border-default)',
-                      borderLeft: !isUser ? '3px solid var(--accent-neon)' : undefined,
                       padding: '0.75rem 0.95rem',
                       borderRadius: isUser ? '12px 12px 2px 12px' : '12px 12px 12px 2px',
                       color: 'var(--text-primary)',
@@ -410,7 +409,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
 
             {isLoading && (
               <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.8rem', background: 'var(--bg-surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
-                <Sparkles size={14} style={{ color: 'var(--accent-neon)', animation: 'spin 1.5s linear infinite' }} />
+                <Sparkles size={14} style={{ color: 'var(--accent-neon)' }} />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>rkbot sedang berpikir...</span>
               </div>
             )}

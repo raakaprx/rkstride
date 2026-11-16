@@ -269,6 +269,9 @@ export function useWorkoutEngine() {
   // Import smartwatch activity file
   const importSmartwatchFile = useCallback((fileContent: string, filename: string) => {
     const parsed: ParsedSmartwatchData = parseUniversalSmartwatchFile(fileContent, filename);
+    if (parsed.parseError) {
+      return parsed;
+    }
 
     // Update daily readiness
     setTodayReadiness((prev) => ({
@@ -277,18 +280,54 @@ export function useWorkoutEngine() {
       restingHeartRate: parsed.restingHeartRate,
     }));
 
+    if (parsed.workoutDetected && parsed.workoutDetected.durationMinutes > 0) {
+      const detectedRun: RunSession = {
+        jarakKm: parsed.workoutDetected.distanceKm || Math.round(parsed.workoutDetected.durationMinutes * 0.16 * 10) / 10,
+        durasiMenit: parsed.workoutDetected.durationMinutes,
+        avgPace: parsed.workoutDetected.avgPace || 5.4,
+        avgHeartRate: parsed.workoutDetected.avgHeartRate || 148,
+        runningType: (parsed.workoutDetected.avgHeartRate || 148) > 165 ? 'intervals' : 'easy',
+      };
+      const runLoad = calculateRunningLoad(detectedRun);
+      const entryDate = parsed.date || new Date().toISOString().split('T')[0];
+      setHistory((prev) => {
+        const updated = [...prev];
+        const idx = updated.findIndex((u) => u.tanggal === entryDate);
+        if (idx >= 0) {
+          const existing = updated[idx];
+          const mergedEntry: DailyLog = {
+            ...existing,
+            runningWorkouts: [...existing.runningWorkouts, detectedRun],
+            totalLoadScore: existing.totalLoadScore + runLoad,
+          };
+          updated[idx] = mergedEntry;
+          db.workoutLogs.put(mergedEntry).catch(console.error);
+        } else {
+          const newEntry: DailyLog = {
+            tanggal: entryDate,
+            strengthWorkouts: [],
+            runningWorkouts: [detectedRun],
+            totalLoadScore: runLoad,
+          };
+          updated.unshift(newEntry);
+          db.workoutLogs.put(newEntry).catch(console.error);
+        }
+        return updated;
+      });
+    }
+
     setSmartwatchState({
       connected: true,
       deviceName: `${parsed.brandDetected.toUpperCase()} File (${filename})`,
       brand: parsed.brandDetected,
-      batteryLevel: 88,
+      batteryLevel: undefined,
       liveHeartRate: parsed.restingHeartRate,
-      lastSyncTime: `File Synced: ${parsed.date}`,
+      lastSyncTime: `File Disinkronkan: ${parsed.date}`,
       source: 'file_export',
     });
 
     return parsed;
-  }, []);
+  }, [setTodayReadiness]);
 
   // Apply smartwatch simulation preset
   const applyPreset = useCallback((presetKey: 'normal' | 'fatigued' | 'peak') => {

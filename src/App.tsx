@@ -384,7 +384,6 @@ export default function App() {
                 background: 'var(--bg-secondary)',
                 borderRadius: 'var(--radius-lg)',
                 border: '1px solid var(--border-default)',
-                borderLeft: '3px solid var(--accent-neon)',
                 padding: '1.5rem',
                 display: 'flex',
                 flexDirection: 'column',
