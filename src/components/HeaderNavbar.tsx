@@ -1,25 +1,38 @@
 import React, { useState } from 'react';
-import { Watch, Database, Info, User, Settings2, Menu, WifiOff, X } from 'lucide-react';
+import { Watch, Database, Info, User, Settings2, Menu, WifiOff, X, Layers, LogOut } from 'lucide-react';
 import { SmartwatchDeviceState } from '@/lib/engine/smartwatch';
+import { AthleteAuthSession, ExperienceLevel } from '@/types/workout';
+
+const LEVEL_LABELS: Record<ExperienceLevel, string> = {
+  beginner: 'Pemula',
+  intermediate: 'Menengah',
+  expert: 'Expert',
+};
 
 interface HeaderNavbarProps {
   smartwatchState: SmartwatchDeviceState;
   isOnline: boolean;
+  authSession?: AthleteAuthSession | null;
   onOpenSmartwatchModal: () => void;
   onOpenDataModal?: () => void;
   onOpenAboutModal?: () => void;
   onOpenProfileModal?: () => void;
   onOpenAiSettingsModal?: () => void;
+  onOpenOdooModal?: () => void;
+  onLogout?: () => void;
 }
 
 export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
   smartwatchState,
   isOnline,
+  authSession,
   onOpenSmartwatchModal,
   onOpenDataModal,
   onOpenAboutModal,
   onOpenProfileModal,
   onOpenAiSettingsModal,
+  onOpenOdooModal,
+  onLogout,
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -37,6 +50,22 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
           <span style={{ fontFamily: 'var(--font-family-display)', fontWeight: 900, fontSize: '1.05rem', letterSpacing: '0.04em', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
             RK<span style={{ color: 'var(--accent-neon)' }}>STRIDE</span>
           </span>
+          {authSession && (
+            <span
+              style={{
+                fontSize: '0.72rem',
+                fontWeight: 700,
+                padding: '0.18rem 0.55rem',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--accent-neon-subtle)',
+                border: '1px solid var(--border-default)',
+                color: 'var(--accent-neon)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {authSession.athleteName} ({LEVEL_LABELS[authSession.experienceLevel]})
+            </span>
+          )}
           {!isOnline && (
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.7rem', fontWeight: 700, letterSpacing: 'var(--tracking-status)', color: 'var(--text-muted)', border: '1px solid var(--border-default)', borderRadius: 'var(--radius-full)', padding: '0.2rem 0.55rem' }}>
               <WifiOff size={12} /> OFFLINE
@@ -56,9 +85,11 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
       {isMenuOpen && (
         <div role="menu" aria-label="Menu lanjutan" className="header-actions" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem 0.7rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           {onOpenProfileModal && <button role="menuitem" type="button" onClick={() => { closeMenu(); onOpenProfileModal(); }} style={menuBtn}><User size={14} style={{ color: 'var(--accent-neon)' }} /><span>Profil</span></button>}
+          {onOpenOdooModal && <button role="menuitem" type="button" onClick={() => { closeMenu(); onOpenOdooModal(); }} style={menuBtn}><Layers size={14} style={{ color: 'var(--accent-neon)' }} /><span>Sprint Odoo</span></button>}
           {onOpenDataModal && <button role="menuitem" type="button" onClick={() => { closeMenu(); onOpenDataModal(); }} style={menuBtn}><Database size={14} style={{ color: 'var(--accent-neon)' }} /><span>Backup</span></button>}
           {onOpenAiSettingsModal && <button role="menuitem" type="button" onClick={() => { closeMenu(); onOpenAiSettingsModal(); }} style={menuBtn}><Settings2 size={14} style={{ color: 'var(--accent-neon)' }} /><span>AI Coach</span></button>}
           {onOpenAboutModal && <button role="menuitem" type="button" onClick={() => { closeMenu(); onOpenAboutModal(); }} style={menuBtn}><Info size={14} style={{ color: 'var(--accent-neon)' }} /><span>Science</span></button>}
+          {onLogout && <button role="menuitem" type="button" onClick={() => { closeMenu(); onLogout(); }} style={menuBtn}><LogOut size={14} style={{ color: 'var(--color-danger)' }} /><span>Keluar</span></button>}
         </div>
       )}
     </header>

@@ -19,14 +19,27 @@ import { NutritionBodyCompCard } from './components/NutritionBodyCompCard';
 import { TrendsDashboardCard } from './components/TrendsDashboardCard';
 import { OnboardingProfileModal } from './components/OnboardingProfileModal';
 import { AICoachSettingsModal } from './components/AICoachSettingsModal';
+import { AuthLandingGate } from './components/AuthLandingGate';
+import { OdooSprintDocsModal } from './components/OdooSprintDocsModal';
 import { AthleteContext } from './lib/ai/geminiCoach';
 import { db, seedInitialDataIfEmpty } from './lib/db/database';
-import { UserProfile } from './types/workout';
+import { AthleteAuthSession, UserProfile } from './types/workout';
 import { RaceTargetConfig } from './types/productFeatures';
+
+const AUTH_SESSION_STORAGE_KEY = 'rkstride_auth_session';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('today');
   const isOnline = useOnlineStatus();
+
+  const [authSession, setAuthSession] = useState<AthleteAuthSession | null>(() => {
+    try {
+      const raw = localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const tabTitles: Record<AppTab, string> = {
     today: 'Latihan Hari Ini',
@@ -43,6 +56,7 @@ export default function App() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isAiSettingsOpen, setIsAiSettingsOpen] = useState(false);
   const [isCoachChatOpen, setIsCoachChatOpen] = useState(false);
+  const [isOdooModalOpen, setIsOdooModalOpen] = useState(false);
 
   // Athlete Profile & Race Target State
   const [userProfile, setUserProfile] = useState<UserProfile>({
@@ -141,6 +155,45 @@ export default function App() {
     setIsOnboardingOpen(false);
   };
 
+  const handleAuthenticated = async (
+    session: AthleteAuthSession,
+    profileUpdates?: Partial<UserProfile>
+  ) => {
+    setAuthSession(session);
+    try {
+      localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
+      localStorage.setItem('rkstride_disclaimer_accepted', 'true');
+      await db.appSettings.put({
+        key: 'disclaimerAccepted',
+        value: true,
+        updatedAt: new Date().toISOString(),
+      });
+      if (profileUpdates) {
+        const mergedProfile: UserProfile = {
+          ...userProfile,
+          ...profileUpdates,
+        };
+        setUserProfile(mergedProfile);
+        await db.userProfile.put({
+          id: 'current_user',
+          ...mergedProfile,
+        });
+      }
+    } catch (err) {
+      console.error('Failed to persist authenticated session:', err);
+    }
+    setIsOnboardingOpen(false);
+  };
+
+  const handleLogout = () => {
+    setAuthSession(null);
+    try {
+      localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
+    } catch (err) {
+      console.error('Failed to clear auth session:', err);
+    }
+  };
+
   // Dynamic Athlete Context for Google Gemini AI Coach
   const athleteContext: AthleteContext = useMemo(() => ({
     acwrRatio: acwrResult.ratio,
@@ -166,17 +219,40 @@ export default function App() {
     });
   };
 
+  if (!authSession) {
+    return (
+      <>
+        <AuthLandingGate
+          onAuthenticated={handleAuthenticated}
+          onOpenOdooModal={() => setIsOdooModalOpen(true)}
+          onOpenAboutModal={() => setIsAboutModalOpen(true)}
+        />
+        <OdooSprintDocsModal
+          isOpen={isOdooModalOpen}
+          onClose={() => setIsOdooModalOpen(false)}
+        />
+        <AboutDisclaimerModal
+          isOpen={isAboutModalOpen}
+          onClose={() => setIsAboutModalOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--bg-primary)' }}>
       {/* Sticky Top Header */}
       <HeaderNavbar
         smartwatchState={smartwatchState}
         isOnline={isOnline}
+        authSession={authSession}
         onOpenSmartwatchModal={() => setActiveTab('coach')}
         onOpenDataModal={() => setIsDataModalOpen(true)}
         onOpenAboutModal={() => setIsAboutModalOpen(true)}
         onOpenProfileModal={() => setIsProfileModalOpen(true)}
         onOpenAiSettingsModal={() => setIsAiSettingsOpen(true)}
+        onOpenOdooModal={() => setIsOdooModalOpen(true)}
+        onLogout={handleLogout}
       />
 
       {/* Main Container */}
@@ -535,6 +611,12 @@ export default function App() {
       <AICoachSettingsModal
         isOpen={isAiSettingsOpen}
         onClose={() => setIsAiSettingsOpen(false)}
+      />
+
+      {/* Odoo Sprint Board & Documentation Modal */}
+      <OdooSprintDocsModal
+        isOpen={isOdooModalOpen}
+        onClose={() => setIsOdooModalOpen(false)}
       />
 
             {/* Bottom dock: primary destinations in thumb reach */}

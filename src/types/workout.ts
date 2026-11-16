@@ -84,7 +84,19 @@ export interface ReadinessCheckIn {
   tendonPainArea?: string; // e.g. "Patellar", "Achilles", "Hamstring"
 }
 
+export type ExperienceLevel = 'beginner' | 'intermediate' | 'expert';
+
+export interface AthleteAuthSession {
+  athleteName: string;
+  email: string;
+  experienceLevel: ExperienceLevel;
+  loggedInAt: string;
+}
+
 export interface UserProfile {
+  athleteName?: string;
+  email?: string;
+  experienceLevel?: ExperienceLevel;
   age: number;
   weightKg: number;
   heightCm: number;

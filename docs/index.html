@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RKStride Documentation &amp; Odoo Sprint Portal</title>
+  <link rel="stylesheet" href="/src/styles/tokens.css" />
+  <style>
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-family-body);
+      margin: 0;
+      padding: 0;
+    }
+    .doc-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-default);
+      padding: 1rem 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .doc-container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .doc-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+    }
+    .badge-done {
+      background: var(--color-success-bg);
+      color: var(--color-success);
+      border: 1px solid var(--color-success);
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-todo {
+      background: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-default);
+      padding: 0.15rem 0.55rem;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-default);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: var(--accent-neon);
+      font-weight: 800;
+    }
+    a.btn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      border-radius: var(--radius-md);
+      background: var(--accent-neon);
+      color: var(--text-inverse);
+      font-weight: 800;
+      font-size: 0.82rem;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <header class="doc-header">
+    <div style="max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <strong style="font-size: 1.15rem; font-weight: 900; letter-spacing: 0.04em;">
+          RK<span style="color: var(--accent-neon);">STRIDE</span> &bull; DOCUMENTATION &amp; ODOO SPRINT PORTAL
+        </strong>
+        <div style="font-size: 0.78rem; color: var(--text-muted);">
+          Documentation-First Architecture, Value Proposition Blueprint &amp; Odoo Project Backlog
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <a class="btn-link" href="/docs/odoo-tasks-import.csv" download="rkstride-odoo-tasks.csv">Unduh CSV Impor Odoo</a>
+        <a class="btn-link" style="background: var(--bg-surface); color: var(--accent-neon); border: 1px solid var(--border-focus);" href="/">Buka Aplikasi RKStride</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="doc-container">
+    <section class="doc-card" style="border-top: 3px solid var(--accent-neon);">
+      <h1 style="font-size: 1.5rem; margin-bottom: 0.5rem;">1. Blueprint Value Proposition &amp; Gerbang Login (Temuan #1)</h1>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem;">
+        Pengguna baru tidak lagi langsung dilempar ke dasbor teknis. Halaman <code>AuthLandingGate.tsx</code> menjelaskan mengapa atlet hibrida membutuhkan RKStride (penyatuan beban angkat beban PPL dan lari ke dalam rasio ACWR 0.8 sampai 1.4 serta proteksi jeda pemulihan kaki 48 jam), menyediakan sistem Login &amp; Registrasi Akun Atlet Lokal, serta mengizinkan pemilihan tingkat pengalaman (Pemula, Menengah, Expert).
+      </p>
+    </section>
+
+    <section class="doc-card">
+      <h2 style="font-size: 1.25rem; margin-bottom: 0.75rem;">2. Papan Backlog Sprint Odoo (Siap Impor ke Odoo Project)</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>ID Odoo</th>
+              <th>Sprint</th>
+              <th>Epic</th>
+              <th>Judul Task &amp; Acceptance Criteria</th>
+              <th>Status</th>
+              <th>SP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>ODOO-101</code></td>
+              <td>Sprint 1</td>
+              <td>EPIC-01: Documentation-First</td>
+              <td>
+                <strong>Penyusunan Blueprint Dokumentasi Produk &amp; Portal npm run doc:dev</strong>
+                <div style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.25rem;">
+                  Menyediakan portal dokumentasi, kamus bahasa multi-tier, dan berkas CSV siap impor ke Odoo Project.
+                </div>
+              </td>
+              <td><span class="badge-done">Done</span></td>
+              <td><strong>5</strong></td>
+            </tr>
+            <tr>
+              <td><code>ODOO-102</code></td>
+              <td>Sprint 1</td>
+              <td>EPIC-02: Onboarding &amp; Local Auth</td>
+              <td>
+                <strong>Implementasi Gerbang Awal: Value Proposition &amp; Login Akun Atlet Lokal (Temuan #1)</strong>
+                <div style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.25rem;">
+                  Halaman pengenalan nilai RKStride, form Login/Registrasi akun lokal (IndexedDB/localStorage), pemilihan level Pemula/Menengah/Expert, dan tombol Keluar di Header.
+                </div>
+              </td>
+              <td><span class="badge-done">Done</span></td>
+              <td><strong>8</strong></td>
+            </tr>
+            <tr>
+              <td><code>ODOO-201</code></td>
+              <td>Sprint 2</td>
+              <td>EPIC-03: Adaptive Tiering</td>
+              <td>
+                <strong>Sistem Kosakata &amp; Tampilan Adaptif: Pemula, Menengah, dan Expert (Temuan #2)</strong>
+                <div style="color: var(--text-secondary); font-size: 0.78rem; margin-top: 0.25rem;">
+                  Adaptasi dinamis istilah UI di seluruh kartu berdasarkan level pengalaman atlet.
+                </div>
+              </td>
+              <td><span class="badge-todo">To Do</span></td>
+              <td><strong>8</strong></td>
+            </tr>
+            <tr>
+              <td><code>ODOO-202</code></td>
+              <td>Sprint 2</td>
+              <td>EPIC-03: Adaptive Tiering</td>
+              <td>
+                <strong>Penyeragaman Bahasa Indonesia &amp; Penghapusan Em Dash / CTA Generik (Temuan #6 &amp; #10)</strong>
+              </td>
+              <td><span class="badge-todo">To Do</span></td>
+              <td><strong>3</strong></td>
+            </tr>
+            <tr>
+              <td><code>ODOO-301</code></td>
+              <td>Sprint 3</td>
+              <td>EPIC-04: Engine Wiring</td>
+              <td>
+                <strong>Pembersihan Data Asumsi Default &amp; Sinkronisasi Rumus Beban UI-Engine (Temuan #4 &amp; #7)</strong>
+              </td>
+              <td><span class="badge-todo">To Do</span></td>
+              <td><strong>5</strong></td>
+            </tr>
+            <tr>
+              <td><code>ODOO-302</code></td>
+              <td>Sprint 3</td>
+              <td>EPIC-04: Engine Wiring</td>
+              <td>
+                <strong>Eksposur Metrik Mesin ke UI: Estimasi 1RM, PR Badge, Hard Sets &amp; Karvonen (Temuan #7)</strong>
+              </td>
+              <td><span class="badge-todo">To Do</span></td>
+              <td><strong>8</strong></td>
+            </tr>
+            <tr>
+              <td><code>ODOO-401</code></td>
+              <td>Sprint 4</td>
+              <td>EPIC-05: Wearable &amp; Hygiene</td>
+              <td>
+                <strong>Perbaikan Parser File .fit/.gpx/.tcx Tanpa Angka Palsu &amp; Kepatuhan MOTION 1 (Temuan #5, #8, #9)</strong>
+              </td>
+              <td><span class="badge-todo">To Do</span></td>
+              <td><strong>5</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="doc-card">
+      <h2 style="font-size: 1.25rem; margin-bottom: 0.75rem;">3. Kamus Bahasa Adaptif: Pemula vs Menengah vs Expert</h2>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Konsep Fisiologis</th>
+              <th>Mode Pemula</th>
+              <th>Mode Menengah</th>
+              <th>Mode Expert</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Indikator Beban Utama</strong></td>
+              <td>Status Keamanan Porsi Latihan</td>
+              <td>Rasio Beban Mingguan (ACWR)</td>
+              <td>ACWR (Coupled / Uncoupled / EWMA)</td>
+            </tr>
+            <tr>
+              <td><strong>Rentang Adaptasi 0.8 - 1.4</strong></td>
+              <td>Porsi Latihan Pas &amp; Aman</td>
+              <td>Zona Optimal (Sweet Spot 0.8 - 1.4)</td>
+              <td>Adaptation Sweet Spot (Gabbett Model)</td>
+            </tr>
+            <tr>
+              <td><strong>Beban Set Angkatan</strong></td>
+              <td>Tingkat Capek (1 Ringan s.d. 10 Maksimal)</td>
+              <td>Skala Usaha RPE (1-10)</td>
+              <td>Foster Session-RPE &amp; RIR Proximity</td>
+            </tr>
+            <tr>
+              <td><strong>Proteksi Benturan Kaki</strong></td>
+              <td>Jeda Istirahat Kaki 2 Hari Sebelum Lari Cepat</td>
+              <td>Jendela Pemulihan Otot Kaki 48 Jam</td>
+              <td>48h AMPK/mTORC1 Interference Guardrail</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
