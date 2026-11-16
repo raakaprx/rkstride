@@ -10,8 +10,9 @@ import {
   Lock,
   Unlock,
 } from 'lucide-react';
-import { ACWRResult, RecommendationResult, ReadinessCheckIn } from '@/types/workout';
+import { ACWRResult, RecommendationResult, ReadinessCheckIn, ExperienceLevel } from '@/types/workout';
 import { Badge } from './ui/Badge';
+import { EXPERIENCE_COPY } from '@/lib/experienceCopy';
 
 interface WorkloadAdvisorCardProps {
   acwr: ACWRResult;
@@ -19,6 +20,7 @@ interface WorkloadAdvisorCardProps {
   readiness: ReadinessCheckIn;
   readinessScore: number;
   lastLegsHoursAgo: number;
+  experienceLevel?: ExperienceLevel;
 }
 
 export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
@@ -27,7 +29,9 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
   readiness,
   readinessScore,
   lastLegsHoursAgo,
+  experienceLevel = 'expert',
 }) => {
+  const tierCopy = EXPERIENCE_COPY[experienceLevel];
   const isColdStart = acwr.status === 'insufficient_data';
   // Single 1.4 guardrail (AGENTS.md). 'warning' status is legacy-only.
   const isDanger = acwr.status === 'danger' || acwr.ratio > 1.4;
@@ -96,7 +100,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                 color: 'var(--text-muted)',
               }}
             >
-              Athletic Workload Science (ACWR Engine)
+              {tierCopy.advisorEyebrow}
             </span>
             <span
               style={{
@@ -227,8 +231,8 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>ACWR Workload Ratio</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gabbett Athletic Model</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{tierCopy.acwrRatioLabel}</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tierCopy.acwrModelNote}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.4rem' }}>
@@ -243,8 +247,8 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               {acwr.ratio}
             </span>
             <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <div>Acute (7d): <strong style={{ color: 'var(--text-primary)' }}>{acwr.acuteLoad}</strong> pts/day</div>
-              <div>Chronic (28d): <strong style={{ color: 'var(--text-primary)' }}>{acwr.chronicLoad}</strong> pts/day</div>
+              <div>{tierCopy.acuteLabel}: <strong style={{ color: 'var(--text-primary)' }}>{acwr.acuteLoad}</strong> pts/hari</div>
+              <div>{tierCopy.chronicLabel}: <strong style={{ color: 'var(--text-primary)' }}>{acwr.chronicLoad}</strong> pts/hari</div>
             </div>
           </div>
 
@@ -345,7 +349,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                 </div>
               ) : (
                 <div style={{ marginTop: '0.25rem' }}>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-muted)' }}>—</div>
+                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-muted)' }}>Kosong</div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Belum diukur</div>
                 </div>
               )}
@@ -381,7 +385,7 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>48-Hour Leg Recovery Window</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{tierCopy.legWindowTitle}</span>
             <span
               style={{
                 fontSize: '0.7rem',

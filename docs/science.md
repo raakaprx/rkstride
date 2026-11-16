@@ -354,20 +354,20 @@ Untuk mencegah stagnasi kekuatan dan mengurangi risiko overexertion, RKStride me
 1. **Baar, K. (2014).** Using molecular biology to maximize concurrent training. *Sports Medicine*, 44(Suppl 2), S117-S125.
 2. **Banister, E. W., et al. (1975).** A systems model of training for athletic performance. *Australian Journal of Sports Medicine*, 7(3), 57-61.
 3. **Blanch, P., & Gabbett, T. J. (2016).** Has the code been cracked? The nut-shell guide to the acute:chronic workload ratio and injury prevention. *British Journal of Sports Medicine*, 50(8), 471-475.
-4. **Brzycki, M. (1993).** Strength testing—predicting a one-rep max from reps-to-fatigue. *Journal of Physical Education, Recreation & Dance*, 64(1), 88-90.
+4. **Brzycki, M. (1993).** Strength testing: predicting a one-rep max from reps-to-fatigue. *Journal of Physical Education, Recreation & Dance*, 64(1), 88-90.
 5. **Burke, L. M., et al. (2011).** Carbohydrates for training and competition. *Journal of Sports Sciences*, 29(Suppl 1), S17-S27.
 6. **Cook, J. L., & Purdam, C. R. (2009).** Is tendon pathology a continuum? A pathology model to explain the clinical presentation of load-induced tendinopathy. *British Journal of Sports Medicine*, 43(6), 409-416.
 7. **Edwards, S. (1993).** *High performance training and racing*. In: Edwards S, ed. The Heart Rate Monitor Book. Sacramento, CA: Feet Fleet Press, 113-123.
 8. **Epley, B. (1985).** *Poundage Chart*. Lincoln, NE: Boyd Epley Workout.
 9. **Foster, C., et al. (2001).** A new approach to monitoring exercise training. *Journal of Strength and Conditioning Research*, 15(1), 109-115.
-10. **Gabbett, T. J. (2016).** The training—injury prevention paradox: should athletes be training smarter and harder? *British Journal of Sports Medicine*, 50(5), 273-280.
+10. **Gabbett, T. J. (2016).** The training-injury prevention paradox: should athletes be training smarter and harder? *British Journal of Sports Medicine*, 50(5), 273-280.
 11. **Gellish, R. L., et al. (2007).** Longitudinal modeling of the relationship between age and maximal heart rate. *Medicine & Science in Sports & Exercise*, 39(5), 822-829.
 12. **Helgerud, J., et al. (2007).** Aerobic high-intensity intervals improve VO2max more than moderate training. *Medicine & Science in Sports & Exercise*, 39(4), 665-671.
 13. **Helms, E. R., et al. (2014).** Evidence-based recommendations for natural bodybuilding contest preparation: nutrition and supplementation. *Journal of the International Society of Sports Nutrition*, 11, 20.
 14. **Helms, E. R. (2016).** *The Muscle and Strength Pyramid: Training*. 2nd ed.
 15. **Hickson, R. C. (1980).** Interference of strength development by simultaneously training for strength and endurance. *European Journal of Applied Physiology and Occupational Physiology*, 45(2-3), 255-263.
 16. **Hunter, J. S. (1986).** The exponentially weighted moving average. *Journal of Quality Technology*, 18(4), 203-210.
-17. **Impellizzeri, F. M., et al. (2020).** The acute:chronic workload ratio—inconsistencies and challenges. *Sports Medicine*, 50(7), 1251-1263.
+17. **Impellizzeri, F. M., et al. (2020).** The acute:chronic workload ratio: inconsistencies and challenges. *Sports Medicine*, 50(7), 1251-1263.
 18. **Lolli, L., et al. (2019).** The acute-to-chronic workload ratio: An inaccurate method for index calculation and misleading injury risk estimate. *Journal of Science and Medicine in Sport*, 22(6), 650-651.
 19. **Mifflin, M. D., St Jeor, S. T., et al. (1990).** A new predictive equation for resting energy expenditure in healthy individuals. *The American Journal of Clinical Nutrition*, 51(2), 241-247.
 20. **Morton, R. W., et al. (2018).** A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults. *British Journal of Sports Medicine*, 52(6), 376-384.

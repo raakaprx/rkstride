@@ -162,6 +162,34 @@ describe('Dashboard Components - Rendering Across Historical Workload States', (
       expect(screen.getAllByText(/1.65/).length).toBeGreaterThanOrEqual(1);
       expect(screen.getByText(/Sesi Pemulihan Aktif/i)).toBeInTheDocument();
     });
+
+    it('adapts terminology for Pemula (beginner) vs Expert mode', () => {
+      const sweetAcwr: ACWRResult = {
+        ratio: 1.05,
+        acuteLoad: 300,
+        chronicLoad: 285,
+        status: 'sweet_spot',
+        daysCollected: 28,
+        coldStartProgressPercent: 100,
+        weeklySpikeAlert: false,
+        weeklySpikePercent: 0,
+        method: 'rolling_coupled',
+      };
+
+      render(
+        <WorkloadAdvisorCard
+          acwr={sweetAcwr}
+          recommendation={dummyRecommendation}
+          readiness={dummyReadiness}
+          readinessScore={88}
+          lastLegsHoursAgo={72}
+          experienceLevel="beginner"
+        />
+      );
+
+      expect(screen.getByText(/Skor Keseimbangan Beban \(ACWR\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Aturan Istirahat Kaki 2 Hari \(48 Jam\)/i)).toBeInTheDocument();
+    });
   });
 
   describe('TrendsDashboardCard', () => {

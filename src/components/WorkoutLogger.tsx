@@ -16,8 +16,9 @@ import {
   Zap,
   TrendingUp,
 } from 'lucide-react';
-import { StrengthExercise, RunSession, RunningType, ACWRStatus } from '@/types/workout';
+import { StrengthExercise, RunSession, RunningType, ACWRStatus, ExperienceLevel } from '@/types/workout';
 import { GuardrailOverrideModal } from './GuardrailOverrideModal';
+import { EXPERIENCE_COPY } from '@/lib/experienceCopy';
 import {
   calculateStrengthLoad,
   calculateRunningLoad,
@@ -50,6 +51,7 @@ interface WorkoutLoggerProps {
   };
   liveSmartwatchHeartRate?: number;
   lastLegsHoursAgo: number;
+  experienceLevel?: ExperienceLevel;
   onWorkoutCompletedDebrief?: (data: {
     sessionLoad: number;
     projectedACWR: number;
@@ -66,8 +68,10 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
   calculateProjectedImpact,
   liveSmartwatchHeartRate,
   lastLegsHoursAgo,
+  experienceLevel = 'expert',
   onWorkoutCompletedDebrief,
 }) => {
+  const tierCopy = EXPERIENCE_COPY[experienceLevel];
   const [successSaved, setSuccessSaved] = useState(false);
   const [showFormulaGuide, setShowFormulaGuide] = useState(false);
 
@@ -388,10 +392,10 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
           </div>
 
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-            Workout Logging &amp; Real-Time Workload Test
+            Pencatatan Latihan &amp; Uji Beban Real-Time
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.2rem' }}>
-            Configure strength movements (Push, Pull, Legs, Arms, Core) and cardio running spectrum to simulate instantaneous ACWR impact.
+            {tierCopy.loggerSubtitle}
           </p>
         </div>
 
@@ -413,7 +417,7 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               cursor: 'pointer',
             }}
           >
-            <Dumbbell size={15} /> Strength Training {includeStrength ? '✓' : ''}
+            <Dumbbell size={15} /> Latihan Beban {includeStrength ? '✓' : ''}
           </button>
 
           <button
@@ -432,10 +436,27 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
               cursor: 'pointer',
             }}
           >
-            <Timer size={15} /> Running Session {includeRunning ? '✓' : ''}
+            <Timer size={15} /> Sesi Lari {includeRunning ? '✓' : ''}
           </button>
         </div>
       </div>
+
+      {tierCopy.beginnerTipBanner && (
+        <div
+          style={{
+            background: 'var(--accent-neon-subtle)',
+            border: '1px solid var(--border-focus)',
+            borderRadius: 'var(--radius-md)',
+            padding: '0.85rem 1.1rem',
+            marginBottom: '1.5rem',
+            fontSize: '0.82rem',
+            color: 'var(--text-primary)',
+            lineHeight: 1.5,
+          }}
+        >
+          {tierCopy.beginnerTipBanner}
+        </div>
+      )}
 
       {/* Scientific Formula Guide (Collapsible) */}
       {showFormulaGuide && (
@@ -813,10 +834,10 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                       <thead>
                         <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid var(--border-subtle)', textAlign: 'left' }}>
                           <th style={{ padding: '0.4rem 0.5rem', width: '60px' }}>Set #</th>
-                          <th style={{ padding: '0.4rem 0.5rem' }}>Weight (kg)</th>
-                          <th style={{ padding: '0.4rem 0.5rem' }}>Reps</th>
-                          <th style={{ padding: '0.4rem 0.5rem' }}>RPE (1-10)</th>
-                          <th style={{ padding: '0.4rem 0.5rem' }}>Set Score</th>
+                          <th style={{ padding: '0.4rem 0.5rem' }}>Beban (kg)</th>
+                          <th style={{ padding: '0.4rem 0.5rem' }}>Repetisi</th>
+                          <th style={{ padding: '0.4rem 0.5rem' }}>{tierCopy.rpeColumnHeader}</th>
+                          <th style={{ padding: '0.4rem 0.5rem' }}>Skor Set</th>
                           <th style={{ padding: '0.4rem 0.5rem', width: '40px' }}></th>
                         </tr>
                       </thead>
@@ -877,14 +898,29 @@ export const WorkoutLogger: React.FC<WorkoutLoggerProps> = ({
                                                                         cursor: 'pointer',
                                   }}
                                 >
-                                  <option value={6}>6 (Warm-up / 4 RIR)</option>
-                                  <option value={7}>7 (Moderate / 3 RIR)</option>
-                                  <option value={7.5}>7.5 (2-3 RIR)</option>
-                                  <option value={8}>8 (Solid effort / 2 RIR)</option>
-                                  <option value={8.5}>8.5 (1-2 RIR)</option>
-                                  <option value={9}>9 (Heavy / 1 RIR)</option>
-                                  <option value={9.5}>9.5 (Near Failure / 0-1 RIR)</option>
-                                  <option value={10}>10 (Absolute Max / 0 RIR)</option>
+                                  {experienceLevel === 'beginner' ? (
+                                    <>
+                                      <option value={6}>6 (Pemanasan Ringan)</option>
+                                      <option value={7}>7 (Sedang / Masih Kuat 3x)</option>
+                                      <option value={7.5}>7.5 (Mulai Berat)</option>
+                                      <option value={8}>8 (Cukup Berat / Sisa 2x)</option>
+                                      <option value={8.5}>8.5 (Berat / Sisa 1-2x)</option>
+                                      <option value={9}>9 (Sangat Berat / Sisa 1x)</option>
+                                      <option value={9.5}>9.5 (Hampir Mentok)</option>
+                                      <option value={10}>10 (Maksimal / Mentok)</option>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <option value={6}>6 (Warm-up / 4 RIR)</option>
+                                      <option value={7}>7 (Moderate / 3 RIR)</option>
+                                      <option value={7.5}>7.5 (2-3 RIR)</option>
+                                      <option value={8}>8 (Solid effort / 2 RIR)</option>
+                                      <option value={8.5}>8.5 (1-2 RIR)</option>
+                                      <option value={9}>9 (Heavy / 1 RIR)</option>
+                                      <option value={9.5}>9.5 (Near Failure / 0-1 RIR)</option>
+                                      <option value={10}>10 (Absolute Max / 0 RIR)</option>
+                                    </>
+                                  )}
                                 </select>
                               </td>
                               <td style={{ padding: '0.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>

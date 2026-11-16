@@ -39,18 +39,18 @@ export const Footer: React.FC = () => {
             </span>
           </div>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', maxWidth: '520px', lineHeight: 1.5 }}>
-            Evidence-based athletic workload calculation engine grounded in Dr. Tim Gabbett&apos;s Acute:Chronic Workload Ratio (ACWR) and Norwegian 4x4 cardiorespiratory protocol with universal smartwatch biometric integration.
+            Mesin perhitungan beban latihan atletik berbasis bukti ilmiah Acute:Chronic Workload Ratio (ACWR) Dr. Tim Gabbett dan protokol interval Norwegian 4x4 dengan integrasi biometrik jam pintar.
           </p>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', flexWrap: 'wrap', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <ShieldCheck size={16} style={{ color: 'var(--color-success)' }} />
-            <span>ACWR Workload Risk Indicator</span>
+            <span>Indikator Risiko Beban ACWR</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Activity size={16} style={{ color: 'var(--accent-neon)' }} />
-            <span>Smartwatch Biometric Bridge</span>
+            <span>Sinkronisasi Biometrik Jam Pintar</span>
           </div>
         </div>
       </div>

@@ -104,10 +104,10 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
           </div>
 
           <h2 style={{ fontSize: '1.45rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-            Workout Logged Successfully
+            Sesi Latihan Berhasil Dicatat
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.35rem', lineHeight: 1.4 }}>
-            Great effort today! Your cardiovascular and musculoskeletal workload have been registered into the ACWR engine.
+            Beban kerja kardiovaskular dan otot Anda telah diperbarui ke dalam mesin perhitungan ACWR.
           </p>
         </div>
 
@@ -121,14 +121,14 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
           }}
         >
           <div style={{ background: 'var(--bg-surface)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Session Load</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Beban Sesi</div>
             <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
               {debriefData.sessionLoad} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>pts</span>
             </div>
           </div>
 
           <div style={{ background: 'var(--bg-surface)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Updated ACWR</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>ACWR Terkini</div>
             <div
               style={{
                 fontSize: '1.4rem',
@@ -140,17 +140,17 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
               {debriefData.projectedACWR}
             </div>
             <div style={{ fontSize: '0.75rem', color: isSpike ? 'var(--color-danger)' : 'var(--color-success)' }}>
-              {isSpike ? 'High Load Spike' : isSweetSpot ? 'Sweet Spot (Optimal)' : 'Light Stimulus'}
+              {isSpike ? 'Lonjakan Beban Akut' : isSweetSpot ? 'Sweet Spot (Optimal)' : 'Stimulus Ringan'}
             </div>
           </div>
 
           <div style={{ background: 'var(--bg-surface)', padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Recovery Window</div>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Jendela Pemulihan</div>
             <div style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-              {debriefData.hasLegWorkout ? '48h Leg Window' : 'Upper Recovery'}
+              {debriefData.hasLegWorkout ? 'Jeda Kaki 48 Jam' : 'Pemulihan Tubuh Atas'}
             </div>
             <div style={{ fontSize: '0.75rem', color: debriefData.hasLegWorkout ? 'var(--color-warning)' : 'var(--color-success)' }}>
-              {debriefData.hasLegWorkout ? 'Speed run locked' : 'Lower body fresh'}
+              {debriefData.hasLegWorkout ? 'Lari cepat dikunci' : 'Otot kaki segar'}
             </div>
           </div>
         </div>
@@ -283,7 +283,7 @@ export const PostWorkoutDebriefModal: React.FC<PostWorkoutDebriefModalProps> = (
             onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--text-primary)')}
             onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-secondary)')}
           >
-            Done
+            Tutup Ringkasan Sesi
           </button>
         </div>
       </div>

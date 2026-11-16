@@ -194,6 +194,26 @@ export default function App() {
     }
   };
 
+  const handleChangeExperienceLevel = (nextLevel: AthleteAuthSession['experienceLevel']) => {
+    if (authSession) {
+      const updatedSession: AthleteAuthSession = {
+        ...authSession,
+        experienceLevel: nextLevel,
+      };
+      setAuthSession(updatedSession);
+      try {
+        localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(updatedSession));
+      } catch (err) {
+        console.error('Failed to update experience level in session:', err);
+      }
+    }
+    setUserProfile((prev) => {
+      const next = { ...prev, experienceLevel: nextLevel };
+      db.userProfile.put({ id: 'current_user', ...next }).catch(console.error);
+      return next;
+    });
+  };
+
   // Dynamic Athlete Context for Google Gemini AI Coach
   const athleteContext: AthleteContext = useMemo(() => ({
     acwrRatio: acwrResult.ratio,
@@ -246,6 +266,8 @@ export default function App() {
         smartwatchState={smartwatchState}
         isOnline={isOnline}
         authSession={authSession}
+        experienceLevel={authSession.experienceLevel}
+        onChangeExperienceLevel={handleChangeExperienceLevel}
         onOpenSmartwatchModal={() => setActiveTab('coach')}
         onOpenDataModal={() => setIsDataModalOpen(true)}
         onOpenAboutModal={() => setIsAboutModalOpen(true)}
@@ -305,6 +327,7 @@ export default function App() {
               readiness={todayReadiness}
               readinessScore={readinessScore}
               lastLegsHoursAgo={lastLegsTrainedHoursAgo}
+              experienceLevel={authSession.experienceLevel}
             />
 
             {/* Modul Input Latihan Interaktif dengan Katalog Gerakan Lengkap & Dropdown */}
@@ -313,6 +336,7 @@ export default function App() {
               calculateProjectedImpact={calculateProjectedImpact}
               liveSmartwatchHeartRate={smartwatchState.liveHeartRate}
               lastLegsHoursAgo={lastLegsTrainedHoursAgo}
+              experienceLevel={authSession.experienceLevel}
               onWorkoutCompletedDebrief={handleWorkoutCompletedDebrief}
             />
           </>

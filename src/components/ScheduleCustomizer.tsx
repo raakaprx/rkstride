@@ -83,16 +83,16 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
             Custom Schedule Builder
           </span>
           <h2 style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-            Weekly Training Schedule &amp; Hybrid Split
+            Jadwal Latihan Mingguan &amp; Pembagian Hibrida
           </h2>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-            Click on any day to customize sessions. The engine automatically audits 48-hour recovery conflicts between leg days and high-speed running.
+            Klik hari mana pun untuk menyesuaikan sesi. Mesin secara otomatis memeriksa benturan pemulihan 48 jam antara latihan kaki dan lari cepat.
           </p>
         </div>
 
         {/* Template Presets */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Quick Templates:</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Template Cepat:</span>
           {scheduleTemplates.map((tpl) => (
             <button
               key={tpl.id}
@@ -294,7 +294,7 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                 fontSize: '0.85rem',
               }}
             >
-              Close ✕
+              Tutup Editor ✕
             </button>
           </div>
 

@@ -1,4 +1,4 @@
-# DESIGN.md — RKStride / PULSE Hybrid Athletics
+# DESIGN.md: RKStride / PULSE Hybrid Athletics
 
 Sumber arah visual tunggal. Filter antislop (`antislop`) bekerja DI ATAS dokumen ini:
 arah memberi jiwa, filter menolak slop.

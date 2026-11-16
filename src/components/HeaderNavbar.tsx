@@ -13,6 +13,8 @@ interface HeaderNavbarProps {
   smartwatchState: SmartwatchDeviceState;
   isOnline: boolean;
   authSession?: AthleteAuthSession | null;
+  experienceLevel?: ExperienceLevel;
+  onChangeExperienceLevel?: (level: ExperienceLevel) => void;
   onOpenSmartwatchModal: () => void;
   onOpenDataModal?: () => void;
   onOpenAboutModal?: () => void;
@@ -26,6 +28,8 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
   smartwatchState,
   isOnline,
   authSession,
+  experienceLevel = 'intermediate',
+  onChangeExperienceLevel,
   onOpenSmartwatchModal,
   onOpenDataModal,
   onOpenAboutModal,
@@ -37,10 +41,11 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
   const hr = smartwatchState.liveHeartRate;
+  const activeLevel = authSession?.experienceLevel || experienceLevel;
   return (
     <header className="site-header" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-subtle)', position: 'sticky', top: 0, zIndex: 'var(--z-header)', paddingTop: 'var(--safe-top)' }}>
-      <div className="site-header-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+      <div className="site-header-inner" style={{ maxWidth: '1280px', margin: '0 auto', padding: '0.6rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0, flexWrap: 'wrap' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <path d="M4 19L11 4H15L8 19H4Z" style={{ fill: 'var(--accent-neon)' }} />
@@ -63,7 +68,7 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
                 whiteSpace: 'nowrap',
               }}
             >
-              {authSession.athleteName} ({LEVEL_LABELS[authSession.experienceLevel]})
+              {authSession.athleteName} ({LEVEL_LABELS[activeLevel]})
             </span>
           )}
           {!isOnline && (
@@ -72,7 +77,47 @@ export const HeaderNavbar: React.FC<HeaderNavbarProps> = ({
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, flexWrap: 'wrap' }}>
+          {onChangeExperienceLevel && (
+            <div
+              role="group"
+              aria-label="Pilih mode tingkat pengalaman"
+              style={{
+                display: 'inline-flex',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border-default)',
+                borderRadius: 'var(--radius-md)',
+                padding: '2px',
+                gap: '2px',
+              }}
+            >
+              {(['beginner', 'intermediate', 'expert'] as const).map((lvl) => {
+                const isSelected = activeLevel === lvl;
+                return (
+                  <button
+                    key={lvl}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => onChangeExperienceLevel(lvl)}
+                    style={{
+                      minHeight: '38px',
+                      minWidth: '44px',
+                      padding: '0 0.55rem',
+                      borderRadius: 'var(--radius-sm)',
+                      background: isSelected ? 'var(--accent-neon)' : 'transparent',
+                      color: isSelected ? 'var(--text-inverse)' : 'var(--text-secondary)',
+                      border: 'none',
+                      fontSize: '0.72rem',
+                      fontWeight: isSelected ? 800 : 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {LEVEL_LABELS[lvl]}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <button type="button" onClick={onOpenSmartwatchModal} aria-label={hr ? `Jam terhubung, denyut ${hr} per menit. Buka sinkronisasi jam` : 'Buka sinkronisasi jam'} title="Sinkronisasi jam" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minHeight: '44px', padding: '0 0.7rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-surface)', border: '1px solid var(--border-default)', color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
             <Watch size={15} style={{ color: smartwatchState.connected ? 'var(--accent-neon)' : 'var(--text-muted)' }} />
             {hr !== undefined && <span style={{ fontFamily: 'var(--font-family-mono)', fontSize: '0.85rem', color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{hr}</span>}
