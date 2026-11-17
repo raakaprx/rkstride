@@ -1,29 +1,18 @@
 /**
- * RKStride - Types for Fase 3 Product Features
- * Includes:
- * 1. Competition Periodization & Dynamic Tapering
- * 2. Hybrid Athlete Nutrition & Energy Balance
- * 3. Double Progression & Resistance Training
+ * RKStride - Types for Product Features
+ * Domain contracts re-exported from @/contracts/profile.schema
  */
 
-export type RaceCategory = '5k' | '10k' | 'half_marathon' | 'marathon' | 'hyrox' | 'none';
+export type {
+  RaceCategory,
+  RaceTargetConfig,
+  PeriodizationPhase,
+  NutritionGoal,
+  DailyActivityLevel,
+  NutritionPrefs,
+} from '@/contracts/profile.schema';
 
-export interface RaceTargetConfig {
-  id?: string;
-  eventName: string;
-  category: RaceCategory;
-  raceDate: string; // YYYY-MM-DD
-  targetTimeMinutes?: number;
-  priority?: 'A' | 'B' | 'C';
-}
-
-export type PeriodizationPhase =
-  | 'base'
-  | 'build'
-  | 'peak'
-  | 'taper'
-  | 'race_week'
-  | 'recovery';
+import type { NutritionGoal, PeriodizationPhase } from '@/contracts/profile.schema';
 
 export interface PeriodizationPlan {
   currentPhase: PeriodizationPhase;
@@ -36,10 +25,6 @@ export interface PeriodizationPlan {
   strengthGuideline: string;
   advice: string;
 }
-
-export type NutritionGoal = 'maintenance' | 'muscle_gain' | 'fat_loss';
-
-export type DailyActivityLevel = 'sedentary' | 'lightly_active' | 'moderately_active' | 'very_active';
 
 export interface AthleteNutritionPlan {
   bmr: number;

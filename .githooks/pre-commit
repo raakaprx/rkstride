@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# RKStride pre-commit hook (installed via: git config core.hooksPath .githooks)
+echo "[pre-commit] Running RKStride centralized governance & diff guard..."
+node scripts/verify.mjs --staged

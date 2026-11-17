@@ -22,10 +22,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Governance, contract & architecture verifier
+        run: npm run verify
+
       - name: Typecheck + production build
         run: npm run build
 
-      - name: Vitest suite (80 tests)
+      - name: Vitest suite
         run: npm test
 
       - name: Sports science CLI suite (39 tests)

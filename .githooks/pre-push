@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# RKStride pre-push hook (installed via: git config core.hooksPath .githooks)
+echo "[pre-push] Running full verification + Vitest + production build..."
+node scripts/verify.mjs --with-tests --with-build

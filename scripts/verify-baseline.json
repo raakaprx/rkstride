@@ -1,0 +1,26 @@
+{
+  "generatedAt": "2026-11-17T03:33:18.031Z",
+  "note": "Ratchet baseline: counts may only decrease toward 0 as Sprint 1-5 progresses.",
+  "maxCounts": {
+    "ui_hex_literals": 0,
+    "no_outline_none": 0,
+    "no_browser_alert": 0,
+    "no_em_dash_ui_docs": 0,
+    "no_as_any": 4,
+    "weak_zod_enum": 0,
+    "acwr_warning_legacy": 2,
+    "stale_acwr_threshold_text": 3,
+    "legacy_wrong_formula_ui": 4,
+    "dexie_backup_version_drift": 0,
+    "unconditional_byok_key_export": 1,
+    "utc_date_split": 13,
+    "engine_isolation": 0,
+    "ui_direct_db_or_localstorage": 23,
+    "fabricated_telemetry_or_fallback": 1,
+    "brand_parity_ui": 0,
+    "contract_english_field_parity": 0,
+    "tab_key_parity": 0,
+    "monolith_file_guard": 7,
+    "git_tracked_build_artifacts": 7881
+  }
+}

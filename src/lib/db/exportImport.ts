@@ -1,119 +1,82 @@
 /**
  * RKStride - Data Export, Import, and Zod Validation Engine
+ * Uses centralized Zod schemas from @/contracts/backup.schema.
  * Supports:
- * 1. Full JSON backup with strict Zod schema validation (rejecting corrupt data safely)
+ * 1. Full JSON backup with strict Zod schema validation & v1/v2 -> v3 normalization
  * 2. Training history CSV export for external spreadsheet analysis
  */
 
-import { z } from 'zod';
-import { db, StoredReadinessLog } from './database';
-import { DailyLog, UserProfile } from '@/types/workout';
-import { ScheduledDay } from '@/types/schedule';
-import { getAiCoachConfig, saveAiCoachConfig } from '@/lib/ai/geminiCoach';
+import { CURRENT_DB_VERSION, db, type StoredReadinessLog } from './database';
+import {
+  RKStrideExportPayloadSchema,
+  type RKStrideExportPayload,
+} from '@/contracts/backup.schema';
+import type {
+  DailyLog,
+  StoredDebrief,
+  WorkoutSessionEntry,
+} from '@/contracts/workout.schema';
+import type { UserProfile } from '@/contracts/profile.schema';
+import type { ScheduledDay } from '@/contracts/schedule.schema';
+import {
+  getAiCoachConfig,
+  saveAiCoachConfig,
+  type AiCoachConfig,
+} from '@/lib/ai/geminiCoach';
+import {
+  calculateEdwardsTrimp,
+  calculateStrengthVolumeLoad,
+} from '@/lib/engine/workload';
+import { SRPE_CONFIG } from '@/lib/engine/constants';
+
+export { RKStrideExportPayloadSchema };
+export type { RKStrideExportPayload };
+
+function normalizeLegacyDailyLog(log: DailyLog): DailyLog {
+  const strengthWorkouts = log.strengthWorkouts ?? [];
+  const runningWorkouts = log.runningWorkouts ?? [];
+  let sessions: WorkoutSessionEntry[] | undefined = log.sessions;
+
+  if (!sessions || sessions.length === 0) {
+    if (strengthWorkouts.length > 0 || runningWorkouts.length > 0) {
+      const strengthDur = strengthWorkouts.reduce(
+        (sum, ex) =>
+          sum + (ex.durationMinutes ?? ex.sets.length * SRPE_CONFIG.ESTIMATED_MINUTES_PER_STRENGTH_SET),
+        0
+      );
+      const runDur = runningWorkouts.reduce((sum, r) => sum + r.durasiMenit, 0);
+      const isOverridden = runningWorkouts.some((r) => r.isOverridden);
+      sessions = [
+        {
+          sessionId: `legacy-${log.tanggal}`,
+          loggedAt: `${log.tanggal}T12:00:00`,
+          strengthWorkouts,
+          runningWorkouts,
+          sessionLoadScore: log.totalLoadScore,
+          durationMinutes: Math.round(strengthDur + runDur),
+          ...(isOverridden ? { isOverridden: true } : {}),
+        },
+      ];
+    } else {
+      sessions = [];
+    }
+  }
+
+  return {
+    ...log,
+    sessions,
+    volumeLoadSecondary:
+      log.volumeLoadSecondary ?? calculateStrengthVolumeLoad(strengthWorkouts),
+    runningTrimpSecondary:
+      log.runningTrimpSecondary ??
+      Math.round(
+        runningWorkouts.reduce((sum, r) => sum + calculateEdwardsTrimp(r), 0) * 10
+      ) / 10,
+  };
+}
 
 // =============================================================================
-// 1. ZOD DATA CONTRACT SCHEMAS
-// =============================================================================
-
-export const StrengthSetSchema = z.object({
-  bebanKg: z.number().nonnegative({ message: 'Beban kg harus berupa angka non-negatif' }),
-  reps: z.number().int().nonnegative({ message: 'Reps harus berupa bilangan bulat non-negatif' }),
-  rpe: z.number().min(1).max(10, { message: 'RPE harus dalam rentang 1 - 10' }),
-  isWarmup: z.boolean().optional(),
-});
-
-export const StrengthExerciseSchema = z.object({
-  namaGerakan: z.string().min(1, { message: 'Nama gerakan tidak boleh kosong' }),
-  category: z.string().optional(),
-  sets: z.array(StrengthSetSchema),
-  durationMinutes: z.number().optional(),
-  isLegExercise: z.boolean().optional(),
-});
-
-export const RunningIntervalBlockSchema = z.object({
-  zone: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
-  durationMinutes: z.number().nonnegative(),
-  description: z.string().optional(),
-});
-
-export const RunSessionSchema = z.object({
-  jarakKm: z.number().nonnegative(),
-  durasiMenit: z.number().nonnegative(),
-  avgPace: z.number().nonnegative(),
-  avgHeartRate: z.number().nonnegative(),
-  runningType: z.string().optional(),
-  blocks: z.array(RunningIntervalBlockSchema).optional(),
-  rpe: z.number().min(1).max(10).optional(),
-  sRpe: z.number().optional(),
-  trimp: z.number().optional(),
-  isOverridden: z.boolean().optional(),
-});
-
-export const DailyLogSchema = z.object({
-  tanggal: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Format tanggal harus YYYY-MM-DD' }),
-  strengthWorkouts: z.array(StrengthExerciseSchema),
-  runningWorkouts: z.array(RunSessionSchema),
-  totalLoadScore: z.number().nonnegative({ message: 'Total load score harus non-negatif' }),
-  volumeLoadSecondary: z.number().optional(),
-  runningTrimpSecondary: z.number().optional(),
-});
-
-export const ReadinessLogSchema = z.object({
-  tanggal: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  sleepHours: z.number().min(0).max(24),
-  muscleSoreness: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
-  legFatigue: z.boolean(),
-  energyLevel: z.enum(['low', 'moderate', 'high']),
-  restingHeartRate: z.number().min(30).max(220).optional(),
-  hrvRmssd: z.number().optional(),
-  tendonJointPain: z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3)]).optional(),
-  tendonPainArea: z.string().optional(),
-});
-
-export const UserProfileSchema = z.object({
-  id: z.string().optional(),
-  age: z.number().int().min(10).max(110),
-  weightKg: z.number().positive(),
-  heightCm: z.number().positive(),
-  restingHrBaseline: z.number().positive(),
-  maxHr: z.number().positive().optional(),
-  hrMaxFormula: z.enum(['tanaka', 'gellish', 'custom']).optional(),
-});
-
-export const ScheduledDaySchema = z.object({
-  id: z.string(),
-  dayName: z.enum(['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu']),
-  dayIndex: z.number().int().min(0).max(6),
-  category: z.string(),
-  title: z.string(),
-  targetDurationMinutes: z.number().nonnegative(),
-  isRestDay: z.boolean(),
-  notes: z.string().optional(),
-});
-
-export const AiCoachConfigSchema = z.object({
-  mode: z.enum(['byok', 'proxy']),
-  byokApiKey: z.string(),
-  proxyUrl: z.string(),
-  sendTelemetry: z.boolean(),
-});
-
-export const RKStrideExportPayloadSchema = z.object({
-  format: z.literal('RKStride_Backup'),
-  version: z.number().int().positive(),
-  exportedAt: z.string(),
-  userProfile: UserProfileSchema.optional(),
-  workoutLogs: z.array(DailyLogSchema),
-  dailyReadiness: z.array(ReadinessLogSchema).optional(),
-  weeklySchedule: z.array(ScheduledDaySchema).optional(),
-  appSettings: z.record(z.string(), z.any()).optional(),
-  aiCoachConfig: AiCoachConfigSchema.optional(),
-});
-
-export type RKStrideExportPayload = z.infer<typeof RKStrideExportPayloadSchema>;
-
-// =============================================================================
-// 2. EXPORT FUNCTIONS (JSON & CSV)
+// 1. EXPORT FUNCTIONS (JSON & CSV)
 // =============================================================================
 
 /**
@@ -125,21 +88,23 @@ export async function exportDatabaseToJson(): Promise<string> {
   const userProfile = await db.userProfile.get('current_user');
   const weeklySchedule = await db.weeklySchedule.toArray();
   const settingsList = await db.appSettings.toArray();
+  const postWorkoutDebrief = (await db.postWorkoutDebrief.get('latest')) ?? null;
 
-  const appSettings: Record<string, any> = {};
+  const appSettings: Record<string, unknown> = {};
   for (const s of settingsList) {
     appSettings[s.key] = s.value;
   }
 
   const payload: RKStrideExportPayload = {
     format: 'RKStride_Backup',
-    version: 1,
+    version: CURRENT_DB_VERSION,
     exportedAt: new Date().toISOString(),
     userProfile: userProfile || undefined,
     workoutLogs,
     dailyReadiness,
     weeklySchedule,
     appSettings,
+    postWorkoutDebrief,
     aiCoachConfig: getAiCoachConfig(),
   };
 
@@ -167,50 +132,56 @@ export async function exportWorkoutLogsToCsv(): Promise<string> {
   const rows: string[] = [headers.join(',')];
 
   for (const log of sortedLogs) {
-    // Strength Rows
     for (const ex of log.strengthWorkouts) {
       const totalVolume = ex.sets.reduce((sum, s) => sum + s.bebanKg * s.reps, 0);
-      const avgRpe = ex.sets.length > 0 ? (ex.sets.reduce((sum, s) => sum + s.rpe, 0) / ex.sets.length).toFixed(1) : '0';
+      const avgRpe =
+        ex.sets.length > 0
+          ? (ex.sets.reduce((sum, s) => sum + s.rpe, 0) / ex.sets.length).toFixed(1)
+          : '0';
       const setsDetail = ex.sets.map((s) => `${s.bebanKg}kgx${s.reps}`).join('; ');
 
-      rows.push([
-        `"${log.tanggal}"`,
-        '"Strength"',
-        `"${ex.namaGerakan.replace(/"/g, '""')}"`,
-        `"${setsDetail}"`,
-        `"${totalVolume} kg"`,
-        `"${ex.durationMinutes || ex.sets.length * 2.5}"`,
-        `"${avgRpe}"`,
-        `"${log.totalLoadScore}"`,
-      ].join(','));
+      rows.push(
+        [
+          `"${log.tanggal}"`,
+          '"Strength"',
+          `"${ex.namaGerakan.replace(/"/g, '""')}"`,
+          `"${setsDetail}"`,
+          `"${totalVolume} kg"`,
+          `"${ex.durationMinutes || ex.sets.length * 2.5}"`,
+          `"${avgRpe}"`,
+          `"${log.totalLoadScore}"`,
+        ].join(',')
+      );
     }
 
-    // Running Rows
     for (const r of log.runningWorkouts) {
-      rows.push([
-        `"${log.tanggal}"`,
-        '"Running"',
-        `"${(r.runningType || 'Running').replace(/"/g, '""')}"`,
-        `"Pace ${r.avgPace} min/km, HR ${r.avgHeartRate} bpm"`,
-        `"${r.jarakKm} km"`,
-        `"${r.durasiMenit}"`,
-        `"${r.rpe || 'HR Zone'}"`,
-        `"${log.totalLoadScore}"`,
-      ].join(','));
+      rows.push(
+        [
+          `"${log.tanggal}"`,
+          '"Running"',
+          `"${(r.runningType || 'Running').replace(/"/g, '""')}"`,
+          `"Pace ${r.avgPace} min/km, HR ${r.avgHeartRate} bpm"`,
+          `"${r.jarakKm} km"`,
+          `"${r.durasiMenit}"`,
+          `"${r.rpe || 'HR Zone'}"`,
+          `"${log.totalLoadScore}"`,
+        ].join(',')
+      );
     }
 
-    // If rest day or empty session
     if (log.strengthWorkouts.length === 0 && log.runningWorkouts.length === 0) {
-      rows.push([
-        `"${log.tanggal}"`,
-        '"Rest / Inactive"',
-        '"Rest"',
-        '""',
-        '"0"',
-        '"0"',
-        '"0"',
-        `"${log.totalLoadScore}"`,
-      ].join(','));
+      rows.push(
+        [
+          `"${log.tanggal}"`,
+          '"Rest / Inactive"',
+          '"Rest"',
+          '""',
+          '"0"',
+          '"0"',
+          '"0"',
+          `"${log.totalLoadScore}"`,
+        ].join(',')
+      );
     }
   }
 
@@ -218,7 +189,7 @@ export async function exportWorkoutLogsToCsv(): Promise<string> {
 }
 
 // =============================================================================
-// 3. IMPORT FUNCTION WITH ZOD SCHEMA VALIDATION
+// 2. IMPORT FUNCTION WITH ZOD SCHEMA VALIDATION & ATOMIC TRANSACTION
 // =============================================================================
 
 export interface ImportResult {
@@ -230,10 +201,7 @@ export interface ImportResult {
 
 /**
  * Import and validate JSON backup.
- * Rejects corrupt data and guarantees transaction safety.
- * @param opts.wipeBeforeImport when true, existing workout logs, readiness,
- * schedules and profile are cleared first (replace mode). appSettings are
- * always merged so consent flags are never lost.
+ * Rejects corrupt data and guarantees transaction safety across all 6 Dexie stores.
  */
 export async function importDatabaseFromJson(
   jsonContent: string,
@@ -243,16 +211,16 @@ export async function importDatabaseFromJson(
 
   try {
     parsedRaw = JSON.parse(jsonContent);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'JSON Parse Error';
     return {
       success: false,
       message: 'Format file tidak valid. File harus berupa JSON yang valid.',
       importedLogsCount: 0,
-      errorDetails: [err.message || 'JSON Parse Error'],
+      errorDetails: [msg],
     };
   }
 
-  // Validate with Zod Schema
   const validationResult = RKStrideExportPayloadSchema.safeParse(parsedRaw);
 
   if (!validationResult.success) {
@@ -270,50 +238,78 @@ export async function importDatabaseFromJson(
 
   const payload = validationResult.data;
   const wipe = opts?.wipeBeforeImport === true;
+  const normalizedLogs: DailyLog[] = payload.workoutLogs.map(normalizeLegacyDailyLog);
 
   try {
-    // Atomic Transaction to replace/upsert data safely
-    await db.transaction('rw', [db.workoutLogs, db.dailyReadiness, db.userProfile, db.weeklySchedule, db.appSettings], async () => {
-      if (wipe) {
-        await db.workoutLogs.clear();
-        await db.dailyReadiness.clear();
-        await db.weeklySchedule.clear();
-        await db.userProfile.clear();
-      }
+    await db.transaction(
+      'rw',
+      [
+        db.workoutLogs,
+        db.dailyReadiness,
+        db.userProfile,
+        db.weeklySchedule,
+        db.appSettings,
+        db.postWorkoutDebrief,
+      ],
+      async () => {
+        if (wipe) {
+          await db.workoutLogs.clear();
+          await db.dailyReadiness.clear();
+          await db.weeklySchedule.clear();
+          await db.userProfile.clear();
+          await db.postWorkoutDebrief.clear();
+        }
 
-      if (payload.workoutLogs && payload.workoutLogs.length > 0) {
-        await db.workoutLogs.bulkPut(payload.workoutLogs as DailyLog[]);
-      }
+        if (normalizedLogs.length > 0) {
+          await db.workoutLogs.bulkPut(normalizedLogs);
+        }
 
-      if (payload.dailyReadiness && payload.dailyReadiness.length > 0) {
-        await db.dailyReadiness.bulkPut(payload.dailyReadiness as StoredReadinessLog[]);
-      }
+        if (payload.dailyReadiness && payload.dailyReadiness.length > 0) {
+          await db.dailyReadiness.bulkPut(payload.dailyReadiness as StoredReadinessLog[]);
+        }
 
-      if (payload.userProfile) {
-        await db.userProfile.put({
-          id: 'current_user',
-          ...payload.userProfile,
-        } as UserProfile & { id: string });
-      }
+        if (payload.userProfile) {
+          const normalizedProfile: UserProfile & { id: string } = {
+            ...payload.userProfile,
+            id: 'current_user',
+            gender: payload.userProfile.gender ?? 'male',
+          };
+          await db.userProfile.put(normalizedProfile);
+        }
 
-      if (payload.weeklySchedule && payload.weeklySchedule.length > 0) {
-        await db.weeklySchedule.bulkPut(payload.weeklySchedule as ScheduledDay[]);
-      }
+        if (payload.weeklySchedule && payload.weeklySchedule.length > 0) {
+          await db.weeklySchedule.bulkPut(payload.weeklySchedule as ScheduledDay[]);
+        }
 
-      if (payload.appSettings) {
-        for (const [key, value] of Object.entries(payload.appSettings)) {
-          await db.appSettings.put({
-            key,
-            value,
-            updatedAt: new Date().toISOString(),
-          });
+        if (payload.postWorkoutDebrief) {
+          await db.postWorkoutDebrief.put(payload.postWorkoutDebrief as StoredDebrief);
+        }
+
+        if (payload.appSettings) {
+          for (const [key, value] of Object.entries(payload.appSettings)) {
+            await db.appSettings.put({
+              key,
+              value,
+              updatedAt: new Date().toISOString(),
+            });
+          }
         }
       }
-    });
+    );
 
     if (payload.aiCoachConfig) {
       try {
-        saveAiCoachConfig(payload.aiCoachConfig);
+        const current = getAiCoachConfig();
+        const mergedConfig: AiCoachConfig = {
+          mode: payload.aiCoachConfig.mode,
+          proxyUrl: payload.aiCoachConfig.proxyUrl,
+          sendTelemetry: payload.aiCoachConfig.sendTelemetry,
+          byokApiKey:
+            'byokApiKey' in payload.aiCoachConfig
+              ? payload.aiCoachConfig.byokApiKey
+              : current.byokApiKey,
+        };
+        saveAiCoachConfig(mergedConfig);
       } catch (err) {
         console.error('Failed to restore AI Coach config from backup:', err);
       }
@@ -322,17 +318,18 @@ export async function importDatabaseFromJson(
     return {
       success: true,
       message: wipe
-        ? `Berhasil menggantikan seluruh data dengan ${payload.workoutLogs.length} riwayat latihan dari backup.`
-        : `Berhasil mengimpor ${payload.workoutLogs.length} data riwayat latihan dan konfigurasi atlet (digabung dengan data lama).`,
-      importedLogsCount: payload.workoutLogs.length,
+        ? `Berhasil menggantikan seluruh data dengan ${normalizedLogs.length} riwayat latihan dari backup.`
+        : `Berhasil mengimpor ${normalizedLogs.length} data riwayat latihan dan konfigurasi atlet (digabung dengan data lama).`,
+      importedLogsCount: normalizedLogs.length,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'IndexedDB Transaction Error';
     console.error('IndexedDB transaction error during import:', err);
     return {
       success: false,
       message: 'Terjadi kesalahan internal saat menyimpan data ke IndexedDB lokal.',
       importedLogsCount: 0,
-      errorDetails: [err.message || 'IndexedDB Transaction Error'],
+      errorDetails: [msg],
     };
   }
 }

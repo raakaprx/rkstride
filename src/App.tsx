@@ -25,6 +25,7 @@ import { AthleteContext } from './lib/ai/geminiCoach';
 import { db, seedInitialDataIfEmpty } from './lib/db/database';
 import { AthleteAuthSession, UserProfile } from './types/workout';
 import { RaceTargetConfig } from './types/productFeatures';
+import { RaceTargetConfigSchema } from './contracts/profile.schema';
 
 const AUTH_SESSION_STORAGE_KEY = 'rkstride_auth_session';
 
@@ -124,7 +125,10 @@ export default function App() {
         }
         const storedRace = await db.appSettings.get('targetRaceConfig');
         if (storedRace && storedRace.value) {
-          setRaceConfig(storedRace.value);
+          const parsedRace = RaceTargetConfigSchema.safeParse(storedRace.value);
+          if (parsedRace.success) {
+            setRaceConfig(parsedRace.data);
+          }
         }
         const storedDebrief = await db.postWorkoutDebrief.get('latest');
         if (storedDebrief) {
