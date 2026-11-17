@@ -41,7 +41,7 @@ export function calculatePeriodizationPlan(
   let volumeAdjustmentPercent = 0;
   let intensityGuideline = 'Zona 2 Aerobic Base (75-80% volume) + 1 Sesi Tempo / Ambang Laktat mingguan.';
   let strengthGuideline = 'Push-Pull-Legs reguler 3-4x seminggu. Fokus hipertrofi dan kekuatan struktural.';
-  let advice = 'Bangun fondasi ketahanan kardiorespirasi dan volume latihan secara progresif tanpa lonjakan ACWR > 1.3.';
+  let advice = 'Bangun fondasi ketahanan kardiorespirasi dan volume latihan secara progresif tanpa lonjakan ACWR > 1.4.';
 
   if (daysToRace <= 0) {
     currentPhase = 'recovery';
@@ -80,14 +80,14 @@ export function calculatePeriodizationPlan(
     volumeAdjustmentPercent = 5;
     intensityGuideline = 'Simulasi spesifik kecepatan target lomba (Race Pace Intervals & Norwegian 4x4 VO2 Max).';
     strengthGuideline = 'PPL terpelihara. Jaga jeda 48 jam antara sesi leg day dan lari cepat spesifik.';
-    advice = 'Adaptasi neuromuscular pada kecepatan target lomba berada di tingkat tertinggi. Pantau ACWR agar tidak menembus zona bahaya (>1.5).';
+    advice = 'Adaptasi neuromuscular pada kecepatan target lomba berada di tingkat tertinggi. Pantau ACWR agar tidak menembus zona bahaya (> 1.4).';
   } else if (daysToRace <= taperDays + 70) {
     currentPhase = 'build';
     phaseName = 'Fase Peningkatan Kapasitas (Build Phase)';
     volumeAdjustmentPercent = 0;
     intensityGuideline = 'Progresif overload: Tingkatkan jarak long run mingguan dan tambahkan porsi lari tempo.';
     strengthGuideline = 'Beban progresif PPL (Push, Pull, Legs) dengan penambahan beban terukur (Double Progression).';
-    advice = 'Jaga rasio ACWR dalam rentang Sweet Spot (0.8 - 1.3) untuk mengoptimalkan adaptasi kardiometabolik.';
+    advice = 'Jaga rasio ACWR dalam rentang Sweet Spot (0.8 - 1.4) untuk mengoptimalkan adaptasi kardiometabolik.';
   }
 
   return {
