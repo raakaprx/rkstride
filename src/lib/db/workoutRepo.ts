@@ -217,3 +217,13 @@ export async function deleteWorkoutSessionAtomic(
     return updated;
   });
 }
+
+export async function loadLatestDebrief(): Promise<StoredDebrief | undefined> {
+  return db.postWorkoutDebrief.get('latest');
+}
+
+export async function saveLatestDebrief(
+  data: Omit<StoredDebrief, 'id'>
+): Promise<void> {
+  await db.postWorkoutDebrief.put({ id: 'latest', ...data });
+}

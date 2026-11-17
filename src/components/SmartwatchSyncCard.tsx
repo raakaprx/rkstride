@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Watch,
   Bluetooth,
@@ -43,6 +43,18 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
   const [localEnergy, setLocalEnergy] = useState<'low' | 'moderate' | 'high'>(readiness.energyLevel);
   const [localHrv, setLocalHrv] = useState<number>(readiness.hrvRmssd ?? 55);
   const [localTendonPain, setLocalTendonPain] = useState<0 | 1 | 2 | 3>(readiness.tendonJointPain ?? 0);
+  const [localTendonArea, setLocalTendonArea] = useState<string>(readiness.tendonPainArea ?? '');
+
+  useEffect(() => {
+    setLocalSleep(readiness.sleepHours);
+    setLocalRhr(readiness.restingHeartRate ?? 52);
+    setLocalSoreness(readiness.muscleSoreness);
+    setLocalLegFatigue(readiness.legFatigue);
+    setLocalEnergy(readiness.energyLevel);
+    setLocalHrv(readiness.hrvRmssd ?? 55);
+    setLocalTendonPain(readiness.tendonJointPain ?? 0);
+    setLocalTendonArea(readiness.tendonPainArea ?? '');
+  }, [readiness]);
 
   // Bluetooth Connection Handler
   const handleConnectBt = async () => {
@@ -88,6 +100,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
       energyLevel: localEnergy,
       hrvRmssd: localHrv,
       tendonJointPain: localTendonPain,
+      tendonPainArea: localTendonPain > 0 && localTendonArea.trim() ? localTendonArea.trim() : undefined,
     });
   };
 
@@ -136,7 +149,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
               Smartwatch Integration Hub
             </h2>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Bluetooth HR (0x180D) + impor file .fit / .gpx / .tcx / .json / .csv
+              Bluetooth HR (0x180D) + impor file .gpx / .tcx / .json / .csv
             </div>
           </div>
         </div>
@@ -613,10 +626,10 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           >
             <UploadCloud size={36} style={{ color: 'var(--text-muted)', marginBottom: '0.75rem' }} />
             <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-              Unggah File FIT / GPX / TCX / JSON / CSV
+              Unggah File GPX / TCX / JSON / CSV
             </span>
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem', marginBottom: '1rem' }}>
-              Format ekspor standar aplikasi pendamping jam
+              Format ekspor teks/XML standar (file .fit biner perlu diekspor ke .tcx atau .gpx terlebih dahulu)
             </span>
             <button
               type="button"
@@ -637,7 +650,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json,.csv,.fit,.gpx,.tcx"
+              accept=".json,.csv,.gpx,.tcx"
               onChange={handleFileUpload}
               aria-label="Pilih file latihan smartwatch"
               style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0, overflow: 'hidden', whiteSpace: 'nowrap' }}

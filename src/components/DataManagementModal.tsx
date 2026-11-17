@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   FileText,
 } from 'lucide-react';
+import { getLocalDateKey } from '@/lib/engine/dateKey';
 import { Modal } from './ui/Modal';
 import {
   exportDatabaseToJson,
@@ -45,7 +46,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `rkstride-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `rkstride-backup-${getLocalDateKey()}.json`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
@@ -63,7 +64,7 @@ export const DataManagementModal: React.FC<DataManagementModalProps> = ({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `rkstride-workout-history-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `rkstride-workout-history-${getLocalDateKey()}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {

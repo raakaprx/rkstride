@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Apple, Flame, Droplets, Dumbbell, Activity } from 'lucide-react';
 import { UserProfile } from '@/types/workout';
 import { NutritionGoal, DailyActivityLevel } from '@/types/productFeatures';
 import { calculateAthleteNutritionPlan } from '@/lib/engine/nutrition';
+import { useNutritionPrefs } from '@/hooks/useNutritionPrefs';
 
 interface NutritionBodyCompCardProps {
   userProfile: UserProfile;
@@ -17,8 +18,21 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
   todayWorkoutCaloriesBurned = 0,
   isWorkoutEstimated = false,
 }) => {
+  const { prefs, savePrefs } = useNutritionPrefs();
   const [goal, setGoal] = useState<NutritionGoal>('maintenance');
   const [activityLevel, setActivityLevel] = useState<DailyActivityLevel>('lightly_active');
+
+  useEffect(() => {
+    if (prefs) {
+      setGoal(prefs.goal);
+      setActivityLevel(prefs.activityLevel);
+    }
+  }, [prefs]);
+
+  const handleSelectGoal = (nextGoal: NutritionGoal) => {
+    setGoal(nextGoal);
+    savePrefs({ goal: nextGoal, activityLevel }).catch(() => {});
+  };
 
   const plan = useMemo(() => {
     return calculateAthleteNutritionPlan(
@@ -26,7 +40,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
         weightKg: userProfile.weightKg || 72,
         heightCm: userProfile.heightCm || 175,
         age: userProfile.age || 28,
-        gender: (userProfile as any).gender || 'male',
+        gender: userProfile.gender || 'male',
       },
       goal,
       activityLevel,
@@ -87,7 +101,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
           }}
         >
           <button
-            onClick={() => setGoal('fat_loss')}
+            onClick={() => handleSelectGoal('fat_loss')}
             style={{
               padding: '0.35rem 0.75rem',
               borderRadius: 'calc(var(--radius-sm) - 2px)',
@@ -102,7 +116,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
             Fat Loss (-400 kcal)
           </button>
           <button
-            onClick={() => setGoal('maintenance')}
+            onClick={() => handleSelectGoal('maintenance')}
             style={{
               padding: '0.35rem 0.75rem',
               borderRadius: 'calc(var(--radius-sm) - 2px)',
@@ -117,7 +131,7 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
             Maintenance
           </button>
           <button
-            onClick={() => setGoal('muscle_gain')}
+            onClick={() => handleSelectGoal('muscle_gain')}
             style={{
               padding: '0.35rem 0.75rem',
               borderRadius: 'calc(var(--radius-sm) - 2px)',
@@ -236,7 +250,11 @@ export const NutritionBodyCompCard: React.FC<NutritionBodyCompCardProps> = ({
           <select
             aria-label="Tingkat Aktivitas Harian"
             value={activityLevel}
-            onChange={(e) => setActivityLevel(e.target.value as DailyActivityLevel)}
+            onChange={(e) => {
+              const nextActivity = e.target.value as DailyActivityLevel;
+              setActivityLevel(nextActivity);
+              savePrefs({ goal, activityLevel: nextActivity }).catch(() => {});
+            }}
             style={{
               padding: '0.25rem 0.5rem',
               background: 'var(--bg-surface)',

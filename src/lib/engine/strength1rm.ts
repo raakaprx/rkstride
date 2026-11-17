@@ -23,9 +23,12 @@ export function estimate1RM(weightKg: number, reps: number): OneRepMaxEstimate {
     return { epley: weightKg, brzycki: weightKg, average: weightKg };
   }
 
-  const epley = Math.round(weightKg * (1 + reps / 30) * 10) / 10;
-  const brzycki = reps < 37 ? Math.round(weightKg * (36 / (37 - reps)) * 10) / 10 : epley;
-  const average = Math.round(((epley + brzycki) / 2) * 10) / 10;
+  const epley = Math.max(weightKg, Math.round(weightKg * (1 + reps / 30) * 10) / 10);
+  const brzycki =
+    reps < 37
+      ? Math.max(weightKg, Math.round(weightKg * (36 / (37 - reps)) * 10) / 10)
+      : epley;
+  const average = Math.max(weightKg, Math.round(((epley + brzycki) / 2) * 10) / 10);
 
   return { epley, brzycki, average };
 }

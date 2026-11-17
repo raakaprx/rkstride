@@ -33,6 +33,8 @@ export interface BottomNavProps {
   onSelectTab: (tab: AppTab) => void;
   /** Unread coach insight; renders a dot on the Coach tab. 0 hides it. */
   coachBadgeCount?: number;
+  /** Schedule conflict count; renders a dot on the Program tab. 0 hides it. */
+  programBadgeCount?: number;
 }
 
 /**
@@ -44,6 +46,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   activeTab,
   onSelectTab,
   coachBadgeCount = 0,
+  programBadgeCount = 0,
 }) => (
   <nav
     className="bottom-dock"
@@ -115,6 +118,20 @@ export const BottomNav: React.FC<BottomNavProps> = ({
                 height: '7px',
                 borderRadius: 'var(--radius-full)',
                 background: 'var(--color-recovery)',
+              }}
+            />
+          )}
+          {tab.id === 'program' && programBadgeCount > 0 && (
+            <span
+              aria-label={`${programBadgeCount} benturan jadwal`}
+              style={{
+                position: 'absolute',
+                top: '0.35rem',
+                right: '28%',
+                width: '7px',
+                height: '7px',
+                borderRadius: 'var(--radius-full)',
+                background: 'var(--color-warning)',
               }}
             />
           )}

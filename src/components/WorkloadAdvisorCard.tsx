@@ -33,18 +33,15 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
 }) => {
   const tierCopy = EXPERIENCE_COPY[experienceLevel];
   const isColdStart = acwr.status === 'insufficient_data';
-  // Single 1.4 guardrail (AGENTS.md). 'warning' status is legacy-only.
+  // Single 1.4 guardrail (AGENTS.md)
   const isDanger = acwr.status === 'danger' || acwr.ratio > 1.4;
-  const isWarning = acwr.status === 'warning';
-  const isSweetSpot = acwr.status === 'sweet_spot' || (acwr.ratio >= 0.8 && acwr.ratio <= 1.4 && !isDanger && !isWarning);
+  const isSweetSpot = acwr.status === 'sweet_spot' || (acwr.ratio >= 0.8 && acwr.ratio <= 1.4 && !isDanger);
 
   // Status warna
   const statusColor = isColdStart
     ? 'var(--text-muted)'
     : isDanger
     ? 'var(--color-danger)'
-    : isWarning
-    ? 'var(--color-warning)'
     : isSweetSpot
     ? 'var(--color-success)'
     : 'var(--accent-neon)';
@@ -61,13 +58,9 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
         borderRadius: 'var(--radius-lg)',
         border: isDanger
           ? '1px solid rgba(239, 68, 68, 0.35)'
-          : isWarning
-          ? '1px solid rgba(245, 158, 11, 0.35)'
           : '1px solid var(--border-default)',
         borderLeft: isDanger
           ? '3px solid var(--color-danger)'
-          : isWarning
-          ? '3px solid var(--color-warning)'
           : isSweetSpot
           ? '3px solid var(--color-success)'
           : isColdStart
@@ -110,8 +103,6 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                 fontWeight: 700,
                 background: isDanger
                   ? 'var(--color-danger-bg)'
-                  : isWarning
-                  ? 'var(--color-warning-bg)'
                   : isSweetSpot
                   ? 'var(--color-success-bg)'
                   : 'var(--accent-neon-subtle)',
@@ -124,8 +115,6 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
                 ? `DATA BELUM CUKUP (${acwr.daysCollected}/21 HARI)`
                 : isDanger
                 ? 'ZONA BAHAYA: LONJAKAN AKUT'
-                : isWarning
-                ? 'ZONA WASPADA: PANTAU KETAT'
                 : isSweetSpot
                 ? 'SWEET SPOT (ADAPTASI OPTIMAL)'
                 : 'UNDERTRAINING / DETRAINING'}
@@ -151,11 +140,6 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
               <>
                 <AlertTriangle size={22} style={{ color: 'var(--color-danger)' }} />
                 Indikator Risiko Lonjakan Beban Latihan Akut
-              </>
-            ) : isWarning ? (
-              <>
-                <AlertTriangle size={22} style={{ color: 'var(--color-warning)' }} />
-                Beban Latihan Mendekati Batas Atas Adaptasi
               </>
             ) : isSweetSpot ? (
               <>

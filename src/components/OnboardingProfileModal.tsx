@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { X, User } from 'lucide-react';
 import { UserProfile } from '@/types/workout';
 import { RaceCategory, RaceTargetConfig } from '@/types/productFeatures';
-import { db } from '@/lib/db/database';
+import { useAthleteProfile } from '@/hooks/useAthleteProfile';
 import { estimateMaxHeartRate } from '@/lib/engine/workload';
+import { getLocalDateKey } from '@/lib/engine/dateKey';
 import { Modal } from './ui/Modal';
 
 interface OnboardingProfileModalProps {
@@ -12,12 +13,20 @@ interface OnboardingProfileModalProps {
   onProfileUpdated?: (updated: UserProfile, race?: RaceTargetConfig) => void;
 }
 
+type ProfileFormState = UserProfile & {
+  targetRaceCategory: RaceCategory;
+  targetRaceDate: string;
+  targetRaceName: string;
+};
+
 export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
   isOpen,
   onClose,
   onProfileUpdated,
 }) => {
-  const [profile, setProfile] = useState<UserProfile & { gender?: 'male' | 'female'; targetRaceCategory?: RaceCategory; targetRaceDate?: string; targetRaceName?: string }>({
+  const { profile: storedProfile, raceConfig: storedRaceConfig, reload, saveProfileAndRace } = useAthleteProfile();
+
+  const [profile, setProfile] = useState<ProfileFormState>({
     age: 28,
     weightKg: 72,
     heightCm: 175,
@@ -26,68 +35,73 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
     hrMaxFormula: 'tanaka',
     gender: 'male',
     targetRaceCategory: 'none',
-    targetRaceDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    targetRaceDate: getLocalDateKey(new Date(Date.now() + 45 * 24 * 60 * 60 * 1000)),
     targetRaceName: '',
   });
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Load existing profile from IndexedDB on open
+  useEffect(() => {
+    if (isOpen) {
+      reload();
+    }
+  }, [isOpen, reload]);
+
   useEffect(() => {
     if (!isOpen) return;
-    const loadProfile = async () => {
-      try {
-        const stored = await db.userProfile.get('current_user');
-        if (stored) {
-          setProfile((prev) => ({
-            ...prev,
-            ...stored,
-          }));
-        }
-      } catch (err) {
-        console.error('Failed to load user profile from IndexedDB:', err);
-      }
-    };
-    loadProfile();
-  }, [isOpen]);
+    setProfile((prev) => ({
+      ...prev,
+      ...(storedProfile ?? {}),
+      gender: storedProfile?.gender ?? prev.gender ?? 'male',
+      targetRaceCategory: storedRaceConfig?.category ?? prev.targetRaceCategory,
+      targetRaceDate: storedRaceConfig?.raceDate ?? prev.targetRaceDate,
+      targetRaceName: storedRaceConfig?.eventName ?? prev.targetRaceName,
+    }));
+  }, [isOpen, storedProfile, storedRaceConfig]);
 
   if (!isOpen) return null;
 
-  // Auto-calculated Max HR
-  const calculatedMaxHr = profile.hrMaxFormula === 'gellish'
-    ? estimateMaxHeartRate(profile.age, 'gellish')
-    : estimateMaxHeartRate(profile.age, 'tanaka');
+  const calculatedMaxHr =
+    profile.hrMaxFormula === 'custom'
+      ? profile.maxHr
+      : profile.hrMaxFormula === 'gellish'
+        ? estimateMaxHeartRate(profile.age, 'gellish')
+        : estimateMaxHeartRate(profile.age, 'tanaka');
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     setSaveError(null);
     try {
-      const dataToSave = {
-        id: 'current_user',
-        ...profile,
-        maxHr: profile.maxHr || calculatedMaxHr,
+      const profilePayload: UserProfile = {
+        age: profile.age,
+        weightKg: profile.weightKg,
+        heightCm: profile.heightCm,
+        restingHrBaseline: profile.restingHrBaseline,
+        maxHr: profile.hrMaxFormula === 'custom' ? profile.maxHr : calculatedMaxHr,
+        hrMaxFormula: profile.hrMaxFormula,
+        gender: profile.gender,
+        experienceLevel: profile.experienceLevel,
+        athleteName: profile.athleteName,
       };
-      await db.userProfile.put(dataToSave as any);
 
-      // Also persist target race config into appSettings
-      let savedRace: RaceTargetConfig | undefined;
-      if (profile.targetRaceDate && profile.targetRaceCategory) {
-        savedRace = {
-          eventName: profile.targetRaceName || 'Target Race',
-          category: profile.targetRaceCategory,
-          raceDate: profile.targetRaceDate,
-        };
-        await db.appSettings.put({
-          key: 'targetRaceConfig',
-          value: savedRace,
-          updatedAt: new Date().toISOString(),
-        });
-      }
+      const racePayload: RaceTargetConfig | undefined =
+        profile.targetRaceDate && profile.targetRaceCategory
+          ? {
+              eventName: profile.targetRaceName || 'Target Race',
+              category: profile.targetRaceCategory,
+              raceDate: profile.targetRaceDate,
+            }
+          : undefined;
+
+      const saved = await saveProfileAndRace({
+        profile: profilePayload,
+        raceConfig: racePayload,
+      });
 
       if (onProfileUpdated) {
-        onProfileUpdated(dataToSave, savedRace);
+        onProfileUpdated(saved.profile, saved.raceConfig);
       }
       onClose();
     } catch (err) {
@@ -333,9 +347,36 @@ export const OnboardingProfileModal: React.FC<OnboardingProfileModalProps> = ({
                   <option value="custom">Input Hasil Tes Lab Manual</option>
                 </select>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Estimasi Max HR: <strong style={{ color: 'var(--accent-neon)' }}>{calculatedMaxHr} bpm</strong>
+                  {profile.hrMaxFormula === 'custom' ? 'Max HR Lab Manual:' : 'Estimasi Max HR:'}{' '}
+                  <strong style={{ color: 'var(--accent-neon)' }}>{calculatedMaxHr} bpm</strong>
                 </span>
               </div>
+
+              {profile.hrMaxFormula === 'custom' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                    Max HR Lab Manual (bpm)
+                  </label>
+                  <input
+                    type="number"
+                    min="120"
+                    max="230"
+                    required
+                    value={profile.maxHr}
+                    onChange={(e) => setProfile({ ...profile, maxHr: Number(e.target.value) })}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem 0.75rem',
+                      background: 'var(--bg-surface)',
+                      border: '1px solid var(--border-default)',
+                      borderRadius: 'var(--radius-sm)',
+                      color: 'var(--text-primary)',
+                      fontSize: '0.85rem',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 

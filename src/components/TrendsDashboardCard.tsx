@@ -359,7 +359,7 @@ export const TrendsDashboardCard: React.FC<TrendsDashboardCardProps> = ({
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
             Rasio ACWR Saat Ini
           </div>
-          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: currentACWR.status === 'sweet_spot' ? 'var(--accent-neon)' : currentACWR.status === 'warning' ? 'var(--color-warning)' : currentACWR.status === 'danger' ? 'var(--color-danger)' : 'var(--color-info)' }}>
+          <div style={{ fontSize: '1.25rem', fontWeight: 900, color: currentACWR.status === 'sweet_spot' ? 'var(--accent-neon)' : currentACWR.status === 'danger' ? 'var(--color-danger)' : 'var(--color-info)' }}>
             {currentACWR.ratio}
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.2rem', textTransform: 'capitalize' }}>

@@ -23,25 +23,34 @@ import { AuthLandingGate } from './components/AuthLandingGate';
 import { OdooSprintDocsModal } from './components/OdooSprintDocsModal';
 import { AthleteContext } from './lib/ai/geminiCoach';
 import { buildAthleteContext } from './lib/ai/buildAthleteContext';
-import { db, seedInitialDataIfEmpty } from './lib/db/database';
+import {
+  seedInitialDataIfEmpty,
+  loadAuthSession,
+  saveAuthSession,
+  clearAuthSession,
+} from './lib/db/profileRepo';
+import { loadLatestDebrief, saveLatestDebrief } from './lib/db/workoutRepo';
+import { useAthleteProfile } from './hooks/useAthleteProfile';
+import { getLocalDateKey } from './lib/engine/dateKey';
 import { AthleteAuthSession, UserProfile } from './types/workout';
 import { RaceTargetConfig } from './types/productFeatures';
-import { RaceTargetConfigSchema } from './contracts/profile.schema';
 
-const AUTH_SESSION_STORAGE_KEY = 'rkstride_auth_session';
+const DEFAULT_PROFILE: UserProfile = {
+  age: 28,
+  weightKg: 72,
+  heightCm: 175,
+  restingHrBaseline: 52,
+  maxHr: 190,
+  hrMaxFormula: 'tanaka',
+};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<AppTab>('today');
   const isOnline = useOnlineStatus();
 
-  const [authSession, setAuthSession] = useState<AthleteAuthSession | null>(() => {
-    try {
-      const raw = localStorage.getItem(AUTH_SESSION_STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch {
-      return null;
-    }
-  });
+  const [authSession, setAuthSession] = useState<AthleteAuthSession | null>(() =>
+    loadAuthSession<AthleteAuthSession>()
+  );
 
   const tabTitles: Record<AppTab, string> = {
     today: 'Latihan Hari Ini',
@@ -60,21 +69,37 @@ export default function App() {
   const [isCoachChatOpen, setIsCoachChatOpen] = useState(false);
   const [isOdooModalOpen, setIsOdooModalOpen] = useState(false);
 
-  // Athlete Profile & Race Target State
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    age: 28,
-    weightKg: 72,
-    heightCm: 175,
-    restingHrBaseline: 52,
-    maxHr: 190,
-    hrMaxFormula: 'tanaka',
-  });
+  const {
+    profile: storedProfile,
+    raceConfig: storedRaceConfig,
+    disclaimerAccepted,
+    isLoading: isProfileLoading,
+    reload: reloadProfile,
+    saveProfileAndRace,
+    acceptDisclaimer,
+  } = useAthleteProfile();
 
-  const [raceConfig, setRaceConfig] = useState<RaceTargetConfig>({
+  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_PROFILE);
+
+  const [raceConfig, setRaceConfig] = useState<RaceTargetConfig>(() => ({
     eventName: '',
     category: 'none',
-    raceDate: new Date(Date.now() + 42 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  });
+    raceDate: getLocalDateKey(new Date(Date.now() + 42 * 24 * 60 * 60 * 1000)),
+  }));
+
+  useEffect(() => {
+    if (storedProfile) setUserProfile(storedProfile);
+  }, [storedProfile]);
+
+  useEffect(() => {
+    if (storedRaceConfig) setRaceConfig(storedRaceConfig);
+  }, [storedRaceConfig]);
+
+  useEffect(() => {
+    if (!isProfileLoading && !disclaimerAccepted) {
+      setIsOnboardingOpen(true);
+    }
+  }, [isProfileLoading, disclaimerAccepted]);
 
   // Post-Workout Celebration Modal State
   const [isDebriefOpen, setIsDebriefOpen] = useState(false);
@@ -115,50 +140,26 @@ export default function App() {
     dbError,
   } = useWorkoutEngine();
 
-  // Initialize Dexie IndexedDB baseline seed and check onboarding disclaimer consent
+  // Initialize Dexie IndexedDB baseline seed and load latest debrief
   useEffect(() => {
     const initAppPersistence = async () => {
       await seedInitialDataIfEmpty();
+      await reloadProfile();
       try {
-        const storedProfile = await db.userProfile.get('current_user');
-        if (storedProfile) {
-          setUserProfile(storedProfile);
-        }
-        const storedRace = await db.appSettings.get('targetRaceConfig');
-        if (storedRace && storedRace.value) {
-          const parsedRace = RaceTargetConfigSchema.safeParse(storedRace.value);
-          if (parsedRace.success) {
-            setRaceConfig(parsedRace.data);
-          }
-        }
-        const storedDebrief = await db.postWorkoutDebrief.get('latest');
+        const storedDebrief = await loadLatestDebrief();
         if (storedDebrief) {
           const { id: _ignored, ...debrief } = storedDebrief;
           setDebriefData(debrief);
         }
-        const acceptedLocal = localStorage.getItem('rkstride_disclaimer_accepted');
-        const acceptedDbSetting = await db.appSettings.get('disclaimerAccepted');
-        if (!acceptedLocal && (!acceptedDbSetting || !acceptedDbSetting.value)) {
-          setIsOnboardingOpen(true);
-        }
       } catch (err) {
-        console.error('Error checking stored settings state:', err);
+        console.error('Error loading latest debrief:', err);
       }
     };
     initAppPersistence();
-  }, []);
+  }, [reloadProfile]);
 
   const handleAcceptDisclaimer = async () => {
-    try {
-      localStorage.setItem('rkstride_disclaimer_accepted', 'true');
-      await db.appSettings.put({
-        key: 'disclaimerAccepted',
-        value: true,
-        updatedAt: new Date().toISOString(),
-      });
-    } catch (err) {
-      console.error('Failed to persist disclaimer acceptance:', err);
-    }
+    await acceptDisclaimer();
     setIsOnboardingOpen(false);
   };
 
@@ -167,38 +168,22 @@ export default function App() {
     profileUpdates?: Partial<UserProfile>
   ) => {
     setAuthSession(session);
-    try {
-      localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session));
-      localStorage.setItem('rkstride_disclaimer_accepted', 'true');
-      await db.appSettings.put({
-        key: 'disclaimerAccepted',
-        value: true,
-        updatedAt: new Date().toISOString(),
-      });
-      if (profileUpdates) {
-        const mergedProfile: UserProfile = {
-          ...userProfile,
-          ...profileUpdates,
-        };
-        setUserProfile(mergedProfile);
-        await db.userProfile.put({
-          id: 'current_user',
-          ...mergedProfile,
-        });
-      }
-    } catch (err) {
-      console.error('Failed to persist authenticated session:', err);
+    saveAuthSession(session);
+    await acceptDisclaimer();
+    if (profileUpdates) {
+      const mergedProfile: UserProfile = {
+        ...userProfile,
+        ...profileUpdates,
+      };
+      setUserProfile(mergedProfile);
+      await saveProfileAndRace({ profile: mergedProfile });
     }
     setIsOnboardingOpen(false);
   };
 
   const handleLogout = () => {
     setAuthSession(null);
-    try {
-      localStorage.removeItem(AUTH_SESSION_STORAGE_KEY);
-    } catch (err) {
-      console.error('Failed to clear auth session:', err);
-    }
+    clearAuthSession();
   };
 
   const handleChangeExperienceLevel = (nextLevel: AthleteAuthSession['experienceLevel']) => {
@@ -208,17 +193,11 @@ export default function App() {
         experienceLevel: nextLevel,
       };
       setAuthSession(updatedSession);
-      try {
-        localStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(updatedSession));
-      } catch (err) {
-        console.error('Failed to update experience level in session:', err);
-      }
+      saveAuthSession(updatedSession);
     }
-    setUserProfile((prev) => {
-      const next = { ...prev, experienceLevel: nextLevel };
-      db.userProfile.put({ id: 'current_user', ...next }).catch(console.error);
-      return next;
-    });
+    const nextProfile = { ...userProfile, experienceLevel: nextLevel };
+    setUserProfile(nextProfile);
+    saveProfileAndRace({ profile: nextProfile }).catch(console.error);
   };
 
   // Dynamic Athlete Context for Google Gemini AI Coach (derived from measured logs only)
@@ -237,7 +216,7 @@ export default function App() {
   const handleWorkoutCompletedDebrief = (data: PostWorkoutDebriefData) => {
     setDebriefData(data);
     setIsDebriefOpen(true);
-    db.postWorkoutDebrief.put({ id: 'latest', ...data }).catch((err) => {
+    saveLatestDebrief(data).catch((err) => {
       console.error('Failed to persist debrief data:', err);
     });
   };
@@ -340,6 +319,7 @@ export default function App() {
               liveSmartwatchHeartRate={smartwatchState.liveHeartRate}
               lastLegsHoursAgo={lastLegsTrainedHoursAgo}
               experienceLevel={authSession.experienceLevel}
+              weeklySchedule={weeklySchedule}
               onWorkoutCompletedDebrief={handleWorkoutCompletedDebrief}
             />
           </>
@@ -356,14 +336,23 @@ export default function App() {
         )}
 
         {/* Nutrisi: Nutrisi & Kebutuhan Energi Atlet Hibrida */}
-        {activeTab === 'fuel' && (
-          <NutritionBodyCompCard
-            userProfile={userProfile}
-            todayWorkoutDurationMinutes={debriefData.totalDurationMin || 0}
-            todayWorkoutCaloriesBurned={debriefData.sessionLoad > 0 ? Math.round(debriefData.sessionLoad * 1.5) : 0}
-            isWorkoutEstimated={!(debriefData.sessionLoad > 0)}
-          />
-        )}
+        {activeTab === 'fuel' && (() => {
+          const todayLog = history.find((h) => h.tanggal === getLocalDateKey());
+          const todayDur = todayLog
+            ? todayLog.sessions?.reduce((sum, s) => sum + s.durationMinutes, 0) ??
+              todayLog.runningWorkouts.reduce((sum, r) => sum + r.durasiMenit, 0) +
+                todayLog.strengthWorkouts.reduce((sum, ex) => sum + (ex.durationMinutes ?? ex.sets.length * 3), 0)
+            : debriefData.totalDurationMin || 0;
+          const todayLoad = todayLog ? todayLog.totalLoadScore : debriefData.sessionLoad;
+          return (
+            <NutritionBodyCompCard
+              userProfile={userProfile}
+              todayWorkoutDurationMinutes={todayDur}
+              todayWorkoutCaloriesBurned={todayLoad > 0 ? Math.round(todayLoad * 1.5) : 0}
+              isWorkoutEstimated={!(todayLoad > 0)}
+            />
+          );
+        })()}
 
         {/* Program: Jadwal Mingguan Kustom */}
         {activeTab === 'program' && (
@@ -625,6 +614,7 @@ export default function App() {
         onClose={() => setIsDataModalOpen(false)}
         onDataImported={() => {
           reloadFromDb();
+          reloadProfile();
         }}
       />
 
@@ -657,7 +647,7 @@ export default function App() {
           setActiveTab(tab);
           window.scrollTo({ top: 0 });
         }}
-        coachBadgeCount={scheduleConflicts.length}
+        programBadgeCount={scheduleConflicts.length}
       />
 
       {/* Minimalist Dark Footer */}

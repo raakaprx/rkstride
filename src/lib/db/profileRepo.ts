@@ -2,7 +2,9 @@
  * RKStride - Athlete Profile, Race Target & App Settings Repository
  * Single gateway for userProfile, weeklySchedule, and appSettings persistence.
  */
-import { db } from './database';
+import { db, seedInitialDataIfEmpty } from './database';
+
+export { seedInitialDataIfEmpty };
 import {
   NutritionPrefsSchema,
   RaceTargetConfigSchema,
@@ -130,4 +132,31 @@ export async function saveScheduledDay(day: ScheduledDay): Promise<void> {
 
 export async function saveWeeklyScheduleBulk(days: ScheduledDay[]): Promise<void> {
   await db.weeklySchedule.bulkPut(days);
+}
+
+const AUTH_SESSION_KEY = 'rkstride_auth_session';
+
+export function loadAuthSession<T = unknown>(): T | null {
+  try {
+    const raw = localStorage.getItem(AUTH_SESSION_KEY);
+    return raw ? (JSON.parse(raw) as T) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function saveAuthSession<T = unknown>(session: T): void {
+  try {
+    localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // Ignore storage quota errors
+  }
+}
+
+export function clearAuthSession(): void {
+  try {
+    localStorage.removeItem(AUTH_SESSION_KEY);
+  } catch {
+    // Ignore storage errors
+  }
 }

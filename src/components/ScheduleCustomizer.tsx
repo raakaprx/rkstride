@@ -44,7 +44,9 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
 }) => {
   const [editingDayIndex, setEditingDayIndex] = useState<number | null>(null);
 
-  const editingDay = editingDayIndex !== null ? weeklySchedule[editingDayIndex] : null;
+  const editingDay = editingDayIndex !== null
+    ? weeklySchedule.find((d) => d.dayIndex === editingDayIndex) ?? null
+    : null;
 
   return (
     <div
@@ -336,9 +338,13 @@ export const ScheduleCustomizer: React.FC<ScheduleCustomizerProps> = ({
                 <option value="push">Upper Push (Chest, Shoulders, Triceps)</option>
                 <option value="pull">Upper Pull (Back &amp; Biceps)</option>
                 <option value="legs">Legs (Squats, Deadlifts, Quads)</option>
+                <option value="arms">Arms (Biceps &amp; Triceps)</option>
+                <option value="core">Core &amp; Stabilizers</option>
+                <option value="run_recovery">Recovery Run (Zone 1)</option>
                 <option value="run_easy">Easy Run (Zone 2 Base)</option>
-                <option value="run_tempo">Tempo Run (Threshold &amp; Intervals)</option>
+                <option value="run_tempo">Tempo Run (Threshold)</option>
                 <option value="run_long">Long Run (Endurance)</option>
+                <option value="run_intervals">VO2 Max Intervals</option>
                 <option value="norwegian_4x4">Norwegian 4x4 (VO2 Max Protocol)</option>
                 <option value="mobility_recovery">Rest / Active Recovery</option>
               </select>
