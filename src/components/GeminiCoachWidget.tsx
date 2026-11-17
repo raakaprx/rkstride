@@ -11,81 +11,8 @@ import {
   ChatMessage,
   askGeminiCoach,
 } from '@/lib/ai/geminiCoach';
-
-function renderFormattedMessage(text: string) {
-  const lines = text.split('\n');
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-      {lines.map((line, lIdx) => {
-        const trimmed = line.trim();
-        if (!trimmed) {
-          return <div key={lIdx} style={{ height: '0.2rem' }} />;
-        }
-
-        // Heading: starts with # or ## or ###
-        if (trimmed.startsWith('#')) {
-          const cleanHeading = trimmed.replace(/^#+\s*/, '');
-          return (
-            <div
-              key={lIdx}
-              style={{
-                fontWeight: 800,
-                color: 'var(--accent-neon)',
-                fontSize: '0.85rem',
-                marginTop: lIdx > 0 ? '0.35rem' : 0,
-                marginBottom: '0.1rem',
-              }}
-            >
-              {cleanHeading}
-            </div>
-          );
-        }
-
-        // Bullet item: starts with -, *, or •
-        const isBullet = /^[-\*•]\s+/.test(trimmed);
-        const contentText = isBullet ? trimmed.replace(/^[-\*•]\s+/, '') : trimmed;
-
-        // Split text by bold markers **...**
-        const parts = contentText.split(/(\*\*[^*]+\*\*)/g);
-        const formattedParts = parts.map((part, pIdx) => {
-          if (part.startsWith('**') && part.endsWith('**')) {
-            const inner = part.slice(2, -2);
-            return (
-              <strong key={pIdx} style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
-                {inner}
-              </strong>
-            );
-          }
-          return <span key={pIdx}>{part}</span>;
-        });
-
-        if (isBullet) {
-          return (
-            <div
-              key={lIdx}
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '0.4rem',
-                paddingLeft: '0.15rem',
-                lineHeight: 1.45,
-              }}
-            >
-              <span style={{ color: 'var(--accent-neon)', fontWeight: 800 }}>•</span>
-              <div style={{ flex: 1 }}>{formattedParts}</div>
-            </div>
-          );
-        }
-
-        return (
-          <div key={lIdx} style={{ lineHeight: 1.5 }}>
-            {formattedParts}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+import { renderFormattedMessage } from './coach/CoachMessageRenderer';
+import { CoachQuickPrompts } from './coach/CoachQuickPrompts';
 
 interface GeminiCoachWidgetProps {
   athleteContext: AthleteContext;
@@ -167,11 +94,12 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, botMsg]);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errText = err instanceof Error ? err.message : 'Gagal terhubung';
       const errorMsg: ChatMessage = {
         id: `err-${Date.now()}`,
         role: 'model',
-        text: `Maaf, terjadi kendala saat memproses: ${err.message || 'Gagal terhubung'}. Silakan coba lagi.`,
+        text: `Maaf, terjadi kendala saat memproses: ${errText}. Silakan coba lagi.`,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -418,46 +346,11 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
           </div>
 
           {/* Quick Prompts Carousel */}
-          <div
-            style={{
-              padding: '0.5rem 0.75rem',
-              background: 'var(--bg-surface)',
-              borderTop: '1px solid var(--border-subtle)',
-              display: 'flex',
-              gap: '0.4rem',
-              overflowX: 'auto',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {quickPrompts.map((p, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSendMessage(p)}
-                disabled={isLoading}
-                style={{
-                  fontSize: '0.75rem',
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: 'var(--radius-full)',
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--border-default)',
-                  color: 'var(--text-secondary)',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  transition: 'var(--transition-fast)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--accent-neon)';
-                  e.currentTarget.style.color = 'var(--text-primary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--border-default)';
-                  e.currentTarget.style.color = 'var(--text-secondary)';
-                }}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
+          <CoachQuickPrompts
+            prompts={quickPrompts}
+            onSelectPrompt={(p) => handleSendMessage(p)}
+            isLoading={isLoading}
+          />
 
           {/* Input Bar */}
           <div
@@ -486,7 +379,7 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
                 color: 'var(--text-primary)',
                 padding: '0.6rem 0.85rem',
                 fontSize: '0.85rem',
-                              }}
+              }}
             />
             <button
               onClick={() => handleSendMessage()}
@@ -518,6 +411,3 @@ Ada yang bisa saya bantu terkait jadwal latihan, intensitas lari, atau pemulihan
     </>
   );
 };
-
-
-

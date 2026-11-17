@@ -4,15 +4,13 @@ import {
   CheckCircle2,
   TrendingUp,
   Activity,
-  Heart,
-  Moon,
-  Flame,
-  Lock,
-  Unlock,
 } from 'lucide-react';
 import { ACWRResult, RecommendationResult, ReadinessCheckIn, ExperienceLevel } from '@/types/workout';
 import { Badge } from './ui/Badge';
 import { EXPERIENCE_COPY } from '@/lib/experienceCopy';
+import { AdvisorAcwrGauge } from './advisor/AdvisorAcwrGauge';
+import { AdvisorBiometricsPanel } from './advisor/AdvisorBiometricsPanel';
+import { AdvisorLegRecoveryCard } from './advisor/AdvisorLegRecoveryCard';
 
 interface WorkloadAdvisorCardProps {
   acwr: ACWRResult;
@@ -205,215 +203,19 @@ export const WorkloadAdvisorCard: React.FC<WorkloadAdvisorCardProps> = ({
           marginBottom: '1.5rem',
         }}
       >
-        {/* Column 1: ACWR Ratio & Visual Gauge */}
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1.25rem',
-            border: '1px solid var(--border-subtle)',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{tierCopy.acwrRatioLabel}</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tierCopy.acwrModelNote}</span>
-          </div>
+        <AdvisorAcwrGauge
+          acwr={acwr}
+          tierCopy={tierCopy}
+          statusColor={statusColor}
+          meterPercent={meterPercent}
+        />
 
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginTop: '0.4rem' }}>
-            <span
-              style={{
-                fontSize: '2.4rem',
-                fontWeight: 900,
-                fontFamily: 'var(--font-family-display)',
-                color: statusColor,
-              }}
-            >
-              {acwr.ratio}
-            </span>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              <div>{tierCopy.acuteLabel}: <strong style={{ color: 'var(--text-primary)' }}>{acwr.acuteLoad}</strong> pts/hari</div>
-              <div>{tierCopy.chronicLabel}: <strong style={{ color: 'var(--text-primary)' }}>{acwr.chronicLoad}</strong> pts/hari</div>
-            </div>
-          </div>
+        <AdvisorBiometricsPanel readiness={readiness} />
 
-          {/* ACWR Segmented Athletic Gauge */}
-          <div style={{ marginTop: '1.1rem' }}>
-            <div style={{ position: 'relative', height: '14px', display: 'flex', alignItems: 'center' }}>
-              {/* 3 Segments */}
-              <div style={{ display: 'flex', width: '100%', height: '6px', gap: '3px', borderRadius: '3px', overflow: 'hidden' }}>
-                <div
-                  title="Under-load Zone (< 0.8)"
-                  style={{
-                    flex: '20',
-                    background: 'rgba(100, 116, 139, 0.35)',
-                    borderRadius: '2px 0 0 2px',
-                  }}
-                />
-                <div
-                  title="Sweet Spot (0.8 - 1.4)"
-                  style={{
-                    flex: '40',
-                    background: 'rgba(16, 185, 129, 0.55)',
-                  }}
-                />
-                <div
-                  title="High Risk (> 1.4)"
-                  style={{
-                    flex: '40',
-                    background: 'rgba(239, 68, 68, 0.5)',
-                    borderRadius: '0 2px 2px 0',
-                  }}
-                />
-              </div>
-
-              {/* High-Precision Marker Needle */}
-              <div
-                style={{
-                  position: 'absolute',
-                  left: `${meterPercent}%`,
-                  top: '-3px',
-                  width: '4px',
-                  height: '18px',
-                  background: 'var(--text-primary)',
-                  borderRadius: '2px',
-                  transform: 'translateX(-50%)',
-                  boxShadow: '0 0 6px rgba(0, 0, 0, 0.7), 0 0 3px var(--text-primary)',
-                  zIndex: 2,
-                }}
-              />
-            </div>
-
-            {/* Range labels */}
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                fontSize: '0.75rem',
-                color: 'var(--text-muted)',
-                marginTop: '0.5rem',
-              }}
-            >
-              <span>&lt; 0.8 Underload</span>
-              <span style={{ color: 'var(--color-success)', fontWeight: 700 }}>0.8 – 1.4 Sweet Spot</span>
-              <span style={{ color: 'var(--color-danger)' }}>&gt; 1.4 Spike Risk</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Column 2: Smartwatch Biometric Sensors */}
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1.25rem',
-            border: '1px solid var(--border-subtle)',
-          }}
-        >
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-            Smartwatch Synced Biometrics
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Moon size={14} style={{ color: 'var(--color-info)' }} /> Sleep
-              </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                {readiness.sleepHours} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>hrs</span>
-              </div>
-            </div>
-
-            <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Heart size={14} style={{ color: 'var(--color-danger)' }} /> Resting HR
-              </div>
-              {readiness.restingHeartRate != null ? (
-                <div style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                  {readiness.restingHeartRate} <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>bpm</span>
-                </div>
-              ) : (
-                <div style={{ marginTop: '0.25rem' }}>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-muted)' }}>Kosong</div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Belum diukur</div>
-                </div>
-              )}
-            </div>
-
-            <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Activity size={14} style={{ color: 'var(--accent-neon)' }} /> Leg DOMS
-              </div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: readiness.legFatigue ? 'var(--color-warning)' : 'var(--color-success)', marginTop: '0.25rem' }}>
-                {readiness.muscleSoreness}/5 ({readiness.legFatigue ? 'Sore' : 'Fresh'})
-              </div>
-            </div>
-
-            <div style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                <Flame size={14} style={{ color: 'var(--chart-orange)' }} /> Energy Level
-              </div>
-              <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '0.25rem', textTransform: 'capitalize' }}>
-                {readiness.energyLevel}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Column 3: 48-Hour Leg Recovery Guardrail */}
-        <div
-          style={{
-            background: 'var(--bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            padding: '1.25rem',
-            border: lastLegsHoursAgo < 48 ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid var(--border-subtle)',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{tierCopy.legWindowTitle}</span>
-            <span
-              style={{
-                fontSize: '0.7rem',
-                fontWeight: 700,
-                color: lastLegsHoursAgo < 48 ? 'var(--color-warning)' : 'var(--color-success)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-              }}
-            >
-              {lastLegsHoursAgo < 48 ? <Lock size={12} /> : <Unlock size={12} />}
-              {lastLegsHoursAgo < 48 ? 'PROTECTION LOCKED' : 'FRESH &amp; READY'}
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', marginTop: '0.4rem' }}>
-            <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-              {lastLegsHoursAgo < 900 ? `${lastLegsHoursAgo}h` : '> 72h'}
-            </span>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>since previous leg session</span>
-          </div>
-
-          <div
-            style={{
-              marginTop: '0.85rem',
-              padding: '0.75rem',
-              borderRadius: 'var(--radius-sm)',
-              background: 'var(--bg-surface)',
-              fontSize: '0.78rem',
-              lineHeight: 1.4,
-              color: lastLegsHoursAgo < 48 ? 'var(--text-secondary)' : 'var(--text-muted)',
-            }}
-          >
-            {lastLegsHoursAgo < 48 ? (
-              <span style={{ color: 'var(--color-warning)' }}>
-                Perhatian: Sesi lari cepat (Norwegian 4x4, interval, tempo) dan squat berat dibatasi untuk pemulihan tendon patela dan hamstring.
-              </span>
-            ) : (
-              <span style={{ color: 'var(--color-success)' }}>
-                Otot kaki telah melewati jendela pemulihan 48 jam. Sesi lari intensitas tinggi dan latihan kaki siap dieksekusi.
-              </span>
-            )}
-          </div>
-        </div>
+        <AdvisorLegRecoveryCard
+          lastLegsHoursAgo={lastLegsHoursAgo}
+          tierCopy={tierCopy}
+        />
       </div>
 
       {/* Empty-history guidance: fresh user has no logged sessions yet */}

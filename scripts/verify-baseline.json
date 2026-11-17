@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-17T07:55:19.352Z",
-  "note": "Ratchet baseline: counts may only decrease toward 0 as Sprint 1-5 progresses.",
+  "generatedAt": "2026-11-17T08:32:00.000Z",
+  "note": "Ratchet baseline: ALL 20 GOVERNANCE & ARCHITECTURE METRICS ARE NOW AT ZERO DEBT (0).",
   "maxCounts": {
     "ui_hex_literals": 0,
     "no_outline_none": 0,
@@ -20,7 +20,7 @@
     "brand_parity_ui": 0,
     "contract_english_field_parity": 0,
     "tab_key_parity": 0,
-    "monolith_file_guard": 6,
+    "monolith_file_guard": 0,
     "git_tracked_build_artifacts": 0
   }
 }
