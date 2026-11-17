@@ -140,6 +140,15 @@ export async function connectUniversalSmartwatch(
     if (errorMsg.includes('User cancelled')) {
       return { success: false, deviceName: '', brand: 'generic', error: 'Pencarian perangkat dibatalkan.' };
     }
+    if (errorMsg.toLowerCase().includes('globally disabled')) {
+      return {
+        success: false,
+        deviceName: '',
+        brand: 'generic',
+        error:
+          'Web Bluetooth dinonaktifkan oleh browser Anda (umum terjadi jika menggunakan Brave Browser). Buka brave://settings/content/bluetoothDevices untuk mengaktifkan izin, atau buka di Google Chrome / Microsoft Edge. Anda juga dapat menggunakan tab Impor File atau Check-in Manual.',
+      };
+    }
     return { success: false, deviceName: '', brand: 'generic', error: `Gagal menghubungkan jam: ${errorMsg}` };
   }
 }
