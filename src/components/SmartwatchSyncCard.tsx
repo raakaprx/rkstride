@@ -146,10 +146,10 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           </div>
           <div>
             <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-primary)' }}>
-              Smartwatch Integration Hub
+              Sinkronisasi Jam Pintar &amp; Telemetri Kesiapan
             </h2>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              Bluetooth HR (0x180D) + impor file .gpx / .tcx / .json / .csv
+              Koneksi Bluetooth Heart Rate (0x180D), impor file aktivitas, atau check-in harian
             </div>
           </div>
         </div>
@@ -169,13 +169,13 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
         >
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
-              Connected Device
+              Status Perangkat
             </div>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-primary)' }}>
               {smartwatchState.connected ? smartwatchState.deviceName : 'Belum terhubung'}
             </div>
             <div style={{ fontSize: '0.75rem', color: smartwatchState.connected ? 'var(--color-success)' : 'var(--text-muted)' }}>
-              {smartwatchState.connected ? smartwatchState.lastSyncTime : 'Hubungkan perangkat atau isi check-in pagi'}
+              {smartwatchState.connected ? smartwatchState.lastSyncTime : 'Hubungkan jam atau isi check-in pagi'}
             </div>
           </div>
 
@@ -219,7 +219,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           }}
         >
           <Sliders size={15} style={{ color: activeSyncTab === 'quick' ? 'var(--accent-neon)' : 'inherit' }} />
-          <span>Quick Morning Check-In</span>
+          <span>1. Check-in Kesiapan (Manual / Preset)</span>
         </button>
 
         <button
@@ -240,7 +240,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           }}
         >
           <Bluetooth size={15} style={{ color: activeSyncTab === 'bluetooth' ? 'var(--accent-neon)' : 'inherit' }} />
-          <span>Web Bluetooth BLE</span>
+          <span>2. Sambung Jam via Bluetooth</span>
         </button>
 
         <button
@@ -261,7 +261,7 @@ export const SmartwatchSyncCard: React.FC<SmartwatchSyncCardProps> = ({
           }}
         >
           <UploadCloud size={15} style={{ color: activeSyncTab === 'file' ? 'var(--accent-neon)' : 'inherit' }} />
-          <span>File Import (.fit / .gpx / .csv)</span>
+          <span>3. Unggah File (.gpx / .tcx / .json)</span>
         </button>
       </div>
 
