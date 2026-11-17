@@ -42,4 +42,18 @@ describe('useWorkoutEngine - guardrail override persistence', () => {
     expect(latest.runningWorkouts).toHaveLength(1);
     expect(latest.runningWorkouts[0].isOverridden).toBeFalsy();
   });
+
+  it('enforces 21-day cold-start guard in calculateProjectedImpact and marks preset [SIMULASI] without fabricated battery', () => {
+    const { result } = renderHook(() => useWorkoutEngine());
+
+    const impact = result.current.calculateProjectedImpact([], [fastRun]);
+    expect(impact.projectedStatus).toBe('insufficient_data');
+    expect(impact.isOverloaded).toBe(false);
+
+    act(() => {
+      result.current.applyPreset('normal');
+    });
+    expect(result.current.smartwatchState.deviceName).toContain('[SIMULASI]');
+    expect(result.current.smartwatchState.batteryLevel).toBeUndefined();
+  });
 });

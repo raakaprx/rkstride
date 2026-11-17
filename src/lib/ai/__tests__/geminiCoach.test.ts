@@ -4,8 +4,10 @@ import {
   checkMedicalRedFlags,
   generateOfflineSportsScienceResponse,
   buildSystemInstruction,
+  isSafeProxyUrl,
   AthleteContext,
 } from '../geminiCoach';
+import { buildAthleteContext } from '../buildAthleteContext';
 
 describe('rkbot AI Coach & Local Sports Science Engine', () => {
   const mockContext: AthleteContext = {
@@ -88,6 +90,40 @@ describe('rkbot AI Coach & Local Sports Science Engine', () => {
       expect(instruction).toContain('You are rkbot');
       expect(instruction).not.toContain('You are the RKStride AI Athletic Coach');
       expect(instruction).toContain('Always introduce and refer to yourself simply as "rkbot"');
+    });
+  });
+
+  describe('buildAthleteContext & proxy URL safety', () => {
+    it('omits restingHeartRate instead of fabricating a number when unmeasured', () => {
+      const ctx = buildAthleteContext({
+        acwrResult: {
+          acuteLoad: 100,
+          chronicLoad: 100,
+          ratio: 1.0,
+          status: 'insufficient_data',
+          method: 'rolling_coupled',
+          daysCollected: 5,
+          coldStartProgressPercent: 24,
+          weeklySpikeAlert: false,
+          weeklySpikePercent: 0,
+        },
+        todayReadiness: {
+          sleepHours: 7,
+          muscleSoreness: 2,
+          legFatigue: false,
+          energyLevel: 'moderate',
+        },
+        readinessScore: 75,
+        lastLegsHoursAgo: 72,
+      });
+      expect(ctx.readiness.restingHeartRate).toBeUndefined();
+      expect(ctx.acwrStatus).toBe('insufficient_data');
+    });
+
+    it('rejects non-HTTPS external proxy URLs and allows HTTPS or localhost URLs', () => {
+      expect(isSafeProxyUrl('https://coach.example.com/api/chat')).toBe(true);
+      expect(isSafeProxyUrl('http://localhost:8787/api/coach')).toBe(true);
+      expect(isSafeProxyUrl('http://insecure.example.com/api')).toBe(false);
     });
   });
 });

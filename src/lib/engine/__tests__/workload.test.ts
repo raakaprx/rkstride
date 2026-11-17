@@ -8,6 +8,8 @@ import {
   calculateKarvonenHeartRateZones,
   estimateMaxHeartRate,
   calculateACWR,
+  projectACWRImpact,
+  isLegStrengthExercise,
   calculateEWMALoad,
   detectWeeklyLoadSpike,
   evaluateSoftGuardrail,
@@ -519,6 +521,40 @@ describe('Workload & Sports Science Engine - Unit Tests', () => {
       ];
       const conflicts = auditWeeklySchedule(schedule, baseReadiness, 85);
       expect(conflicts.filter((c) => c.dayIndex === 1)).toHaveLength(0);
+    });
+  });
+
+  describe('Live ACWR Projection & Leg Movement Classifier', () => {
+    it('enforces 21-day cold-start guard in projectACWRImpact when history < 21 days', () => {
+      const shortHistory: DailyLog[] = Array.from({ length: 10 }, (_, idx) => ({
+        tanggal: `2026-11-${String(10 - idx).padStart(2, '0')}`,
+        strengthWorkouts: [],
+        runningWorkouts: [],
+        totalLoadScore: 200,
+      }));
+      const projected = projectACWRImpact({
+        history: shortHistory,
+        targetDate: '2026-11-11',
+        draftStrength: [
+          {
+            namaGerakan: 'Barbell Squat',
+            category: 'legs',
+            sets: [{ bebanKg: 100, reps: 5, rpe: 9 }],
+          },
+        ],
+        draftRunning: [],
+        lastLegsHoursAgo: 72,
+        legFatigue: false,
+        method: 'rolling_coupled',
+      });
+      expect(projected.projectedStatus).toBe('insufficient_data');
+      expect(projected.isOverloaded).toBe(false);
+    });
+
+    it('detects leg strain exercises from category or movement keywords', () => {
+      expect(isLegStrengthExercise({ namaGerakan: 'Back Squat', category: 'legs' })).toBe(true);
+      expect(isLegStrengthExercise({ namaGerakan: 'Romanian Deadlift' })).toBe(true);
+      expect(isLegStrengthExercise({ namaGerakan: 'Barbell Bench Press', category: 'push' })).toBe(false);
     });
   });
 });

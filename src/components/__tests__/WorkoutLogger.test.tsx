@@ -75,5 +75,27 @@ describe('WorkoutLogger Component - Unit & Interaction Tests', () => {
     const calledArg = mockSaveWorkout.mock.calls[0][0];
     expect(calledArg.strengthExercises).toBeDefined();
     expect(calledArg.strengthExercises.length).toBeGreaterThanOrEqual(2);
+    expect(calledArg.mode).toBe('append');
+    expect(calledArg.targetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('supports Plan-to-Log button when weeklySchedule is provided', () => {
+    render(
+      <WorkoutLogger
+        {...defaultProps}
+        weeklySchedule={[
+          { id: 'd0', dayIndex: 0, dayName: 'Senin', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+          { id: 'd1', dayIndex: 1, dayName: 'Selasa', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+          { id: 'd2', dayIndex: 2, dayName: 'Rabu', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+          { id: 'd3', dayIndex: 3, dayName: 'Kamis', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+          { id: 'd4', dayIndex: 4, dayName: 'Jumat', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+          { id: 'd5', dayIndex: 5, dayName: 'Sabtu', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+          { id: 'd6', dayIndex: 6, dayName: 'Minggu', category: 'norwegian_4x4', title: 'VO2 Max 4x4', targetDurationMinutes: 44, isRestDay: false },
+        ]}
+      />
+    );
+    const planButton = screen.getByRole('button', { name: /Muat Menu Hari Ini/i });
+    expect(planButton).toBeInTheDocument();
+    fireEvent.click(planButton);
   });
 });
