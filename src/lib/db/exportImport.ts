@@ -79,10 +79,16 @@ function normalizeLegacyDailyLog(log: DailyLog): DailyLog {
 // 1. EXPORT FUNCTIONS (JSON & CSV)
 // =============================================================================
 
+export interface ExportOptions {
+  includeAiConfig?: boolean;
+  includeSensitiveApiKey?: boolean;
+}
+
 /**
- * Export entire IndexedDB database to a formatted JSON string
+ * Export entire IndexedDB database to a formatted JSON string.
+ * By default, sensitive BYOK API keys are excluded (opt-in via includeSensitiveApiKey).
  */
-export async function exportDatabaseToJson(): Promise<string> {
+export async function exportDatabaseToJson(options?: ExportOptions): Promise<string> {
   const workoutLogs = await db.workoutLogs.toArray();
   const dailyReadiness = await db.dailyReadiness.toArray();
   const userProfile = await db.userProfile.get('current_user');
@@ -95,6 +101,19 @@ export async function exportDatabaseToJson(): Promise<string> {
     appSettings[s.key] = s.value;
   }
 
+  const includeAiConfig = options?.includeAiConfig !== false;
+  const includeSensitiveApiKey = options?.includeSensitiveApiKey === true;
+  const rawAiConfig = getAiCoachConfig();
+  const exportedAiConfig = includeAiConfig
+    ? includeSensitiveApiKey
+      ? rawAiConfig
+      : {
+          mode: rawAiConfig.mode,
+          proxyUrl: rawAiConfig.proxyUrl,
+          sendTelemetry: rawAiConfig.sendTelemetry,
+        }
+    : undefined;
+
   const payload: RKStrideExportPayload = {
     format: 'RKStride_Backup',
     version: CURRENT_DB_VERSION,
@@ -105,7 +124,7 @@ export async function exportDatabaseToJson(): Promise<string> {
     weeklySchedule,
     appSettings,
     postWorkoutDebrief,
-    aiCoachConfig: getAiCoachConfig(),
+    aiCoachConfig: exportedAiConfig,
   };
 
   return JSON.stringify(payload, null, 2);

@@ -22,6 +22,7 @@ import { AICoachSettingsModal } from './components/AICoachSettingsModal';
 import { AuthLandingGate } from './components/AuthLandingGate';
 import { OdooSprintDocsModal } from './components/OdooSprintDocsModal';
 import { AthleteContext } from './lib/ai/geminiCoach';
+import { buildAthleteContext } from './lib/ai/buildAthleteContext';
 import { db, seedInitialDataIfEmpty } from './lib/db/database';
 import { AthleteAuthSession, UserProfile } from './types/workout';
 import { RaceTargetConfig } from './types/productFeatures';
@@ -220,22 +221,18 @@ export default function App() {
     });
   };
 
-  // Dynamic Athlete Context for Google Gemini AI Coach
-  const athleteContext: AthleteContext = useMemo(() => ({
-    acwrRatio: acwrResult.ratio,
-    acwrStatus: acwrResult.status,
-    acuteLoad: acwrResult.acuteLoad,
-    chronicLoad: acwrResult.chronicLoad,
-    readiness: todayReadiness,
-    readinessScore,
-    lastLegsHoursAgo: lastLegsTrainedHoursAgo,
-    recentWorkoutSummary: debriefData.sessionLoad > 0 ? {
-      strengthExercisesCount: debriefData.hasLegWorkout || debriefData.hasUpperWorkout ? 3 : 0,
-      runningMinutes: debriefData.totalDurationMin,
-      runningKm: Math.round(debriefData.totalDurationMin * 0.15 * 10) / 10,
-      totalLoadScore: debriefData.sessionLoad,
-    } : undefined,
-  }), [acwrResult, todayReadiness, readinessScore, lastLegsTrainedHoursAgo, debriefData]);
+  // Dynamic Athlete Context for Google Gemini AI Coach (derived from measured logs only)
+  const athleteContext: AthleteContext = useMemo(
+    () =>
+      buildAthleteContext({
+        acwrResult,
+        todayReadiness,
+        readinessScore,
+        lastLegsHoursAgo: lastLegsTrainedHoursAgo,
+        latestDailyLog: history[0],
+      }),
+    [acwrResult, todayReadiness, readinessScore, lastLegsTrainedHoursAgo, history]
+  );
 
   const handleWorkoutCompletedDebrief = (data: PostWorkoutDebriefData) => {
     setDebriefData(data);

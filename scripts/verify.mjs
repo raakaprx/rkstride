@@ -370,7 +370,7 @@ function checkDiffAddedLines() {
   const diffFailures = [];
   if (CHECK_STAGED) {
     try {
-      const stagedFiles = execSync('git diff --cached --name-only', {
+      const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACMR', {
         cwd: ROOT,
         encoding: 'utf8',
         stdio: 'pipe',

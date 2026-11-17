@@ -4,7 +4,23 @@
  * Universal BLE Heart Rate GATT service (0x180D) and multi-format file parser (.fit, .gpx, .tcx, .json, .csv).
  */
 
+import { getLocalDateKey } from './dateKey';
+
 export type SmartwatchBrand = 'garmin' | 'apple' | 'xiaomi' | 'samsung' | 'coros' | 'polar' | 'generic';
+
+/**
+ * Parse Bluetooth SIG Heart Rate Measurement characteristic (0x2A37).
+ * Bit 0 of flags byte: 0 = uint8 HR at byte 1, 1 = uint16 LE HR at bytes 1..2.
+ */
+export function parseBleHeartRateMeasurement(value: DataView): number {
+  if (value.byteLength < 2) return 0;
+  const flags = value.getUint8(0);
+  const isUint16 = (flags & 0x01) === 1;
+  if (isUint16 && value.byteLength >= 3) {
+    return value.getUint16(1, true);
+  }
+  return value.getUint8(1);
+}
 
 export interface SmartwatchDeviceState {
   connected: boolean;
@@ -104,8 +120,8 @@ export async function connectUniversalSmartwatch(
       await hrChar.startNotifications();
 
       hrChar.addEventListener('characteristicvaluechanged', (event: any) => {
-        const value = event.target.value;
-        const hr = value.getUint8(1);
+        const value = event.target.value as DataView;
+        const hr = parseBleHeartRateMeasurement(value);
         if (onHeartRateUpdate && hr > 0) {
           onHeartRateUpdate(hr);
         }
@@ -132,7 +148,7 @@ export async function connectUniversalSmartwatch(
  * Universal File Parser untuk ekspor data smartwatch (.json, .csv, .tcx, .gpx)
  */
 export function parseUniversalSmartwatchFile(content: string, filename: string): ParsedSmartwatchData {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateKey();
   const lowerName = filename.toLowerCase();
 
   let brand: SmartwatchBrand = 'generic';
@@ -141,6 +157,24 @@ export function parseUniversalSmartwatchFile(content: string, filename: string):
   else if (lowerName.includes('mi') || lowerName.includes('xiaomi') || lowerName.includes('zepp')) brand = 'xiaomi';
   else if (lowerName.includes('samsung')) brand = 'samsung';
   else if (lowerName.includes('coros')) brand = 'coros';
+
+  // 0. Explicit rejection for binary .fit files (not supported in browser without FIT SDK)
+  if (lowerName.endsWith('.fit')) {
+    return {
+      date: todayStr,
+      brandDetected: brand,
+      sleepHours: 0,
+      deepSleepMinutes: 0,
+      remSleepMinutes: 0,
+      sleepScore: 0,
+      restingHeartRate: 0,
+      maxHeartRateDuringDay: 0,
+      activeCalories: 0,
+      steps: 0,
+      parseError:
+        'Format biner .fit belum didukung di browser. Ekspor file aktivitas Anda sebagai .json, .csv, .tcx, atau .gpx dari aplikasi jam.',
+    };
+  }
 
   // 1. Parser JSON (Apple Health / Garmin JSON / Mi Fitness JSON)
   if (filename.endsWith('.json') || content.trim().startsWith('{')) {
@@ -288,7 +322,7 @@ export function parseUniversalSmartwatchFile(content: string, filename: string):
  */
 export const SMARTWATCH_SAMPLE_PRESETS: Record<'normal' | 'fatigued' | 'peak', ParsedSmartwatchData> = {
   normal: {
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateKey(),
     brandDetected: 'garmin',
     sleepHours: 7.5,
     deepSleepMinutes: 105,
@@ -300,7 +334,7 @@ export const SMARTWATCH_SAMPLE_PRESETS: Record<'normal' | 'fatigued' | 'peak', P
     steps: 8750,
   },
   fatigued: {
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateKey(),
     brandDetected: 'apple',
     sleepHours: 5.2,
     deepSleepMinutes: 45,
@@ -312,7 +346,7 @@ export const SMARTWATCH_SAMPLE_PRESETS: Record<'normal' | 'fatigued' | 'peak', P
     steps: 5400,
   },
   peak: {
-    date: new Date().toISOString().split('T')[0],
+    date: getLocalDateKey(),
     brandDetected: 'coros',
     sleepHours: 8.3,
     deepSleepMinutes: 130,

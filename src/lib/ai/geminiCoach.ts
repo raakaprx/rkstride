@@ -11,6 +11,35 @@
 
 import { GoogleGenAI } from '@google/genai';
 import { ReadinessCheckIn, ACWRStatus } from '@/types/workout';
+import { ProxyCoachResponseSchema } from '@/contracts/ai.schema';
+
+const PROXY_TIMEOUT_MS = 15000;
+
+export function isSafeProxyUrl(rawUrl: string): boolean {
+  try {
+    const parsed = new URL(rawUrl.trim());
+    if (parsed.protocol === 'https:') return true;
+    if (
+      parsed.protocol === 'http:' &&
+      (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1')
+    ) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export const OUT_OF_DOMAIN_RESPONSE = `### Lingkup Pelatih Olahraga (rkbot)
+
+Halo! Sebagai asisten pelatih performa atletik hibrida, keahlian saya berfokus pada:
+- **Manajemen Beban Latihan (ACWR)** dan pencegahan kelelahan akut.
+- **Jadwal Hibrida & Interference Effect** (kombinasi Push-Pull-Legs dengan lari).
+- **Protokol Lari Kardiorespirasi** (Norwegian 4x4, Zona 2 aerobik, tempo).
+- **Nutrisi & Hidrasi Pemulihan** pasca latihan.
+
+Silakan tanyakan menu latihan, jadwal besok, atau analisis beban fisik Anda!`;
 
 export interface AthleteContext {
   acwrRatio: number;
@@ -241,15 +270,7 @@ export function generateOfflineSportsScienceResponse(
 
   // 2. Out of domain scope check
   if (!isQueryInSportsDomain(prompt)) {
-    return `### Lingkup Pelatih Olahraga (rkbot)
-
-Halo! Sebagai asisten pelatih performa atletik hibrida, keahlian saya berfokus pada:
-- **Manajemen Beban Latihan (ACWR)** dan pencegahan kelelahan akut.
-- **Jadwal Hibrida & Interference Effect** (kombinasi Push-Pull-Legs dengan lari).
-- **Protokol Lari Kardiorespirasi** (Norwegian 4x4, Zona 2 aerobik, tempo).
-- **Nutrisi & Hidrasi Pemulihan** pasca latihan.
-
-Silakan tanyakan menu latihan, jadwal besok, atau analisis beban fisik Anda!`;
+    return OUT_OF_DOMAIN_RESPONSE;
   }
 
   const p = prompt.toLowerCase();
@@ -329,8 +350,6 @@ Secara umum, ambang batas **Acute:Chronic Workload Ratio (ACWR)** adalah:
         ? 'Data Belum Cukup (Pengumpulan Baseline)'
         : ctx.acwrStatus === 'danger'
         ? 'Indikator Risiko Lonjakan Akut'
-        : ctx.acwrStatus === 'warning'
-        ? 'Zona Waspada (Pantau Ketat)'
         : ctx.acwrStatus === 'sweet_spot'
         ? 'Zona Manis / Sweet Spot'
         : 'Undertraining / Stimulus Ringan';
@@ -412,19 +431,32 @@ export async function askGeminiCoach(
   history: ChatMessage[],
   ctx?: AthleteContext
 ): Promise<string> {
-  // Immediate medical red flag check
+  // 1. Immediate medical red flag check across all modes
   const medicalAlert = checkMedicalRedFlags(userMessage);
   if (medicalAlert) {
     return medicalAlert;
   }
 
+  // 2. Domain scope guard across all modes (BYOK, Proxy, Offline)
+  if (!isQueryInSportsDomain(userMessage)) {
+    return OUT_OF_DOMAIN_RESPONSE;
+  }
+
   const config = getAiCoachConfig();
   const effectiveCtx = config.sendTelemetry ? ctx : undefined;
 
-  // 1. Mode Proxy Backend (Thin Backend Proxy)
+  // 3. Mode Proxy Backend (Thin Backend Proxy with URL safety, timeout & Zod response validation)
   if (config.mode === 'proxy' && config.proxyUrl) {
+    if (!isSafeProxyUrl(config.proxyUrl)) {
+      console.warn('Unsafe proxy URL rejected; falling back to local engine.');
+      return generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
+
     try {
-      const response = await fetch(config.proxyUrl, {
+      const response = await fetch(config.proxyUrl.trim(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -432,18 +464,24 @@ export async function askGeminiCoach(
           history: history.slice(-6),
           athleteContext: effectiveCtx,
         }),
+        signal: controller.signal,
       });
 
       if (!response.ok) {
         throw new Error(`Proxy status error: ${response.status}`);
       }
 
-      const data = await response.json();
-      if (data.reply) return data.reply;
-      throw new Error('Invalid JSON from proxy');
-    } catch (err: any) {
+      const data: unknown = await response.json();
+      const parsed = ProxyCoachResponseSchema.safeParse(data);
+      if (parsed.success) {
+        return parsed.data.reply;
+      }
+      throw new Error('Invalid JSON response schema from proxy');
+    } catch (err: unknown) {
       console.warn('Proxy failed, falling back to local engine:', err);
       return generateOfflineSportsScienceResponse(userMessage, effectiveCtx);
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 
