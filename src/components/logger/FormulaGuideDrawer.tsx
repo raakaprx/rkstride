@@ -68,7 +68,7 @@ export const FormulaGuideDrawer: React.FC<FormulaGuideDrawerProps> = ({ isOpen }
             >
               TRIMP = sum(Duration_min × Zone_Weight)
             </div>
-            Z1=1.0, Z2=1.2, Z3=1.7, Z4=2.5, Z5=3.5. Sensorless fallback: Duration × RPE × 0.2.
+            Zone 1 (1.0x), Zone 2 (1.2x), Zone 3 (1.5x), Zone 4 (2.2x), Zone 5 (3.5x). Sensorless fallback: Durasi (menit) × RPE × 0.2.
           </div>
         </div>
 

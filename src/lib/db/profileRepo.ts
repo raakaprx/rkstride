@@ -9,6 +9,7 @@ import {
   NutritionPrefsSchema,
   RaceTargetConfigSchema,
   UserProfileSchema,
+  type ExperienceLevel,
   type NutritionPrefs,
   type RaceTargetConfig,
   type UserProfile,
@@ -158,5 +159,40 @@ export function clearAuthSession(): void {
     localStorage.removeItem(AUTH_SESSION_KEY);
   } catch {
     // Ignore storage errors
+  }
+}
+
+const ACCOUNTS_STORAGE_KEY = 'rkstride_registered_accounts';
+
+export interface StoredLocalAccount {
+  athleteName: string;
+  email: string;
+  pin: string;
+  experienceLevel: ExperienceLevel;
+  age: number;
+  weightKg: number;
+  heightCm: number;
+  createdAt: string;
+}
+
+export function getRegisteredAccounts(): StoredLocalAccount[] {
+  try {
+    const raw = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveRegisteredAccount(account: StoredLocalAccount): void {
+  const existing = getRegisteredAccounts().filter(
+    (a) => a.email.toLowerCase() !== account.email.toLowerCase()
+  );
+  try {
+    localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify([account, ...existing]));
+  } catch {
+    // Ignore storage quota errors
   }
 }

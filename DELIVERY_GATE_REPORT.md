@@ -8,7 +8,7 @@
 | **Sprint 2** | Security & AI Guard (`geminiCoach.ts` domain guard di semua mode, timeout 15s, validasi URL proxy, `buildAthleteContext.ts`), Smartwatch `.fit` explicit rejection & BLE 0x2A37 parser, pembersihan `dist/` & `node_modules/` dari Git | Selesai & Terverifikasi |
 | **Sprint 3** | Pecah monolith `workload.ts` ke pure-engine sub-modul (`hrZones`, `loadMetrics`, `acwr`, `guardrail`, `readiness`, `strength1rm`), perbaikan teks ambang `1.4` di `periodization.ts`, refactor `useWorkoutEngine.ts`, ekstraksi `useAthleteProfile.ts` & `useNutritionPrefs.ts` | Selesai & Terverifikasi |
 | **Sprint 4** | Pecah `WorkoutLogger.tsx` ke `src/components/logger/`, perbaiki rumus UI & Plan-to-Log, `ScheduleCustomizer.tsx` (12 kategori + `dayIndex` lookup), `OnboardingProfileModal.tsx` (`useAthleteProfile` + custom MaxHR), `SmartwatchSyncCard.tsx` (`useEffect` sync + `.gpx/.tcx/.json/.csv`), `NutritionBodyCompCard.tsx` + `TrendsDashboardCard.tsx` + `WorkloadAdvisorCard.tsx`, integrasi `App.tsx` & `BottomNav.tsx` | Selesai & Terverifikasi |
-| **Sprint 5** | Automated test coverage (`contracts.test.ts`, `smartwatch.test.ts`, `workload.test.ts`, `geminiCoach.test.ts`, `useWorkoutEngine.test.ts`, `WorkoutLogger.test.tsx`) + release verification gate | Selesai & Terverifikasi |
+| **Sprint 5** | Automated test coverage (`contracts.test.ts`, `smartwatch.test.ts`, `dbPersistence.test.ts`, `workload.test.ts`, `geminiCoach.test.ts`, `useWorkoutEngine.test.ts`, `WorkoutLogger.test.tsx`) + Zero Debt Release Gate (`no_as_any: 0`, `legacy_wrong_formula_ui: 0`, `utc_date_split: 0`, `ui_direct_db_or_localstorage: 0`) | Selesai & Terverifikasi |
 
 ## Gerbang Verifikasi Otomatis
 

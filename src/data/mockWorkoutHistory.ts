@@ -1,10 +1,11 @@
 import { DailyLog, ReadinessCheckIn } from '@/types/workout';
+import { getLocalDateKey } from '@/lib/engine/dateKey';
 
 // Helper to generate dates relative to today
 const getDateString = (daysAgo: number): string => {
   const d = new Date();
   d.setDate(d.getDate() - daysAgo);
-  return d.toISOString().split('T')[0];
+  return getLocalDateKey(d);
 };
 
 export const mockReadinessToday: ReadinessCheckIn = {

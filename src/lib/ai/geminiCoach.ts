@@ -80,7 +80,12 @@ const LOCAL_STORAGE_KEY_CONFIG = 'rkstride_ai_coach_config';
  */
 export function getEnvApiKey(): string {
   try {
-    const meta = typeof import.meta !== 'undefined' ? (import.meta as any) : undefined;
+    interface ViteEnv {
+      env?: {
+        VITE_GEMINI_API_KEY?: string;
+      };
+    }
+    const meta = typeof import.meta !== 'undefined' ? (import.meta as unknown as ViteEnv) : undefined;
     if (meta && meta.env && meta.env.VITE_GEMINI_API_KEY) {
       return String(meta.env.VITE_GEMINI_API_KEY).trim();
     }

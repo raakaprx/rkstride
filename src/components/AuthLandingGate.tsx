@@ -13,37 +13,13 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { AthleteAuthSession, ExperienceLevel, UserProfile } from '@/types/workout';
+import {
+  type StoredLocalAccount,
+  getRegisteredAccounts,
+  saveRegisteredAccount,
+} from '@/lib/db/profileRepo';
 
-export interface StoredLocalAccount {
-  athleteName: string;
-  email: string;
-  pin: string;
-  experienceLevel: ExperienceLevel;
-  age: number;
-  weightKg: number;
-  heightCm: number;
-  createdAt: string;
-}
-
-const ACCOUNTS_STORAGE_KEY = 'rkstride_registered_accounts';
-
-export function getRegisteredAccounts(): StoredLocalAccount[] {
-  try {
-    const raw = localStorage.getItem(ACCOUNTS_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-export function saveRegisteredAccount(account: StoredLocalAccount): void {
-  const existing = getRegisteredAccounts().filter(
-    (a) => a.email.toLowerCase() !== account.email.toLowerCase()
-  );
-  localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify([account, ...existing]));
-}
+export type { StoredLocalAccount };
 
 interface AuthLandingGateProps {
   onAuthenticated: (session: AthleteAuthSession, profileUpdates?: Partial<UserProfile>) => void;
@@ -639,7 +615,7 @@ export const AuthLandingGate: React.FC<AuthLandingGateProps> = ({
                             cursor: 'pointer',
                           }}
                         >
-                          {acc.athleteName} ({LEVEL_DESCRIPTIONS[acc.experienceLevel].label})
+                          {acc.athleteName} ({(LEVEL_DESCRIPTIONS[acc.experienceLevel] ?? LEVEL_DESCRIPTIONS.intermediate).label})
                         </button>
                       ))}
                     </div>
